@@ -18,6 +18,13 @@ Joint codebase for SIFIS-HOME including ACE, EDHOC, OSCORE, Group OSCORE, and Gr
     - oscore-cf
     - scandium
 
+4. To "group-applications" add the following folders to the build path:
+    - ace
+    - californium-core
+    - element-connector
+    - oscore-cf
+    - scandium
+
 To add dependencies:
 
 *Right click project->Properties->Java Build Path->Add...*
