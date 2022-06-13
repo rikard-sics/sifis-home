@@ -26,6 +26,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import se.sics.prototype.mqtt.MqttV5Receiver.ReceivedMessage;
+
 /**
  * This test aims to run some basic SSL functionality tests of the MQTT client
  */
@@ -65,6 +67,8 @@ public class BasicSSLTest {
 	 */
 	public static void testSSL() throws Exception {
 		URI serverURI = new URI("ssl://" + serverHost + ":" + TestProperties.getServerSSLPort());
+		// No-TLS: URI serverURI = new
+		// URI(TestProperties.getServerURI().toString());
 		String methodName = Utility.getMethodName();
 		LoggingUtilities.banner(log, cclass, methodName);
 		log.entering(className, methodName);
@@ -83,20 +87,34 @@ public class BasicSSLTest {
 			log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
 			mqttClient.connect();
 
-			String[] topicNames = new String[] { topicPrefix + methodName + "/Topic" };
+			// String[] topicNames = new String[] { topicPrefix + methodName +
+			// "/Topic" };
+			String[] topicNames = new String[] { "sifis-test-123" };
+			// String[] topicNames2 = new String[] { "sifis-test-new" };
 			int[] topicQos = { 2 };
 			log.info("Subscribing to..." + topicNames[0]);
 			mqttClient.subscribe(topicNames, topicQos);
+			// mqttClient.subscribe(topicNames2, topicQos);
 
-			byte[] payload = ("Message payload " + "BasicSSLTest" + "." + methodName).getBytes();
-			MqttTopic mqttTopic = mqttClient.getTopic(topicNames[0]);
-			log.info("Publishing to..." + topicNames[0]);
-			mqttTopic.publish(payload, 2, false);
 
-			boolean ok = mqttV5Receiver.validateReceipt(topicNames[0], 2, payload);
-			if (!ok) {
-				Assert.fail("Receive failed");
+			while (true) {
+				ReceivedMessage msg = mqttV5Receiver.receiveNext(0);
+				if (msg != null) {
+					System.out.println("Received msg: " + msg.topic.toString() + ": " + msg.message.toString());
+				}
 			}
+
+			// byte[] payload = ("Message payload " + "BasicSSLTest" + "." +
+			// methodName).getBytes();
+			// MqttTopic mqttTopic = mqttClient.getTopic(topicNames[0]);
+			// log.info("Publishing to..." + topicNames[0]);
+			// mqttTopic.publish(payload, 2, false);
+
+			// boolean ok = mqttV5Receiver.validateReceipt(topicNames[0], 2,
+			// payload);
+			// if (!ok) {
+			// Assert.fail("Receive failed");
+			// }
 		} catch (Exception exception) {
 			log.log(Level.SEVERE, "caught exception:", exception);
 			Assert.fail("Failed to instantiate:" + methodName + " exception=" + exception);
