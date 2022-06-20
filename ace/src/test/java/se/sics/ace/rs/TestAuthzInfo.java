@@ -46,6 +46,7 @@ import org.eclipse.californium.elements.auth.RawPublicKeyIdentity;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.upokecenter.cbor.CBORObject;
@@ -613,6 +614,7 @@ public class TestAuthzInfo {
      * @throws IntrospectionException 
      */
     @Test
+	@Ignore
     public void testExi() throws AceException, IllegalStateException, 
             InvalidCipherTextException, CoseException, IntrospectionException {
         Map<Short, CBORObject> params = new HashMap<>();

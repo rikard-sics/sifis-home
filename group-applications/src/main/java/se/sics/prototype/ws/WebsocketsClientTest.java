@@ -8,6 +8,8 @@ import javax.websocket.*;
 // https://www.piesocket.com/websocket-tester
 // https://www.piesocket.com/blog/websocket
 // https://socketsbay.com/test-websockets
+
+// Old testing
 public class WebsocketsClientTest {
 
 	public static void main(String[] args) throws Exception {

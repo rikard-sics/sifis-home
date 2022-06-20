@@ -16,6 +16,8 @@ import jakarta.websocket.Session;
 import org.glassfish.tyrus.client.ClientManager;
 
 // https://raw.githubusercontent.com/javiergs/Medium/main/Websockets/ChatClientEndpoint.java
+// https://socketsbay.com/test-websockets
+
 @ClientEndpoint
 public class ChatClientEndpoint {
 
@@ -49,7 +51,7 @@ public class ChatClientEndpoint {
 		latch.countDown();
 	}
 
-	public static void main(String[] args) throws jakarta.websocket.DeploymentException, IOException {
+	public static void main(String[] args) throws DeploymentException, IOException {
 		latch = new CountDownLatch(1);
 		ClientManager client = ClientManager.createClient();
 		try {
