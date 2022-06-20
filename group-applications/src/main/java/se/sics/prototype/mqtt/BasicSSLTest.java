@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.paho.mqttv5.client.IMqttClient;
 import org.eclipse.paho.mqttv5.client.MqttClient;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.MqttTopic;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -85,6 +86,15 @@ public class BasicSSLTest {
 			System.setProperty("javax.net.ssl.keyStorePassword", TestProperties.getClientKeyStorePassword());
 			System.setProperty("javax.net.ssl.trustStore", TestProperties.getClientTrustStore());
 			log.info("Connecting...(serverURI:" + serverURI + ", ClientId:" + methodName);
+
+			// Set username/pw
+			/*
+			 * MqttConnectionOptions mqttConnectOptions = new
+			 * MqttConnectionOptions(); mqttConnectOptions.setUserName("test");
+			 * mqttConnectOptions.setPassword("test".getBytes());
+			 * mqttClient.connect(mqttConnectOptions);
+			 */
+
 			mqttClient.connect();
 
 			// String[] topicNames = new String[] { topicPrefix + methodName +
