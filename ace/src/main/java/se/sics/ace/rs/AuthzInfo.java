@@ -339,9 +339,8 @@ public class AuthzInfo implements Endpoint, AutoCloseable {
 	    }
 	    
 	    //8. Handle EXI if present
-		claims.remove(Constants.EXI); // FIXME
 	    int exiSeqNum = handleExi(claims);
-		if (exiSeqNum < -1) {
+	    if (exiSeqNum < -1) {
 	    	// The 'exi' claim is present, but an error occurs during its processing
 	        CBORObject map = CBORObject.NewMap();
 	        String errStr = null;

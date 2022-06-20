@@ -1019,9 +1019,9 @@ public class TestDtlspRSGroupOSCORE {
     			// The group mode is used. The PoP evidence is a signature
     			if (targetedGroup.getMode() != Constants.GROUP_OSCORE_PAIRWISE_MODE_ONLY) {
     			    
-    			    if (publicKey.get(KeyKeys.KeyType).equals(org.eclipse.californium.cose.KeyKeys.KeyType_EC2))
+					if (publicKey.get(KeyKeys.KeyType).equals(org.eclipse.californium.cose.KeyKeys.KeyType_EC2))
         			    signKeyCurve = publicKey.get(KeyKeys.EC2_Curve).AsInt32();
-    			    else if (publicKey.get(KeyKeys.KeyType).equals(org.eclipse.californium.cose.KeyKeys.KeyType_OKP))
+					else if (publicKey.get(KeyKeys.KeyType).equals(org.eclipse.californium.cose.KeyKeys.KeyType_OKP))
         			    signKeyCurve = publicKey.get(KeyKeys.OKP_Curve).AsInt32();
 
     			    // This should never happen, due to the previous sanity checks
