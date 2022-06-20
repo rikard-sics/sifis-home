@@ -164,9 +164,9 @@ public class OSCOREProfileRequestsGroupOSCORE {
         if (token == null) {
             throw new AceException("AS response did not contain a token");
         }
-        if (token.getType() != CBORType.ByteString) {
-            throw new AceException("The token must be a CBOR byte string");
-        }
+		if (token.getType() != CBORType.ByteString) {
+			throw new AceException("The token must be a CBOR byte string");
+		}
         
         CBORObject cnf = asPayload.get(
                 CBORObject.FromObject(Constants.CNF));

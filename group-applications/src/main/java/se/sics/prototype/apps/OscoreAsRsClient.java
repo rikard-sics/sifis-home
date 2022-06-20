@@ -327,14 +327,16 @@ public class OscoreAsRsClient {
         System.out.println("Received response from AS to Token request: " + res.toString());
         
         //Fix the structure of the response from the AS as the first element should be an array (FIXME?)
-        CBORObject first = res.get(CBORObject.FromObject(1));
-        CBORObject firstAsCBORArray = CBORObject.DecodeFromBytes(first.GetByteString());
-        //System.out.println(firstAsCBORArray.toString());
-        res.Remove(CBORObject.FromObject(1));
-        res.Add(CBORObject.FromObject(1), firstAsCBORArray);
-        System.out.println("Fixed response from AS to Token request: " + res.toString());
-        
-        response.setPayload(res.EncodeToBytes());
+		// CBORObject first = res.get(CBORObject.FromObject(1));
+		// CBORObject firstAsCBORArray =
+		// CBORObject.DecodeFromBytes(first.GetByteString());
+		// // System.out.println(firstAsCBORArray.toString());
+		// res.Remove(CBORObject.FromObject(1));
+		// res.Add(CBORObject.FromObject(1), firstAsCBORArray);
+		// System.out.println("Fixed response from AS to Token request: " +
+		// res.toString());
+
+		response.setPayload(res.EncodeToBytes());
         
         db.purge(); // FIXME: Remove?
         return response;
