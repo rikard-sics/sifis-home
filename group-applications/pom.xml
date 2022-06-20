@@ -14,8 +14,17 @@
         <id>Eclipse Paho Repo</id>
         <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
     </repository>
+    <repository> <!-- Rikard: WebSocket Tyrus library -->
+        <id>Maven Central Repo</id>
+        <url>https://repo1.maven.org/maven2/</url>
+    </repository>
  </repositories>
   <dependencies>
+  	<dependency> <!-- Rikard: Added for WebSocket -->
+    	    <groupId>javax.websocket</groupId>
+    	    <artifactId>javax.websocket-api</artifactId>
+	    <version>1.1</version>
+  	</dependency>
   	<dependency>
   		<groupId>junit</groupId>
   		<artifactId>junit</artifactId>
@@ -56,6 +65,16 @@
 		  <groupId>org.postgresql</groupId>
 		  <artifactId>postgresql</artifactId>
 		  <version>9.3-1104-jdbc4</version>
+    </dependency>
+    <dependency> <!-- Rikard: Added for WebSocket -->
+		  <groupId>org.glassfish.tyrus</groupId>
+		  <artifactId>tyrus-client</artifactId>
+		  <version>2.0.0</version>
+    </dependency>
+    <dependency> <!-- Rikard: Added for WebSocket -->
+		  <groupId>org.glassfish.tyrus</groupId>
+		  <artifactId>tyrus-container-grizzly-client</artifactId>
+		  <version>2.0.0</version>
     </dependency>
 <!-- Rikard: Disabled these dependencies. They will come from Group OSCORE Californium.
 	<dependency>

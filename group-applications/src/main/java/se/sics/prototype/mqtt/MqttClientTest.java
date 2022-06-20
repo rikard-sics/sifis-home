@@ -4,7 +4,6 @@ public class MqttClientTest {
 
 	public static void main(String[] args) throws Exception {
 
-		
 		BasicSSLTest.setUpBeforeClass();
 		BasicSSLTest.testSSL();
 		
