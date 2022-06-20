@@ -335,8 +335,7 @@ public class OscoreAsRsClient {
 		// res.Add(CBORObject.FromObject(1), firstAsCBORArray);
 		// System.out.println("Fixed response from AS to Token request: " +
 		// res.toString());
-
-		response.setPayload(res.EncodeToBytes());
+		// response.setPayload(res.EncodeToBytes());
         
         db.purge(); // FIXME: Remove?
         return response;
