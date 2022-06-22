@@ -3114,7 +3114,7 @@ public class OscoreRsServer {
         myResource5.put(rootGroupMembershipResource + "/" + groupName2 + "/policies", actions5);
         myScopes.put(rootGroupMembershipResource + "/" + groupName2, myResource5);
         
-        String rsId = "rs1";
+		String rsId = "rs2";
         
         Set<String> auds = new HashSet<>();
         auds.add("aud1"); // Simple test audience
