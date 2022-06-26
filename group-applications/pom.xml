@@ -81,14 +81,12 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.5</version>
 		</dependency>
-
 		<dependency> <!-- Rikard: MQTT library -->
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.mqttv5.client</artifactId>
 			<!-- <artifactId>org.eclipse.paho.client.mqttv3</artifactId> -->
 			<version>1.2.5</version>
 		</dependency>
-
 	</dependencies>
 	<build>
 		<plugins>
@@ -104,3 +102,5 @@
 		</plugins>
 	</build>
 </project>
+
+>>>>>>> Pom.xml formatting fix
