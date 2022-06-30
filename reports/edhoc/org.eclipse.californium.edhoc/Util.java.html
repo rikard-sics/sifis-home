@@ -1,0 +1,1287 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Util.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Cf-EDHOC</a> &gt; <a href="index.source.html" class="el_package">org.eclipse.californium.edhoc</a> &gt; <span class="el_source">Util.java</span></div><h1>Util.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (c) 2020 RISE and others.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v2.0
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
+ * 
+ * The Eclipse Public License is available at
+ *    http://www.eclipse.org/legal/epl-v20.html
+ * and the Eclipse Distribution License is available at
+ *    http://www.eclipse.org/org/documents/edl-v10.html.
+ * 
+ * Contributors:
+ *    Marco Tiloca (RISE)
+ *    Rikard H��glund (RISE)
+ *    
+ ******************************************************************************/
+
+package org.eclipse.californium.edhoc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Set;
+
+import org.eclipse.californium.cose.AlgorithmID;
+import org.eclipse.californium.cose.Attribute;
+import org.eclipse.californium.cose.CoseException;
+import org.eclipse.californium.cose.Encrypt0Message;
+import org.eclipse.californium.cose.HeaderKeys;
+import org.eclipse.californium.cose.KeyKeys;
+import org.eclipse.californium.cose.Message;
+import org.eclipse.californium.cose.MessageTag;
+import org.eclipse.californium.cose.OneKey;
+import org.eclipse.californium.cose.Sign1Message;
+import org.eclipse.californium.oscore.CoapOSException;
+import org.eclipse.californium.oscore.OSCoreCtx;
+import org.eclipse.californium.oscore.OSCoreCtxDB;
+import org.eclipse.californium.oscore.OSException;
+
+import com.upokecenter.cbor.CBORObject;
+import com.upokecenter.cbor.CBORType;
+
+import net.i2p.crypto.eddsa.EdDSASecurityProvider;
+import net.i2p.crypto.eddsa.Utils;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
+
+<span class="nc" id="L53">public class Util {</span>
+
+    /**
+     *  Compute a ciphertext using the COSE Encrypt0 object
+     * @param pretectedHeader   The elements to include in the COSE protected header, as a CBOR map
+     * @param externalData   The data to use as external_aad
+     * @param plaintext   The plaintext to encrypt
+     * @param alg   The encryption algorithm to use
+     * @param iv   The IV to use for encrypting
+     * @param key   The symmetric key to use for encrypting
+     * @return  the computed ciphertext, or null in case of invalid input
+     */
+	public static byte[] encrypt (CBORObject pretectedHeader, byte[] externalData, byte[] plaintext,
+			                      AlgorithmID alg, byte[] iv, byte[] key) throws CoseException {
+        
+<span class="pc bpc" id="L68" title="5 of 10 branches missed.">		if(pretectedHeader == null || externalData == null || plaintext == null || iv == null || key == null)</span>
+<span class="nc" id="L69">        	return null;       </span>
+		
+        // The elements to include in the COSE protected header must be provided as a CBOR map 
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if(pretectedHeader.getType() != CBORType.Map)</span>
+<span class="nc" id="L73">        	return null;</span>
+                
+<span class="fc" id="L75">        Encrypt0Message msg = new Encrypt0Message();</span>
+        
+        // Set the protected header of the COSE object
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for(CBORObject label : pretectedHeader.getKeys()) {</span>
+<span class="fc" id="L79">        	msg.addAttribute(label, pretectedHeader.get(label), Attribute.PROTECTED);</span>
+<span class="fc" id="L80">        }</span>
+        
+<span class="fc" id="L82">        msg.addAttribute(HeaderKeys.Algorithm, alg.AsCBOR(), Attribute.DO_NOT_SEND);</span>
+<span class="fc" id="L83">        msg.addAttribute(HeaderKeys.IV, iv, Attribute.DO_NOT_SEND);</span>
+        
+        // Set the external_aad to use for the encryption process
+<span class="fc" id="L86">        msg.setExternal(externalData);</span>
+       
+        // Set the payload of the COSE object
+<span class="fc" id="L89">        msg.SetContent(plaintext);</span>
+        
+        // Debug print
+        /*
+        System.out.println(&quot;Protected attributes: &quot; + msg.getProtectedAttributes().toString());
+        System.out.println(&quot;aad                 : &quot; + Utils.bytesToHex(msg.getExternal()));
+        System.out.println(&quot;plaintext           : &quot; + Utils.bytesToHex(msg.GetContent()));
+        */
+        
+        // Perform the encryption
+<span class="fc" id="L99">        msg.encrypt(key);</span>
+        
+        // Debug print
+        /*
+        System.out.println(&quot;Encrypted content: &quot; + Utils.bytesToHex(msg.getEncryptedContent()));
+        */
+        
+<span class="fc" id="L106">        return msg.getEncryptedContent();</span>
+        
+	}
+	
+    /**
+     *  Decrypt a ciphertext using the COSE Encrypt0 object
+     * @param pretectedHeader   The elements to include in the COSE protected header, as a CBOR map 
+     * @param externalData   The data to use as external_aad
+     * @param ciphertext   The ciphertext to decrypt
+     * @param alg   The encryption algorithm to use
+     * @param iv   The IV to use for decrypting
+     * @param key   The symmetric key to use for decrypting
+     * @return  the computed plaintext, or null in case of invalid input
+     */
+	public static byte[] decrypt (CBORObject pretectedHeader, byte[] externalData, byte[] ciphertext,
+								  AlgorithmID alg, byte[] iv, byte[] key) throws CoseException {
+        
+<span class="pc bpc" id="L123" title="5 of 10 branches missed.">		if(pretectedHeader == null || externalData == null || ciphertext == null || iv == null || key == null)</span>
+<span class="nc" id="L124">        	return null;       </span>
+		
+        // The elements to include in the COSE protected header must be provided as a CBOR map
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if(pretectedHeader.getType() != CBORType.Map)</span>
+<span class="nc" id="L128">        	return null;</span>
+        
+<span class="fc" id="L130">        Encrypt0Message msg = new Encrypt0Message();</span>
+        
+        // Set the protected header of the COSE object
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        for(CBORObject label : pretectedHeader.getKeys()) {</span>
+<span class="fc" id="L134">        	msg.addAttribute(label, pretectedHeader.get(label), Attribute.PROTECTED);</span>
+<span class="fc" id="L135">        }</span>
+        
+<span class="fc" id="L137">        msg.addAttribute(HeaderKeys.Algorithm, alg.AsCBOR(), Attribute.DO_NOT_SEND);</span>
+<span class="fc" id="L138">        msg.addAttribute(HeaderKeys.IV, iv, Attribute.DO_NOT_SEND);</span>
+        
+        // Set the external_aad to use for the signing process
+<span class="fc" id="L141">        msg.setExternal(externalData);</span>
+       
+        // Set the payload of the COSE object
+<span class="fc" id="L144">        msg.setEncryptedContent(ciphertext);</span>
+        
+        // Debug print
+        /*
+        System.out.println(&quot;Protected attributes: &quot; + msg.getProtectedAttributes().toString());
+        System.out.println(&quot;aad                 : &quot; + Utils.bytesToHex(msg.getExternal()));
+        System.out.println(&quot;payload             : &quot; + Utils.bytesToHex(msg.GetContent()));
+        */
+        
+        // Perform the encryption
+<span class="fc" id="L154">        msg.decrypt(key);</span>
+        
+        // Debug print
+        /*
+        System.out.println(&quot;Decrypted content: &quot; + Utils.bytesToHex(msg.GetContent()));
+        */
+        
+<span class="fc" id="L161">        return msg.GetContent();</span>
+        
+	}
+	
+    /**
+     *  Compute a signature using the COSE Sign1 object
+     * @param idCredX   The ID of the public credential of the signer, as a CBOR map 
+     * @param externalData   The data to use as external_aad
+     * @param payload   The payload to sign
+     * @param signKey   The private key to use for signing
+     * @return  the computed signature, or null in case of invalid input
+     */
+	public static byte[] computeSignature (CBORObject idCredX, byte[] externalData, byte[] payload, OneKey signKey)
+			                               throws CoseException {
+        
+<span class="pc bpc" id="L176" title="4 of 8 branches missed.">		if(idCredX == null || externalData == null || payload == null || signKey == null)</span>
+<span class="nc" id="L177">        	return null;       </span>
+		
+        // The ID of the public credential has to be a CBOR map ...
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if(idCredX.getType() != CBORType.Map)</span>
+<span class="nc" id="L181">        	return null;</span>
+        
+        // ... and it cannot be empty
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">        if(idCredX.size() == 0)</span>
+<span class="nc" id="L185">        	return null;</span>
+        
+<span class="fc" id="L187">        Sign1Message msg = new Sign1Message();</span>
+        
+        // Set the protected header of the COSE object
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        for(CBORObject label : idCredX.getKeys()) {</span>
+            // All good if the map has only one element, otherwise it needs to be rebuilt deterministically
+<span class="fc" id="L192">        	msg.addAttribute(label, idCredX.get(label), Attribute.PROTECTED);</span>
+<span class="fc" id="L193">        }</span>
+        
+		// Identify algorithm used from values in the key
+<span class="fc" id="L196">		CBORObject alg = signKey.get(KeyKeys.Algorithm);</span>
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">		if (alg == null) {</span>
+<span class="nc" id="L198">			alg = determineKeyAlgorithm(signKey).AsCBOR();</span>
+		}
+<span class="fc" id="L200">		msg.addAttribute(HeaderKeys.Algorithm, alg, Attribute.DO_NOT_SEND);</span>
+        
+        // Set the external_aad to use for the signing process
+<span class="fc" id="L203">        msg.setExternal(externalData);</span>
+       
+        // Set the payload of the COSE object
+<span class="fc" id="L206">        msg.SetContent(payload);</span>
+        
+        // Debug print
+        /*
+        System.out.println(&quot;Protected attributes: &quot; + msg.getProtectedAttributes().toString());
+        System.out.println(&quot;aad                 : &quot; + Utils.bytesToHex(msg.getExternal()));
+        System.out.println(&quot;payload             : &quot; + Utils.bytesToHex(msg.GetContent()));
+        */
+        
+        // Compute the signature
+<span class="fc" id="L216">        msg.sign(signKey);</span>
+        
+        // Serialize the COSE Sign1 object as a CBOR array
+<span class="fc" id="L219">        CBORObject myArray = msg.EncodeToCBORObject();</span>
+		
+        // Debug print
+        /*
+        System.out.println(&quot;\nCBOR array with signature: &quot; + myArray.toString() + &quot;\n&quot;);
+        */
+        
+        // Return the actual signature, as fourth element of the CBOR array
+<span class="fc" id="L227">		return myArray.get(3).GetByteString();</span>
+		
+	}
+	
+	/**
+	 * Identifies the algorithm used by a key from the curve parameters.
+	 * 
+	 * @param key the key
+	 * @return the algorithm used
+	 */
+	private static AlgorithmID determineKeyAlgorithm(OneKey key) {
+
+<span class="nc bnc" id="L239" title="All 2 branches missed.">		if (key.get(KeyKeys.OKP_Curve) == KeyKeys.OKP_Ed25519) {</span>
+<span class="nc" id="L240">			return AlgorithmID.EDDSA;</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P256) {</span>
+<span class="nc" id="L242">			return AlgorithmID.ECDSA_256;</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P384) {</span>
+<span class="nc" id="L244">			return AlgorithmID.ECDSA_384;</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P521) {</span>
+<span class="nc" id="L246">			return AlgorithmID.ECDSA_512;</span>
+		} else {
+<span class="nc" id="L248">			return null;</span>
+		}
+	}
+
+    /**
+     *  Verify a signature using the COSE Sign1 object
+     * @param signature   The signature to verify
+     * @param idCredX   The ID of the public credential of the signer, as a CBOR map
+     * @param externalData   The data to use as external_aad
+     * @param payload   The payload to sign
+     * @param publicKey   The public key to use for verifying the signature
+     * @return  true is the signature is valid, false if the signature is not valid or the input is not valid 
+     */
+	public static boolean verifySignature (byte[] signature, CBORObject idCredX, byte[] externalData, byte[] payload, OneKey publicKey)
+			                               throws CoseException {
+	    
+<span class="pc bpc" id="L264" title="5 of 10 branches missed.">        if(signature == null || idCredX == null || externalData == null || payload == null || publicKey == null)</span>
+<span class="nc" id="L265">        	return false;</span>
+        
+        // The ID of the public credential has to be a CBOR map ...
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        if (idCredX.getType() != CBORType.Map)</span>
+<span class="nc" id="L269">        	return false;</span>
+        
+        // ... and it cannot be empty
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">        if (idCredX.size() == 0)</span>
+<span class="nc" id="L273">        	return false;</span>
+        
+        // Prepare the raw COSE Sign1 object as a CBOR array
+<span class="fc" id="L276">        CBORObject myArray = CBORObject.NewArray();</span>
+        
+        // Add the Protected header, i.e. the provided CBOR map wrapped into a CBOR byte string
+<span class="fc" id="L279">        myArray.Add(idCredX.EncodeToBytes());</span>
+        
+        // Add the Unprotected, i.e. a CBOR map specifying the signature algorithm
+<span class="fc" id="L282">        CBORObject myMap = CBORObject.NewMap();</span>
+<span class="fc" id="L283">        myMap.Add(KeyKeys.Algorithm, publicKey.get(KeyKeys.Algorithm));</span>
+<span class="fc" id="L284">        myArray.Add(myMap);</span>
+        
+        // Add the signed payload
+<span class="fc" id="L287">        myArray.Add(payload);</span>
+        
+        // Add the signature to verify
+<span class="fc" id="L290">        myArray.Add(signature);</span>
+                
+<span class="fc" id="L292">        myArray = CBORObject.FromObjectAndTag(myArray, MessageTag.Sign1.value);</span>
+  
+        // Debug print
+        /*
+        System.out.println(&quot;\nCBOR array with signature: &quot; + myArray.toString() + &quot;\n&quot;);
+        */
+        
+        // Build the COSE Sign1 object from the raw version
+<span class="fc" id="L300">        Sign1Message msg = (Sign1Message) Message.DecodeFromBytes(myArray.EncodeToBytes(), MessageTag.Sign1);</span>
+        
+        // Set the external_aad to use for the signing process
+<span class="fc" id="L303">        msg.setExternal(externalData);</span>
+        
+        // Debug print
+        /*
+        System.out.println(&quot;Protected attributes: &quot; + msg.getProtectedAttributes().toString());
+        System.out.println(&quot;aad                 : &quot; + Utils.bytesToHex(msg.getExternal()));
+        System.out.println(&quot;payload             : &quot; + Utils.bytesToHex(msg.GetContent()));
+        */
+        
+        // Verify the signature
+<span class="fc" id="L313">        return msg.validate(publicKey);</span>
+       
+	}
+	
+    /**
+     *  Compute a hash value using the specified algorithm 
+     * @param input   The content to hash
+     * @param algorithm   The name of the hash algorithm to use
+     * @return  the computed hash, or null in case of invalid input
+     */
+	public static byte[] computeHash (byte[] input, String algorithm) throws NoSuchAlgorithmException {
+		
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">		if (input == null)</span>
+<span class="nc" id="L326">			return null;</span>
+		
+		MessageDigest myDigest;
+		
+<span class="fc bfc" id="L330" title="All 2 branches covered.">		if (algorithm.equals(&quot;SHA-256&quot;))</span>
+<span class="fc" id="L331">			myDigest = MessageDigest.getInstance(&quot;SHA-256&quot;);</span>
+<span class="pc bpc" id="L332" title="1 of 2 branches missed.">		else if (algorithm.equals(&quot;SHA-512&quot;))</span>
+<span class="fc" id="L333">			myDigest = MessageDigest.getInstance(&quot;SHA-512&quot;);</span>
+		else
+<span class="nc" id="L335">			return null;</span>
+		
+<span class="fc" id="L337">		myDigest.reset();</span>
+<span class="fc" id="L338">		myDigest.update(input);</span>
+<span class="fc" id="L339">		return myDigest.digest();</span>
+		
+	}
+
+    /**
+     *  Prepare a CBOR sequence, given a list of CBOR Objects as input
+     * @param objectList   The CBOR Objects to compose the CBOR sequence
+     * @return  the CBOR sequence, as an array of bytes
+     */
+	public static byte[] buildCBORSequence (List&lt;CBORObject&gt; objectList) {
+		
+<span class="fc" id="L350">		int sequenceLength = 0;</span>
+<span class="fc" id="L351">		byte[] mySequence = new byte[0];</span>
+		
+<span class="fc" id="L353">		List&lt;CBORObject&gt; serializationList = new ArrayList&lt;CBORObject&gt;();</span>
+		
+<span class="fc bfc" id="L355" title="All 2 branches covered.">		for (int i = 0; i &lt; objectList.size(); i++) {</span>
+<span class="fc" id="L356">			byte[] objBytes = objectList.get(i).EncodeToBytes();			</span>
+<span class="fc" id="L357">			serializationList.add(CBORObject.FromObject(objBytes));</span>
+<span class="fc" id="L358">			sequenceLength += objBytes.length;</span>
+		}
+		
+<span class="fc" id="L361">		int offset = 0;</span>
+<span class="fc" id="L362">		mySequence = new byte[sequenceLength];</span>
+		
+<span class="fc bfc" id="L364" title="All 2 branches covered.">		for (int i = 0; i &lt; serializationList.size(); i++) {</span>
+<span class="fc" id="L365">			byte[] objBytes = serializationList.get(i).GetByteString();</span>
+<span class="fc" id="L366">			System.arraycopy(objBytes, 0, mySequence, offset, objBytes.length);</span>
+<span class="fc" id="L367">			offset += objBytes.length;</span>
+		}
+		
+<span class="fc" id="L370">		return mySequence;</span>
+		
+	}
+	
+    /**
+     *  Concatenate byte arrays, each of which wrapped as a CBOR byte strings
+     * @param objectList   The list of CBOR byte strings wrapping the byte arrays to concatenate
+     * @return  the concatenation of all the byte arrays taken as input
+     */
+	public static byte[] concatenateByteArrays (List&lt;CBORObject&gt; byteStrings) {
+		
+<span class="fc" id="L381">		int outputLength = 0;</span>
+<span class="fc" id="L382">		byte[] myOutput = new byte[0];</span>
+		
+<span class="pc bpc" id="L384" title="2 of 4 branches missed.">		if (byteStrings == null || byteStrings.size() == 0)</span>
+<span class="nc" id="L385">			return null;</span>
+		
+<span class="fc bfc" id="L387" title="All 2 branches covered.">		for (int i = 0; i &lt; byteStrings.size(); i++) {</span>
+<span class="pc bpc" id="L388" title="1 of 2 branches missed.">			if (byteStrings.get(i).getType() != CBORType.ByteString)</span>
+<span class="nc" id="L389">				return null;</span>
+<span class="fc" id="L390">			outputLength += byteStrings.get(i).GetByteString().length;</span>
+		}
+		
+<span class="fc" id="L393">		int offset = 0;</span>
+<span class="fc" id="L394">		myOutput = new byte[outputLength];</span>
+		
+<span class="fc bfc" id="L396" title="All 2 branches covered.">		for (int i = 0; i &lt; byteStrings.size(); i++) {</span>
+<span class="fc" id="L397">			byte[] objBytes = byteStrings.get(i).GetByteString();</span>
+<span class="fc" id="L398">			System.arraycopy(objBytes, 0, myOutput, offset, objBytes.length);</span>
+<span class="fc" id="L399">			offset += objBytes.length;</span>
+		}
+		
+<span class="fc" id="L402">		return myOutput;</span>
+		
+	}
+	
+    /**
+     *  Build a CBOR map, ensuring the exact order of its entries
+     * @param labelList   The labels of the CBOR map entries, already prepared as CBOR objects (uint or tstr)
+     * @param valueList   The CBOR Objects to include as values of the CBOR map entries
+     * @return  the binary serialization of the CBOR map, or null in case of invalid input
+     */
+	public static byte[] buildDeterministicCBORMap (List&lt;CBORObject&gt; labelList, List&lt;CBORObject&gt; valueList) {
+		
+<span class="pc bpc" id="L414" title="1 of 2 branches missed.">		if (labelList.size() != valueList.size())</span>
+<span class="nc" id="L415">			return null;</span>
+		
+<span class="fc" id="L417">		int numEntries = labelList.size(); </span>
+		
+<span class="pc bpc" id="L419" title="1 of 2 branches missed.">		if (numEntries == 0) {</span>
+<span class="nc" id="L420">			CBORObject emptyMap = CBORObject.NewMap();</span>
+<span class="nc" id="L421">			return emptyMap.EncodeToBytes();</span>
+		}
+		
+<span class="fc" id="L424">		byte[] mapContent = new byte[0];</span>
+<span class="fc" id="L425">		List&lt;CBORObject&gt; pairList = new ArrayList&lt;CBORObject&gt;();</span>
+		
+<span class="fc bfc" id="L427" title="All 2 branches covered.">		for(int i = 0; i &lt; numEntries; i++) {</span>
+<span class="pc bpc" id="L428" title="2 of 4 branches missed.">			if (labelList.get(i) == null || valueList.get(i) == null)</span>
+<span class="nc" id="L429">				return null;</span>
+			
+<span class="fc bfc" id="L431" title="All 2 branches covered.">			if (labelList.get(i).getType() != CBORType.Integer &amp;&amp;</span>
+<span class="pc bpc" id="L432" title="1 of 2 branches missed.">					labelList.get(i).getType() != CBORType.TextString)</span>
+<span class="nc" id="L433">				return null;</span>
+			
+<span class="fc" id="L435">			pairList.add(labelList.get(i));</span>
+<span class="fc" id="L436">			pairList.add(valueList.get(i));</span>
+		}
+<span class="fc" id="L438">		mapContent = buildCBORSequence(pairList);</span>
+		
+		// Encode the number N of map entries as a CBOR integer
+<span class="fc" id="L441">		CBORObject numEntriesCBOR = CBORObject.FromObject(numEntries);</span>
+<span class="fc" id="L442">		byte[] mapHeader = numEntriesCBOR.EncodeToBytes();</span>
+		// Change the first byte so that the result is the header of a CBOR map with N entries
+		// 0b000_xxxxx &amp; 0b000_11111 --&gt; 0b101_xxxxx  , x ={0,1}
+<span class="fc" id="L445">		mapHeader[0] = (byte) (mapHeader[0] &amp; intToBytes(31)[0]);</span>
+<span class="fc" id="L446">		byte mapTypeValue = (byte) 0b10100000;</span>
+<span class="fc" id="L447">		mapHeader[0] |= mapTypeValue;</span>
+		
+<span class="fc" id="L449">		byte[] serializedMap = new byte[mapHeader.length + mapContent.length];</span>
+<span class="fc" id="L450">		System.arraycopy(mapHeader, 0, serializedMap, 0, mapHeader.length);</span>
+<span class="fc" id="L451">		System.arraycopy(mapContent, 0, serializedMap, mapHeader.length, mapContent.length);</span>
+		
+<span class="fc" id="L453">		return serializedMap;</span>
+		
+	}
+	
+    /**
+     *  Compute the bitwise xor between two byte arrays of equal length
+     * @param arg1   The first byte array
+     * @param arg2   The second byte array
+     * @return  a byte including the xor result, or null in case of invalid input
+     */
+	public static byte[] arrayXor (byte[] arg1, byte[] arg2) {
+		
+<span class="pc bpc" id="L465" title="2 of 4 branches missed.">		if(arg1 == null || arg2 == null)</span>
+<span class="nc" id="L466">			return null;</span>
+		
+<span class="pc bpc" id="L468" title="1 of 2 branches missed.">		if(arg1.length != arg2.length)</span>
+<span class="nc" id="L469">			return null;</span>
+		
+<span class="pc bpc" id="L471" title="1 of 2 branches missed.">		if(arg1.length == 0)</span>
+<span class="nc" id="L472">			return null;</span>
+		
+<span class="fc" id="L474">		int length = arg1.length;</span>
+<span class="fc" id="L475">		byte[] result = new byte[length];</span>
+		
+<span class="fc bfc" id="L477" title="All 2 branches covered.">		for (int i = 0; i &lt; length; i ++) {</span>
+<span class="fc" id="L478">			result[i] = (byte) (arg1[i] ^ arg2[i]);</span>
+		}
+		
+<span class="fc" id="L481">		return result;</span>
+		
+	}
+	
+    /**
+     *  Convert a positive integer into a byte array of minimal size.
+     *  The positive integer can be up to 2,147,483,647 
+     * @param num
+     * @return  the byte array
+     */
+    public static byte[] intToBytes(final int num) {
+
+    	// Big-endian
+<span class="pc bpc" id="L494" title="1 of 2 branches missed.">    	if (num &lt; 0)</span>
+<span class="nc" id="L495">    		return null;</span>
+<span class="pc bpc" id="L496" title="1 of 2 branches missed.">        else if (num &lt; 256) {</span>
+<span class="fc" id="L497">            return new byte[] { (byte) (num) };</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">        } else if (num &lt; 65536) {</span>
+<span class="nc" id="L499">            return new byte[] { (byte) (num &gt;&gt;&gt; 8), (byte) num };</span>
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        } else if (num &lt; 16777216) {</span>
+<span class="nc" id="L501">            return new byte[] { (byte) (num &gt;&gt;&gt; 16), (byte) (num &gt;&gt;&gt; 8), (byte) num };</span>
+        } else { // up to 2,147,483,647
+<span class="nc" id="L503">            return new byte[]{ (byte) (num &gt;&gt;&gt; 24), (byte) (num &gt;&gt;&gt; 16), (byte) (num &gt;&gt;&gt; 8), (byte) num };</span>
+        }
+    	
+    	// Little-endian
+    	/*
+    	if (num &lt; 0)
+    		return null;
+        else if (num &lt; 256) {
+            return new byte[] { (byte) (num) };
+        } else if (num &lt; 65536) {
+            return new byte[] { (byte) num, (byte) (num &gt;&gt;&gt; 8) };
+        } else if (num &lt; 16777216){
+            return new byte[] { (byte) num, (byte) (num &gt;&gt;&gt; 8), (byte) (num &gt;&gt;&gt; 16) };
+        } else{ // up to 2,147,483,647
+            return new byte[] { (byte) num, (byte) (num &gt;&gt;&gt; 8), (byte) (num &gt;&gt;&gt; 16), (byte) (num &gt;&gt;&gt; 24) };
+        }
+    	*/
+    	
+    }
+	
+    /**
+     * Convert a byte array into an equivalent unsigned integer.
+     * The input byte array can be up to 4 bytes in size.
+     *
+     * N.B. If the input array is 4 bytes in size, the returned integer may be negative! The calling method has to check, if relevant!
+     * 
+     * @param bytes 
+     * @return   the converted integer
+     */
+    public static int bytesToInt(final byte[] bytes) {
+    	
+<span class="pc bpc" id="L534" title="1 of 2 branches missed.">    	if (bytes.length &gt; 4)</span>
+<span class="nc" id="L535">    		return -1;</span>
+    	
+<span class="fc" id="L537">    	int ret = 0;</span>
+
+    	// Big-endian
+<span class="fc bfc" id="L540" title="All 2 branches covered.">    	for (int i = 0; i &lt; bytes.length; i++)</span>
+<span class="fc" id="L541">    		ret = ret + (bytes[bytes.length - 1 - i] &amp; 0xFF) * (int) (Math.pow(256, i));</span>
+
+    	/*
+    	// Little-endian
+    	for (int i = 0; i &lt; bytes.length; i++)
+    		ret = ret + (bytes[i] &amp; 0xFF) * (int) (Math.pow(256, i));
+    	*/
+    	
+<span class="fc" id="L549">    	return ret;</span>
+    	
+    }
+    
+    // v-14 identifiers
+    /**
+     * Get an available Connection Identifier to offer to the other peer
+     *  
+     * @param usedConnectionIds   The set of already allocated Connection Identifiers
+     * @param db   The database of OSCORE security contexts when using EDHOC to key OSCORE, it can be null
+     * @param forbiddenIdentifier   The connection identifier C_I, it is null when the caller is the Initiator
+     * @return   the newly allocated connection identifier, or null in case of errors or if no connection identifier is available
+     */
+    public static byte[] getConnectionId(Set&lt;CBORObject&gt; usedConnectionIds, OSCoreCtxDB db, byte[] forbiddenIdentifier) {
+    	
+<span class="nc bnc" id="L564" title="All 2 branches missed.">    	if (usedConnectionIds == null)</span>
+<span class="nc" id="L565">    		return null;</span>
+    
+<span class="nc" id="L567">    	synchronized(usedConnectionIds) {</span>
+    		
+<span class="nc" id="L569">    		return allocateConnectionId(usedConnectionIds, db, forbiddenIdentifier);</span>
+    		
+    	}
+    	
+    }
+        
+    // v-14 identifiers
+    /**
+     * Actually allocate an available Connection Identifier to offer to the other peer
+     *  
+     * @param usedConnectionIds   The set of already allocated Connection Identifiers
+     * @param db   The database of OSCORE security contexts when using EDHOC to key OSCORE, it can be null
+     * @param forbiddenIdentifier   The connection identifier C_I, it is null when the caller is the Initiator
+     * @return   the newly allocated connection identifier, or null in case of errors or if no connection identifiers are available
+     */
+    private static byte[] allocateConnectionId(Set&lt;CBORObject&gt; usedConnectionIds,
+    										   OSCoreCtxDB db, byte[] forbiddenIdentifier) {
+
+<span class="nc" id="L587">        byte[] identifier = null;</span>
+         
+        /* Check if the empty connection identifier 0x is available */
+        
+<span class="nc" id="L591">	    identifier = new byte[0];</span>
+<span class="nc" id="L592">	    identifier = checkAndCommitConnectionId(identifier, usedConnectionIds, db, forbiddenIdentifier);</span>
+<span class="nc bnc" id="L593" title="All 2 branches missed.">        if (identifier != null)</span>
+<span class="nc" id="L594">        	return identifier;</span>
+        
+    	
+        /* Check if a 1-byte connection identifier is available */
+        
+    	// Check the range encoding the values 0..23. These connection identifiers
+    	// encode on the wire as a CBOR integer C_X, with numeric value 0..23
+<span class="nc bnc" id="L601" title="All 2 branches missed.">        for (int i = 0; i &lt;= 23; i++) {</span>
+        	
+<span class="nc" id="L603">        	identifier = new byte[1];</span>
+<span class="nc" id="L604">        	identifier[0] = (byte) (i &amp; 0xff);</span>
+<span class="nc" id="L605">    	    identifier = checkAndCommitConnectionId(identifier, usedConnectionIds, db, forbiddenIdentifier);</span>
+<span class="nc bnc" id="L606" title="All 2 branches missed.">            if (identifier != null)</span>
+<span class="nc" id="L607">            	return identifier;</span>
+        	
+    	}
+        
+    	// Check the range encoding the values 32..55. These connection identifiers
+    	// encode on the wire as a CBOR integer C_X, with numeric value -24..-1
+<span class="nc bnc" id="L613" title="All 2 branches missed.">        for (int i = 32; i &lt;= 55; i++) {</span>
+        	
+<span class="nc" id="L615">        	identifier = new byte[1];</span>
+<span class="nc" id="L616">        	identifier[0] = (byte) (i &amp; 0xff);</span>
+<span class="nc" id="L617">    	    identifier = checkAndCommitConnectionId(identifier, usedConnectionIds, db, forbiddenIdentifier);</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">            if (identifier != null)</span>
+<span class="nc" id="L619">            	return identifier;</span>
+        	
+    	}
+
+    	// Check the remaining ranges 24..31 and 56..255
+<span class="nc bnc" id="L624" title="All 2 branches missed.">        for (int i = 24; i &lt;= 255; i++) {</span>
+        	
+        	// Skip this range as it was already checked before
+<span class="nc bnc" id="L627" title="All 4 branches missed.">        	if (i &gt;= 32 &amp;&amp; i &lt;= 55)</span>
+<span class="nc" id="L628">        		continue;</span>
+        	
+<span class="nc" id="L630">        	identifier = new byte[1];</span>
+<span class="nc" id="L631">        	identifier[0] = (byte) (i &amp; 0xff);</span>
+<span class="nc" id="L632">    	    identifier = checkAndCommitConnectionId(identifier, usedConnectionIds, db, forbiddenIdentifier);    	    	</span>
+<span class="nc bnc" id="L633" title="All 2 branches missed.">            if (identifier != null)</span>
+<span class="nc" id="L634">            	return identifier;</span>
+        	
+    	}
+    	
+    	
+    	/* Check if a 2-byte connection identifier is available */
+        
+<span class="nc bnc" id="L641" title="All 2 branches missed.">        for (int i = 0; i &lt;= 255; i++) {</span>
+        	
+<span class="nc" id="L643">            identifier = new byte[2];</span>
+<span class="nc" id="L644">        	identifier[0] = (byte) (i &amp; 0xff);</span>
+        	
+<span class="nc bnc" id="L646" title="All 2 branches missed.">        	for (int j = 0; j &lt;= 255; j++) {</span>
+        		
+<span class="nc" id="L648">        		identifier[1] = (byte) (j &amp; 0xff);</span>
+<span class="nc" id="L649">        	    identifier = checkAndCommitConnectionId(identifier, usedConnectionIds, db, forbiddenIdentifier);</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">                if (identifier != null)</span>
+<span class="nc" id="L651">                	return identifier;</span>
+		    	
+        	}
+        	
+    	}
+      
+    	/* Check if a 3-byte connection identifier is available */
+        
+<span class="nc bnc" id="L659" title="All 2 branches missed.">        for (int i = 0; i &lt;= 255; i++) {</span>
+        	
+<span class="nc" id="L661">        	identifier = new byte[3];</span>
+<span class="nc" id="L662">        	identifier[0] = (byte) (i &amp; 0xff);</span>
+        	
+<span class="nc bnc" id="L664" title="All 2 branches missed.">        	for (int j = 0; j &lt;= 255; j++) {</span>
+        		
+<span class="nc" id="L666">        		identifier[1] = (byte) (j &amp; 0xff);</span>
+            	
+<span class="nc bnc" id="L668" title="All 2 branches missed.">            	for (int k = 0; k &lt;= 255; k++) {</span>
+            		
+<span class="nc" id="L670">            		identifier[2] = (byte) (k &amp; 0xff);</span>
+<span class="nc" id="L671">            	    identifier = checkAndCommitConnectionId(identifier, usedConnectionIds, db, forbiddenIdentifier);</span>
+<span class="nc bnc" id="L672" title="All 2 branches missed.">                    if (identifier != null)</span>
+<span class="nc" id="L673">                    	return identifier;</span>
+        		}
+		    	
+        	}
+        	
+    	}
+        
+<span class="nc" id="L680">        return null;</span>
+    	
+    }
+    
+    // v-14 identifiers
+    /**
+     * Check if a Connection Identifier is available to offer to the other peer
+     *
+     * @param recipientID   The candidate connection identifier to use as OSCORE Recipient ID
+     * @param usedConnectionIds   The set of already allocated Connection Identifiers
+     * @param db   The database of OSCORE security contexts when using EDHOC to key OSCORE, it can be null
+     * @param forbiddenIdentifier   The connection identifier C_I, it is null when the caller is the Initiator
+     * @return   the newly allocated connection identifier, or null in case it is not available
+     */
+    private static byte[] checkAndCommitConnectionId(byte[] identifier, Set&lt;CBORObject&gt; usedConnectionIds,
+    												 OSCoreCtxDB db, byte[] forbiddenIdentifier) {
+    	
+<span class="nc bnc" id="L697" title="All 2 branches missed.">        if (db != null) {</span>
+        	// EDHOC is used for keying OSCORE
+<span class="nc" id="L699">        	synchronized (db) {</span>
+<span class="nc" id="L700">        		return commitConnectionIdForOSCORE(identifier, db, usedConnectionIds, forbiddenIdentifier);</span>
+        	}
+        }
+        else {
+<span class="nc" id="L704">    	    CBORObject identifierCbor = CBORObject.FromObject(identifier);</span>
+        	
+<span class="nc bnc" id="L706" title="All 2 branches missed.">        	if (usedConnectionIds.contains(identifierCbor) == false) {</span>
+<span class="nc" id="L707">	    		usedConnectionIds.add(identifierCbor);</span>
+<span class="nc" id="L708">	    		return identifier;</span>
+        	}
+        }
+        
+<span class="nc" id="L712">        return null;</span>
+    	
+    }
+    
+    // v-14 identifiers
+    /**
+     * Check for the availability of an OSCORE Recipient ID and the corresponding, identical EDHOC Connection Identifier.
+     * If they are both available, mark them as used and return the Connection Identifier. Otherwise, return null.
+     *  
+     * @param recipientID   The candidate connection identifier to use as OSCORE Recipient ID
+     * @param db   The database of OSCORE security contexts when using EDHOC to key OSCORE
+     * @param usedConnectionIds   The set of already allocated Connection Identifiers
+     * @param forbiddenIdentifier   The connection identifier to avoid, it can be null if there is no constraint
+     * @return   the newly allocated connection identifier, or null in case of errors or unavailability
+     */
+    private static byte[] commitConnectionIdForOSCORE(byte[] recipientId, OSCoreCtxDB db,
+    												  Set&lt;CBORObject&gt; usedConnectionIds, byte[] forbiddenIdentifier) {
+    
+<span class="nc" id="L730">    	OSCoreCtx ctx = null;</span>
+    	
+<span class="nc bnc" id="L732" title="All 4 branches missed.">    	if (recipientId == null || db == null)</span>
+<span class="nc" id="L733">    		return null;</span>
+    	
+        try {
+<span class="nc" id="L736">            ctx = db.getContext(recipientId, null);</span>
+<span class="nc" id="L737">        } catch (CoapOSException e) {</span>
+        	// Found multiple OSCORE Security Contexts with the same Recipient ID
+<span class="nc" id="L739">        	return null;</span>
+<span class="nc" id="L740">        }</span>
+<span class="nc bnc" id="L741" title="All 2 branches missed.">    	if (ctx == null) {</span>
+    		// The Recipient ID is available for OSCORE, i.e., it is
+    		// currently not used in the sets of all the Recipient Contexts
+    		
+        	// The EDHOC Connection Identifier coincides with the one to avoid (i.e., C_I offered by the Initiator) 
+<span class="nc bnc" id="L746" title="All 4 branches missed.">        	if (forbiddenIdentifier != null &amp;&amp; Arrays.equals(recipientId, forbiddenIdentifier) == true)</span>
+<span class="nc" id="L747">        		return null;</span>
+
+<span class="nc" id="L749">        	CBORObject identifierCbor = CBORObject.FromObject(recipientId);</span>
+<span class="nc bnc" id="L750" title="All 2 branches missed.">        	if (usedConnectionIds.contains(identifierCbor) == false) {</span>
+	        	// The corresponding EDHOC Connection Identifier is also available
+        		
+<span class="nc" id="L753">        		usedConnectionIds.add(identifierCbor);</span>
+        		
+        		// Allocate a non-finalized OSCORE Security Context, to have the Recipient ID as taken
+        		try {
+<span class="nc" id="L757">        			byte[] emptyArray = new byte[0];</span>
+<span class="nc" id="L758">    				ctx = new OSCoreCtx(emptyArray, true, null, null, recipientId, AlgorithmID.HKDF_HMAC_SHA_256, 0, null, null, 0);</span>
+<span class="nc" id="L759">    				db.addContext(ctx);</span>
+<span class="nc" id="L760">    			} catch (OSException | NullPointerException e) {</span>
+<span class="nc" id="L761">    				System.err.println(&quot;Error when allocating an EDHOC Connection Identifier to use as &quot;</span>
+<span class="nc" id="L762">    						           + &quot;OSCORE Recipient ID&quot; + e.getMessage());</span>
+    				
+    				// Rollback
+<span class="nc" id="L765">    				usedConnectionIds.remove(identifierCbor);</span>
+<span class="nc bnc" id="L766" title="All 2 branches missed.">    				if (ctx != null)</span>
+<span class="nc" id="L767">    					db.removeContext(ctx);</span>
+    				
+<span class="nc" id="L769">    				return null;</span>
+<span class="nc" id="L770">    			}</span>
+        		
+<span class="nc" id="L772">        		return recipientId;</span>
+        	}
+    	}
+    	
+<span class="nc" id="L776">    	return null;</span>
+    	
+    }
+    
+    // v-14 identifiers
+    /**
+     * Deallocate a Connection Identifier previously locked to offer to a peer
+     * Note that, if this was an OSCORE Recipient ID, the Recipient ID itself will not be deallocated
+     *  
+     * @param connectionId   The Connection Identifier to release
+     * @param usedConnectionIds   The set of already allocated Connection Identifiers
+     * @param db   The database of OSCORE security contexts when using EDHOC to key OSCORE, it can be null
+     */
+    public static void releaseConnectionId (byte[] connectionId, Set&lt;CBORObject&gt; usedConnectionIds, OSCoreCtxDB db) {
+    	
+<span class="nc bnc" id="L791" title="All 2 branches missed.">    	if (connectionId == null)</span>
+<span class="nc" id="L792">    		return;</span>
+    	
+<span class="nc" id="L794">    	synchronized (usedConnectionIds) {</span>
+<span class="nc" id="L795">    		CBORObject connectionIdCbor = CBORObject.FromObject(connectionId); </span>
+<span class="nc" id="L796">    		usedConnectionIds.remove(connectionIdCbor);</span>
+<span class="nc" id="L797">    	}</span>
+    	
+<span class="nc bnc" id="L799" title="All 2 branches missed.">    	if (db != null) {</span>
+        	// EDHOC is used for keying OSCORE. The EDHOC connection identifier is the OSCORE Recipient ID.
+    		
+<span class="nc" id="L802">    		synchronized (db) {</span>
+<span class="nc" id="L803">	    		OSCoreCtx ctx = null;</span>
+				try {
+<span class="nc" id="L805">					ctx = db.getContext(connectionId, null);</span>
+<span class="nc" id="L806">				} catch (CoapOSException e) {</span>
+<span class="nc" id="L807">					System.err.println(&quot;Found multiple OSCORE Security Contexts with the same Recipient ID &quot; +</span>
+<span class="nc" id="L808">									   Utils.bytesToHex(connectionId) + &quot;\n&quot; + e.getMessage());</span>
+<span class="nc" id="L809">				}</span>
+<span class="nc bnc" id="L810" title="All 2 branches missed.">	    		if (ctx != null) {</span>
+<span class="nc" id="L811">	    			db.removeContext(ctx);</span>
+	    		}
+<span class="nc" id="L813">    		}</span>
+    			
+    	}
+    	
+<span class="nc" id="L817">    }</span>
+    
+    // v-14 identifiers
+	/**
+	 * Remove an EDHOC session from the list of active sessions; release the used Connection Identifier; invalidate the session
+	 * @param session   The EDHOC session to invalidate
+	 * @param connectionIdentifier   The Connection Identifier used for the session to invalidate
+	 * @param edhocSessions   The set of active EDHOC sessions of the recipient
+     * @param usedConnectionIds   The collection of already allocated Connection Identifiers
+	 */
+	public static void purgeSession(EdhocSession session, byte[] connectionIdentifier,
+			                        HashMap&lt;CBORObject, EdhocSession&gt; edhocSessions, Set&lt;CBORObject&gt; usedConnectionIds) {
+<span class="nc bnc" id="L829" title="All 2 branches missed.">		if (session != null) {</span>
+<span class="nc" id="L830">			CBORObject connectionIdentifierCbor = CBORObject.FromObject(connectionIdentifier);</span>
+<span class="nc" id="L831">		    edhocSessions.remove(session);</span>
+<span class="nc" id="L832">		    releaseConnectionId(connectionIdentifier, usedConnectionIds, session.getOscoreDb());</span>
+<span class="nc" id="L833">		    session.deleteTemporaryMaterial();</span>
+<span class="nc" id="L834">		    session = null;</span>
+		}
+<span class="nc" id="L836">	}</span>
+    
+    /**
+     * Generate an asymmetric key pair, according to the specified elliptic curve
+     *  
+     * @param keyCurve   The elliptic curve
+     * @return    The generated asymmetric key pair, or null in case of error
+     */
+    public static OneKey generateKeyPair (int keyCurve) {
+    	
+<span class="fc" id="L846">    	OneKey keyPair = null;</span>
+    	
+		// Generate the new long-term asymmetric key pair 
+		try {
+<span class="pc bpc" id="L850" title="1 of 2 branches missed.">	 		if (keyCurve == KeyKeys.EC2_P256.AsInt32()) {</span>
+<span class="fc" id="L851">	 			keyPair = OneKey.generateKey(AlgorithmID.ECDSA_256);</span>
+	 		}
+<span class="nc bnc" id="L853" title="All 2 branches missed.">	 		else if (keyCurve == KeyKeys.OKP_Ed25519.AsInt32()) {</span>
+<span class="nc" id="L854">	    		Provider EdDSA = new EdDSASecurityProvider();</span>
+<span class="nc" id="L855">	        	Security.insertProviderAt(EdDSA, 1);</span>
+<span class="nc" id="L856">	    		keyPair = OneKey.generateKey(AlgorithmID.EDDSA);</span>
+<span class="nc" id="L857">	    	}</span>
+<span class="nc bnc" id="L858" title="All 2 branches missed.">	 		else if (keyCurve == KeyKeys.OKP_X25519.AsInt32()) {</span>
+<span class="nc" id="L859">				keyPair = SharedSecretCalculation.generateCurve25519OneKey();</span>
+	    	}
+			
+<span class="nc" id="L862">		} catch (CoseException e) {</span>
+<span class="nc" id="L863">			System.err.println(&quot;Error while generating the key pair&quot;);</span>
+<span class="nc" id="L864">			return null;</span>
+<span class="fc" id="L865">		}</span>
+		
+		// Print out the base64 serialization of the key pair
+		/*
+		byte[] keyPairBytes = keyPair.EncodeToBytes();
+    	String testKeyBytesBase64 = Base64.encodeBytes(keyPairBytes);
+    	System.out.println(testKeyBytesBase64);
+    	
+    	System.out.println(keyCurve);
+    	System.out.println(keyPair.AsCBOR());
+    	*/
+		
+		// Print out the base64 serialization of the public key only
+		/*
+    	OneKey testPublicKey = keyPair.PublicKey();
+    	byte[] testPublicKeyBytes = testPublicKey.EncodeToBytes();
+    	String testPublicKeyBytesBase64 = Base64.encodeBytes(testPublicKeyBytes);
+    	System.out.println(testPublicKeyBytesBase64);
+    	
+    	System.out.println(keyCurve);
+    	System.out.println(testPublicKey.AsCBOR());
+    	*/
+    	
+<span class="fc" id="L888">    	return keyPair;</span>
+    	
+    }
+    
+    /**
+     * Print out a byte string in a convenient diagnostic way
+     *  
+     * @param header   First readable part of the output
+     * @param bstr   Actual binary content to print
+     */
+    public static void nicePrint(String header, byte[] content) {
+    	
+<span class="fc" id="L900">    	System.out.println(header + &quot; (&quot; + (content.length) + &quot; bytes):&quot;);</span>
+    	
+<span class="fc" id="L902">    	String contentStr = Utils.bytesToHex(content);</span>
+<span class="fc bfc" id="L903" title="All 2 branches covered.">    	for (int i = 0; i &lt; (content.length * 2); i++) {</span>
+<span class="fc bfc" id="L904" title="All 4 branches covered.">    		if ((i != 0) &amp;&amp; (i % 20) == 0)</span>
+<span class="fc" id="L905">    	    	System.out.println();</span>
+    		
+<span class="fc" id="L907">        	System.out.print(contentStr.charAt(i));</span>
+<span class="fc bfc" id="L908" title="All 2 branches covered.">    		if ((i % 2) == 1)</span>
+<span class="fc" id="L909">    	    	System.out.print(&quot; &quot;);</span>
+    	}
+    	
+<span class="fc" id="L912">    	System.out.println(&quot;\n&quot;);</span>
+
+<span class="fc" id="L914">    }</span>
+    
+	public static OneKey makeSingleKey(OneKey keyPair, boolean isPrivate) {
+		
+<span class="nc" id="L918">	    CBORObject key = CBORObject.NewMap();</span>
+<span class="nc" id="L919">        OneKey coseKey = null;</span>
+	    
+<span class="nc" id="L921">        key.Add(KeyKeys.KeyType.AsCBOR(), keyPair.get(KeyKeys.KeyType));</span>
+        
+<span class="nc bnc" id="L923" title="All 2 branches missed.">	    if (isPrivate) {</span>
+<span class="nc bnc" id="L924" title="All 2 branches missed.">	    	if(keyPair.get(KeyKeys.KeyType) == KeyKeys.KeyType_EC2) {	    		</span>
+<span class="nc" id="L925">		        key.Add(KeyKeys.EC2_Curve.AsCBOR(), keyPair.get(KeyKeys.EC2_Curve));</span>
+<span class="nc" id="L926">		        key.Add(KeyKeys.EC2_D.AsCBOR(), keyPair.get(KeyKeys.EC2_D));</span>
+
+	    	}
+<span class="nc bnc" id="L929" title="All 2 branches missed.">	    	else if(keyPair.get(KeyKeys.KeyType) == KeyKeys.KeyType_OKP) {	    		</span>
+<span class="nc" id="L930">		        key.Add(KeyKeys.OKP_Curve.AsCBOR(), keyPair.get(KeyKeys.OKP_Curve));</span>
+<span class="nc" id="L931">		        key.Add(KeyKeys.OKP_D.AsCBOR(), keyPair.get(KeyKeys.OKP_D));</span>
+	    	}
+	        
+	    }
+	    else {
+<span class="nc bnc" id="L936" title="All 2 branches missed.">	    	if(keyPair.get(KeyKeys.KeyType) == KeyKeys.KeyType_EC2) {</span>
+<span class="nc" id="L937">		        key.Add(KeyKeys.KeyType.AsCBOR(), KeyKeys.KeyType_EC2);</span>
+<span class="nc" id="L938">		        key.Add(KeyKeys.EC2_Curve.AsCBOR(), KeyKeys.EC2_P256);</span>
+<span class="nc" id="L939">		        key.Add(KeyKeys.EC2_X.AsCBOR(), keyPair.get(KeyKeys.EC2_X));</span>
+<span class="nc" id="L940">		        key.Add(KeyKeys.EC2_Y.AsCBOR(), keyPair.get(KeyKeys.EC2_Y));</span>
+	    	}
+<span class="nc bnc" id="L942" title="All 2 branches missed.">	    	else if(keyPair.get(KeyKeys.KeyType) == KeyKeys.KeyType_OKP) {	    		</span>
+<span class="nc" id="L943">		        key.Add(KeyKeys.OKP_Curve.AsCBOR(), keyPair.get(KeyKeys.OKP_Curve));</span>
+<span class="nc" id="L944">		        key.Add(KeyKeys.OKP_X.AsCBOR(), keyPair.get(KeyKeys.OKP_X));</span>
+	    	}
+	    }
+	    
+        try {
+<span class="nc" id="L949">        	coseKey = new OneKey(key);</span>
+<span class="nc" id="L950">		} catch (CoseException e) {</span>
+<span class="nc" id="L951">			System.err.println(e.getMessage());</span>
+<span class="nc" id="L952">			System.err.println(&quot;Error while generating the COSE key&quot;);</span>
+<span class="nc" id="L953">		}</span>
+<span class="nc" id="L954">	    return coseKey;</span>
+		
+	}
+	
+    /**
+     * Build SUITES_R
+     *  
+     * @param ciphersuites   The list of supported ciphersuites for this peer to include in SUITES_R
+     * @return SUITES_R, as a CBOR object
+     */
+	public static CBORObject buildSuitesR(List&lt;Integer&gt; ciphersuites) {
+		
+		CBORObject suitesR;
+		
+<span class="nc bnc" id="L968" title="All 2 branches missed.">		if (ciphersuites.size() == 1) {</span>
+<span class="nc" id="L969">			int suite = ciphersuites.get(0).intValue();</span>
+<span class="nc" id="L970">			suitesR = CBORObject.FromObject(suite);</span>
+<span class="nc" id="L971">		}</span>
+		// This peer supports multiple ciphersuites
+		else {
+<span class="nc" id="L974">			suitesR = CBORObject.NewArray();</span>
+<span class="nc bnc" id="L975" title="All 2 branches missed.">			for (Integer i : ciphersuites) {</span>
+<span class="nc" id="L976">				suitesR.Add(i.intValue());</span>
+<span class="nc" id="L977">			}</span>
+		}
+		
+<span class="nc" id="L980">		return suitesR;</span>
+		
+	}
+	
+    /**
+     * Build an ID_CRED using 'kcwt', with value a CWT as a CBOR array,
+     *  
+     * @param cwt   The CWT to use
+     * @return The ID_CRED, as a CBOR map
+     */
+	public static CBORObject buildIdCredKcwt(CBORObject cwt) {
+		
+<span class="nc" id="L992">		CBORObject idCred = CBORObject.NewMap();</span>
+<span class="nc" id="L993">		idCred.Add(Constants.COSE_HEADER_PARAM_KCWT, cwt);</span>
+<span class="nc" id="L994">		return idCred;</span>
+		
+	}
+	
+    /**
+     * Build an ID_CRED using 'kccs', with value a CWT Claims Set (CCS) as a CBOR map
+     *  
+     * @param claimSet   The CWT Claims Set to use, as a CBOR map
+     * @return The ID_CRED, as a CBOR map
+     */
+	public static CBORObject buildIdCredKccs(CBORObject claimSet) {
+		
+<span class="nc" id="L1006">		CBORObject idCred = CBORObject.NewMap();</span>
+<span class="nc" id="L1007">		idCred.Add(Constants.COSE_HEADER_PARAM_KCCS, claimSet);</span>
+<span class="nc" id="L1008">		return idCred;</span>
+		
+	}
+	
+    /**
+     * Build an ID_CRED using 'kid'
+     *  
+     * @param kid   The kid to use
+     * @return The ID_CRED, as a CBOR map
+     */
+	public static CBORObject buildIdCredKid(byte[] kid) {
+		
+<span class="fc" id="L1020">		CBORObject idCred = CBORObject.NewMap();</span>
+<span class="fc" id="L1021">		idCred.Add(HeaderKeys.KID.AsCBOR(), kid);</span>
+<span class="fc" id="L1022">		return idCred;</span>
+		
+	}
+	
+    /**
+     * Build an ID_CRED using 'x5chain'
+     *  
+     * @param cert   The binary serialization of the x509 certificate
+     * @return The ID_CRED, as a CBOR map
+     */
+	public static CBORObject buildIdCredX5chain(byte[] cert) {
+		
+<span class="nc" id="L1034">		CBORObject idCred = CBORObject.NewMap();</span>
+		
+		// Since a single certificate is specified,
+		// the map element encodes it as a CBOR byte string
+<span class="nc" id="L1038">		idCred.Add(Constants.COSE_HEADER_PARAM_X5CHAIN, cert);</span>
+<span class="nc" id="L1039">		return idCred;</span>
+		
+	}
+	
+    /**
+     * Build an ID_CRED using 'x5t'
+     *  
+     * @param cert   The binary serialization of the x509 certificate
+     * @return The ID_CRED, as a CBOR map
+     */
+	public static CBORObject buildIdCredX5t(byte[] cert) {
+		
+<span class="fc" id="L1051">		CBORObject idCred = CBORObject.NewMap();</span>
+		
+<span class="fc" id="L1053">		CBORObject idCredElem = CBORObject.NewArray();</span>
+<span class="fc" id="L1054">		idCredElem.Add(-15); // SHA-2 256-bit Hash truncated to 64-bits</span>
+<span class="fc" id="L1055">		byte[] hash = null;</span>
+		try {
+<span class="fc" id="L1057">			hash = Util.computeHash(cert, &quot;SHA-256&quot;);</span>
+<span class="nc" id="L1058">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L1059">			System.err.println(&quot;Error while hashing the x509 certificate: &quot; + e.getMessage());</span>
+<span class="nc" id="L1060">			return null;</span>
+<span class="fc" id="L1061">		}</span>
+<span class="pc bpc" id="L1062" title="1 of 2 branches missed.">		if (hash == null) {</span>
+<span class="nc" id="L1063">			return null;</span>
+		}
+<span class="fc" id="L1065">		byte[] truncatedHash = new byte[8];</span>
+<span class="fc" id="L1066">		System.arraycopy(hash, 0, truncatedHash, 0, 8);</span>
+<span class="fc" id="L1067">		idCredElem.Add(truncatedHash);</span>
+		
+<span class="fc" id="L1069">		idCred.Add(Constants.COSE_HEADER_PARAM_X5T, idCredElem);</span>
+				
+<span class="fc" id="L1071">		return idCred;</span>
+		
+	}
+	
+    /**
+     * Build an ID_CRED using 'x5u'
+     *  
+     * @param uri   The URI pointing to the certificate
+     * @return The ID_CRED, as a CBOR map
+     */
+	public static CBORObject buildIdCredX5u(String uri) {
+		
+<span class="nc" id="L1083">		CBORObject idCred = CBORObject.NewMap();</span>
+<span class="nc" id="L1084">		idCred.Add(Constants.COSE_HEADER_PARAM_X5U, uri);</span>
+<span class="nc" id="L1085">		return idCred;</span>
+		
+	}
+	
+    /**
+     * Build an ID_CRED to use with 'kid'
+     *  
+     * @param identityKey   The identity key to encode as CRED
+     * @param subjectName   The subject name associated to this key, it can be an empty string
+     * @return The CRED, as a byte serialization of a deterministic CBOR map
+     */
+	public static byte[] buildCredRawPublicKey(OneKey identityKey, String subjectName) {
+		
+<span class="nc bnc" id="L1098" title="All 4 branches missed.">		if (identityKey  == null || subjectName == null)</span>
+<span class="nc" id="L1099">			return null;</span>
+		
+<span class="nc" id="L1101">        List&lt;CBORObject&gt; labelList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L1102">        List&lt;CBORObject&gt; valueList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L1103">        labelList.add(KeyKeys.KeyType.AsCBOR());</span>
+<span class="nc" id="L1104">        valueList.add(identityKey.get(KeyKeys.KeyType));</span>
+<span class="nc bnc" id="L1105" title="All 2 branches missed.">        if (identityKey.get(KeyKeys.KeyType) == KeyKeys.KeyType_OKP) {</span>
+<span class="nc" id="L1106">            labelList.add(KeyKeys.OKP_Curve.AsCBOR());</span>
+<span class="nc" id="L1107">            valueList.add(identityKey.get(KeyKeys.OKP_Curve));</span>
+<span class="nc" id="L1108">            labelList.add(KeyKeys.OKP_X.AsCBOR());</span>
+<span class="nc" id="L1109">            valueList.add(identityKey.get(KeyKeys.OKP_X));</span>
+		}
+<span class="nc bnc" id="L1111" title="All 2 branches missed.">		else if (identityKey.get(KeyKeys.KeyType) == KeyKeys.KeyType_EC2) {</span>
+<span class="nc" id="L1112">            labelList.add(KeyKeys.EC2_Curve.AsCBOR());</span>
+<span class="nc" id="L1113">            valueList.add(identityKey.get(KeyKeys.EC2_Curve));</span>
+<span class="nc" id="L1114">            labelList.add(KeyKeys.EC2_X.AsCBOR());</span>
+<span class="nc" id="L1115">            valueList.add(identityKey.get(KeyKeys.EC2_X));</span>
+<span class="nc" id="L1116">            labelList.add(KeyKeys.EC2_Y.AsCBOR());</span>
+<span class="nc" id="L1117">            valueList.add(identityKey.get(KeyKeys.EC2_Y));</span>
+		}
+		else {
+<span class="nc" id="L1120">			return null;</span>
+		}
+<span class="nc" id="L1122">        labelList.add(CBORObject.FromObject(&quot;subject name&quot;));</span>
+<span class="nc" id="L1123">        valueList.add(CBORObject.FromObject(subjectName));</span>
+<span class="nc" id="L1124">        return Util.buildDeterministicCBORMap(labelList, valueList);</span>
+		
+	}
+	
+    /**
+     * Build an ID_CRED to use with 'kid2', with value a CWT Claims Set (CCS) 
+     *  
+     * @param identityKey   The identity key to encode as CRED
+     * @param subjectName   The subject name associated to this key, it can be an empty string
+     * @param kid   The key identifier associated to this key
+     * @return The CRED, as a byte serialization of a CBOR map
+     */
+	public static byte[] buildCredRawPublicKeyCcs(OneKey identityKey, String subjectName, CBORObject kid) {
+		
+<span class="nc bnc" id="L1138" title="All 4 branches missed.">		if (identityKey  == null || subjectName == null)</span>
+<span class="nc" id="L1139">			return null;</span>
+		
+<span class="nc" id="L1141">		CBORObject coseKeyMap = CBORObject.NewOrderedMap();</span>
+<span class="nc" id="L1142">		coseKeyMap.Add(KeyKeys.KeyType.AsCBOR(), identityKey.get(KeyKeys.KeyType));</span>
+<span class="nc" id="L1143">		coseKeyMap.Add(KeyKeys.KeyId.AsCBOR(), kid);</span>
+<span class="nc bnc" id="L1144" title="All 2 branches missed.">		if (identityKey.get(KeyKeys.KeyType) == KeyKeys.KeyType_OKP) {</span>
+<span class="nc" id="L1145">			coseKeyMap.Add(KeyKeys.OKP_Curve.AsCBOR(), identityKey.get(KeyKeys.OKP_Curve));</span>
+<span class="nc" id="L1146">			coseKeyMap.Add(KeyKeys.OKP_X.AsCBOR(), identityKey.get(KeyKeys.OKP_X));</span>
+		}
+<span class="nc bnc" id="L1148" title="All 2 branches missed.">		else if (identityKey.get(KeyKeys.KeyType) == KeyKeys.KeyType_EC2) {</span>
+<span class="nc" id="L1149">			coseKeyMap.Add(KeyKeys.EC2_Curve.AsCBOR(), identityKey.get(KeyKeys.EC2_Curve));</span>
+<span class="nc" id="L1150">			coseKeyMap.Add(KeyKeys.EC2_X.AsCBOR(), identityKey.get(KeyKeys.EC2_X));</span>
+<span class="nc" id="L1151">			coseKeyMap.Add(KeyKeys.EC2_Y.AsCBOR(), identityKey.get(KeyKeys.EC2_Y));</span>
+		}
+		else {
+<span class="nc" id="L1154">			return null;</span>
+		}
+		
+<span class="nc" id="L1157">		CBORObject cnfMap = CBORObject.NewOrderedMap();</span>
+<span class="nc" id="L1158">		cnfMap.Add(Constants.CWT_CNF_COSE_KEY, coseKeyMap);</span>
+		
+<span class="nc" id="L1160">		CBORObject claimSetMap = CBORObject.NewOrderedMap();</span>
+<span class="nc" id="L1161">		claimSetMap.Add(Constants.CWT_CLAIMS_SUB, subjectName);</span>
+<span class="nc" id="L1162">		claimSetMap.Add(Constants.CWT_CLAIMS_CNF, cnfMap);</span>
+
+<span class="nc" id="L1164">		System.out.println(&quot;CCS serialization: &quot; + Utils.bytesToHex(claimSetMap.EncodeToBytes()));</span>
+		
+<span class="nc" id="L1166">        return claimSetMap.EncodeToBytes();</span>
+		
+	}
+    
+    /**
+     * Check that a signature key is compliant with the selected cipher suite
+     *  
+     * @param identityKey   The signature key to check against the selected cipher suite
+     * @param selectedCipherSuite   The selected cipher suite used in an EDHOC session
+     * @return True in case the key complies with the selected cipher suite, or false otherwise
+     */
+	public static boolean checkSignatureKeyAgainstCiphersuite(OneKey key, int selectedCipherSuite) {
+			
+		
+<span class="pc bpc" id="L1180" title="3 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
+			
+<span class="pc bpc" id="L1182" title="1 of 2 branches missed.">				if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_OKP) {</span>
+<span class="nc" id="L1183">					System.err.println(&quot;Invalid key type - Expected key type: OKP&quot;);</span>
+<span class="nc" id="L1184">					return false;</span>
+				}
+				
+<span class="pc bpc" id="L1187" title="1 of 2 branches missed.">			if (key.get(KeyKeys.OKP_Curve) != KeyKeys.OKP_Ed25519) {</span>
+<span class="nc" id="L1188">				System.err.println(&quot;Invalid OKP curve - Expected curve: Ed25519&quot;);</span>
+<span class="nc" id="L1189">				return false;</span>
+			}
+			
+		}
+<span class="pc bpc" id="L1193" title="2 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3) {</span>
+				
+<span class="nc bnc" id="L1195" title="All 2 branches missed.">			if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_EC2) {</span>
+<span class="nc" id="L1196">				System.err.println(&quot;Invalid key type - Expected key type: EC2&quot;);</span>
+<span class="nc" id="L1197">				return false;</span>
+			}
+				
+<span class="nc bnc" id="L1200" title="All 2 branches missed.">			if (key.get(KeyKeys.EC2_Curve) != KeyKeys.EC2_P256) {</span>
+<span class="nc" id="L1201">				System.err.println(&quot;Invalid EC2 curve - Expected curve: P-256&quot;);</span>
+<span class="nc" id="L1202">				return false;</span>
+			}
+				
+		}
+				
+<span class="fc" id="L1207">		return true;</span>
+		
+	}
+	
+    /**
+     * Check that a Diffie-Hellman key is compliant with the selected cipher suite
+     *  
+     * @param identityKey   The signature key to check against the selected cipher suite
+     * @param selectedCipherSuite   The selected cipher suite used in an EDHOC session
+     * @return True in case the key complies with the selected cipher suite, or false otherwise
+     */
+	public static boolean checkDiffieHellmanKeyAgainstCiphersuite(OneKey key, int selectedCipherSuite) {
+			
+<span class="pc bpc" id="L1220" title="2 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
+		    
+<span class="nc bnc" id="L1222" title="All 2 branches missed.">			if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_OKP) {</span>
+<span class="nc" id="L1223">				System.err.println(&quot;Invalid key type - Expected key type: OKP&quot;);</span>
+<span class="nc" id="L1224">				return false;</span>
+			}
+				
+<span class="nc bnc" id="L1227" title="All 2 branches missed.">			if (key.get(KeyKeys.OKP_Curve) != KeyKeys.OKP_X25519) {</span>
+<span class="nc" id="L1228">				System.err.println(&quot;Invalid OKP curve - Expected curve: Ed25519&quot;);</span>
+<span class="nc" id="L1229">				return false;</span>
+			}
+			
+		}
+<span class="pc bpc" id="L1233" title="3 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3) {</span>
+				
+<span class="pc bpc" id="L1235" title="1 of 2 branches missed.">			if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_EC2) {</span>
+<span class="nc" id="L1236">				System.err.println(&quot;Invalid key type - Expected key type: EC2&quot;);</span>
+<span class="nc" id="L1237">				return false;</span>
+			}
+				
+<span class="pc bpc" id="L1240" title="1 of 2 branches missed.">			if (key.get(KeyKeys.EC2_Curve) != KeyKeys.EC2_P256) {</span>
+<span class="nc" id="L1241">				System.err.println(&quot;Invalid EC2 curve - Expected curve: P-256&quot;);</span>
+<span class="nc" id="L1242">				return false;</span>
+			}
+				
+		}
+		
+<span class="fc" id="L1247">		return true;</span>
+		
+	}
+
+	
+    /**
+     * Check if a CBOR integer complies with deterministic CBOR encoding
+     *  
+     * @param obj   The CBOR integer to check
+     * @return True in case the CBOR integer complies with deterministic CBOR encoding, or false otherwise
+     */
+	public static boolean isDeterministicCborInteger (CBORObject obj) {
+		
+<span class="nc bnc" id="L1260" title="All 2 branches missed.">		if (obj.getType() != CBORType.Integer)</span>
+<span class="nc" id="L1261">			return false;</span>
+		
+<span class="nc" id="L1263">		byte[] objBytes = obj.EncodeToBytes();</span>
+		
+<span class="nc bnc" id="L1265" title="All 6 branches missed.">		switch (objBytes.length) {</span>
+			case 1:
+<span class="nc" id="L1267">				return true;</span>
+			case 2:
+<span class="nc bnc" id="L1269" title="All 4 branches missed.">				if (obj.AsInt32() &gt;= -24 || obj.AsInt32() &lt;= 23)</span>
+<span class="nc" id="L1270">					return false;</span>
+			case 3:
+<span class="nc bnc" id="L1272" title="All 4 branches missed.">				if (obj.AsInt32() &gt;= -256 || obj.AsInt32() &lt;= 255)</span>
+<span class="nc" id="L1273">					return false;</span>
+			case 5:
+<span class="nc bnc" id="L1275" title="All 4 branches missed.">				if (obj.AsInt32() &gt;= -65536 || obj.AsInt32() &lt;= 65535)</span>
+<span class="nc" id="L1276">					return false;</span>
+			case 9:
+<span class="nc bnc" id="L1278" title="All 4 branches missed.">				if (obj.AsInt64Value() &gt;= -4294967296L || obj.AsInt64Value() &lt;= 4294967295L)</span>
+<span class="nc" id="L1279">					return false;</span>
+			default:
+<span class="nc" id="L1281">				return false;</span>
+		}
+		
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

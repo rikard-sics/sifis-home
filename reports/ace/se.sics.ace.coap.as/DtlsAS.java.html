@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DtlsAS.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ACE library</a> &gt; <a href="index.source.html" class="el_package">se.sics.ace.coap.as</a> &gt; <span class="el_source">DtlsAS.java</span></div><h1>DtlsAS.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (c) 2019, RISE AB
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, 
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, 
+ *    this list of conditions and the following disclaimer in the documentation 
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+package se.sics.ace.coap.as;
+
+import java.net.InetSocketAddress;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import org.eclipse.californium.core.CoapServer;
+import org.eclipse.californium.core.coap.CoAP;
+import org.eclipse.californium.core.network.CoapEndpoint;
+import org.eclipse.californium.scandium.DTLSConnector;
+import org.eclipse.californium.scandium.config.DtlsConfig;
+import org.eclipse.californium.scandium.config.DtlsConnectorConfig;
+import org.eclipse.californium.scandium.dtls.CertificateType;
+import org.eclipse.californium.scandium.dtls.cipher.CipherSuite;
+import org.eclipse.californium.scandium.dtls.x509.AsyncNewAdvancedCertificateVerifier;
+import org.eclipse.californium.scandium.dtls.x509.SingleCertificateProvider;
+
+import org.eclipse.californium.cose.CoseException;
+import org.eclipse.californium.cose.KeyKeys;
+import org.eclipse.californium.cose.OneKey;
+import org.eclipse.californium.elements.auth.RawPublicKeyIdentity;
+import org.eclipse.californium.elements.config.CertificateAuthenticationMode;
+import org.eclipse.californium.elements.config.Configuration;
+
+import se.sics.ace.AceException;
+import se.sics.ace.TimeProvider;
+import se.sics.ace.as.Introspect;
+import se.sics.ace.as.PDP;
+import se.sics.ace.as.Token;
+
+/**
+ * An authorization server listening to CoAP requests
+ * over DTLS.
+ * 
+ * Create an instance of this server with the constructor then call
+ * CoapsAS.start();
+ * 
+ * @author Ludwig Seitz and Marco Tiloca
+ *
+ */
+public class DtlsAS extends CoapServer implements AutoCloseable {
+    
+    /**
+     * The logger
+     */
+<span class="fc" id="L81">    private static final Logger LOGGER </span>
+<span class="fc" id="L82">        = Logger.getLogger(DtlsAS.class.getName());</span>
+
+    /**
+     * The token endpoint
+     */
+<span class="fc" id="L87">    Token t = null;</span>
+    
+    /**
+     * The introspect endpoint
+     */
+<span class="fc" id="L92">    Introspect i = null;</span>
+
+    private CoapDtlsEndpoint token;
+
+    private CoapDtlsEndpoint introspect;
+
+    /**
+     * Constructor.
+     * 
+     * @param asId  identifier of the AS
+     * @param db    database connector of the AS
+     * @param pdp   PDP for deciding who gets which token
+     * @param time  time provider, must not be null
+     * @param asymmetricKey  asymmetric key pair of the AS for RPK handshakes,
+     *   can be null if the AS only ever does PSK handshakes
+     * @param port  the port number to run the server on
+     * 
+     * @throws AceException 
+     * @throws CoseException 
+     * 
+     */
+    public DtlsAS(String asId, CoapDBConnector db, PDP pdp, TimeProvider time, 
+            OneKey asymmetricKey, int port) 
+                    throws AceException, CoseException {
+<span class="nc" id="L116">        this(asId, db, pdp, time, asymmetricKey, &quot;token&quot;, &quot;introspect&quot;, port,</span>
+                null, false);
+<span class="nc" id="L118">    }</span>
+    
+    
+    /**
+     * Constructor.
+     * 
+     * @param asId  identifier of the AS
+     * @param db    database connector of the AS
+     * @param pdp   PDP for deciding who gets which token
+     * @param time  time provider, must not be null
+     * @param asymmetricKey  asymmetric key pair of the AS for RPK handshakes,
+     *   can be null if the AS only ever does PSK handshakes
+     * @throws AceException 
+     * @throws CoseException 
+     * 
+     */
+    public DtlsAS(String asId, CoapDBConnector db, PDP pdp, TimeProvider time, 
+            OneKey asymmetricKey) throws AceException, CoseException {
+<span class="fc" id="L136">        this(asId, db, pdp, time, asymmetricKey, &quot;token&quot;, &quot;introspect&quot;,</span>
+                CoAP.DEFAULT_COAP_SECURE_PORT, null, false);
+<span class="fc" id="L138">    }</span>
+    
+    /**
+     * Constructor with endpoint names
+     * 
+     * @param asId  identifier of the AS
+     * @param db    database connector of the AS
+     * @param pdp   PDP for deciding who gets which token
+     * @param time  time provider, must not be null
+     * @param asymmetricKey  asymmetric key pair of the AS for RPK handshakes,
+     *   can be null if the AS only ever does PSK handshakes
+     * @param tokenName  the name of the token endpoint 
+     *  (will be converted into the address as well)
+     * @param introspectName  the name of the introspect endpoint 
+     *  (will be converted into the address as well), if this is null,
+     *  no introspection endpoint will be offered
+     * @param port  the port number to run the server on
+     * @param claims  the claim types to include in tokens issued by this 
+     *                AS, can be null to use default set.
+     * @param setAudHeader  insert the AUD as header in the CWT. 
+     * See {@link se.sics.ace.as.Token} for details.
+     * @throws AceException 
+     * @throws CoseException 
+     * 
+     */
+    public DtlsAS(String asId, CoapDBConnector db, PDP pdp, 
+            TimeProvider time, OneKey asymmetricKey, String tokenName,
+            String introspectName, int port, Set&lt;Short&gt; claims, 
+            boolean setAudHeader) 
+<span class="fc" id="L167">                    throws AceException, CoseException {</span>
+<span class="fc" id="L168">        this.t = new Token(asId, pdp, db, time, asymmetricKey, claims, setAudHeader, null);</span>
+<span class="fc" id="L169">        this.token = new CoapDtlsEndpoint(tokenName, this.t);</span>
+<span class="fc" id="L170">        add(this.token);</span>
+        
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        if (introspectName != null) {</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">            if (asymmetricKey == null) {</span>
+<span class="nc" id="L174">                this.i = new Introspect(pdp, db, time, null, null);</span>
+            } else {
+<span class="fc" id="L176">                this.i = new Introspect(pdp, db, time, asymmetricKey.PublicKey(), null);</span>
+            }
+<span class="fc" id="L178">            this.introspect = new CoapDtlsEndpoint(introspectName, this.i);</span>
+<span class="fc" id="L179">            add(this.introspect);    </span>
+        }
+
+<span class="fc" id="L182">       Configuration dtlsConfig = Configuration.getStandard();</span>
+<span class="fc" id="L183">       dtlsConfig.set(DtlsConfig.DTLS_USE_SERVER_NAME_INDICATION, false);</span>
+<span class="fc" id="L184">       dtlsConfig.set(DtlsConfig.DTLS_CLIENT_AUTHENTICATION_MODE, CertificateAuthenticationMode.NEEDED);</span>
+
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">       if (asymmetricKey != null &amp;&amp; </span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">               asymmetricKey.get(KeyKeys.KeyType) == KeyKeys.KeyType_EC2 ) {</span>
+<span class="fc" id="L188">           LOGGER.info(&quot;Starting CoapsAS with PSK and RPK&quot;);</span>
+<span class="fc" id="L189">           dtlsConfig.set(DtlsConfig.DTLS_CIPHER_SUITES, Arrays.asList(CipherSuite.TLS_PSK_WITH_AES_128_CCM_8, CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8));</span>
+       } else {
+<span class="nc" id="L191">           LOGGER.info(&quot;Starting CoapsAS with PSK only&quot;);</span>
+<span class="nc" id="L192">           dtlsConfig.set(DtlsConfig.DTLS_CIPHER_SUITES, Collections.singletonList(CipherSuite.TLS_PSK_WITH_AES_128_CCM_8));</span>
+       }
+        
+<span class="fc" id="L195">       DtlsConnectorConfig.Builder config =  new DtlsConnectorConfig.Builder(dtlsConfig)</span>
+<span class="fc" id="L196">               .setAddress(new InetSocketAddress(port));</span>
+
+<span class="fc" id="L198">       ArrayList&lt;CertificateType&gt; certTypes = new ArrayList&lt;CertificateType&gt;();</span>
+<span class="fc" id="L199">       certTypes.add(CertificateType.RAW_PUBLIC_KEY);</span>
+<span class="fc" id="L200">       certTypes.add(CertificateType.X_509);</span>
+<span class="fc" id="L201">       AsyncNewAdvancedCertificateVerifier verifier = new AsyncNewAdvancedCertificateVerifier(new X509Certificate[0],</span>
+               new RawPublicKeyIdentity[0], certTypes);
+<span class="fc" id="L203">       config.setAdvancedCertificateVerifier(verifier);</span>
+
+<span class="fc" id="L205">       config.setAdvancedPskStore(db);</span>
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">       if (asymmetricKey != null) {</span>
+<span class="fc" id="L207">           config.setCertificateIdentityProvider(</span>
+<span class="fc" id="L208">                   new SingleCertificateProvider(asymmetricKey.AsPrivateKey(), asymmetricKey.AsPublicKey()));</span>
+       }
+<span class="fc" id="L210">       DTLSConnector connector = new DTLSConnector(config.build());</span>
+       
+<span class="fc" id="L212">       addEndpoint(new CoapEndpoint.Builder()</span>
+<span class="fc" id="L213">               .setConnector(connector).setConfiguration(</span>
+<span class="fc" id="L214">                       Configuration.getStandard()).build());</span>
+       //Add a CoAP (no 's') endpoint for error messages
+       //CoapEndpoint coap = new CoapEndpointBuilder().setInetSocketAddress(
+       //       new InetSocketAddress(CoAP.DEFAULT_COAP_PORT)).build();
+       //addEndpoint(coap);
+<span class="fc" id="L219">    }</span>
+
+    @Override
+    public void close() throws Exception {
+<span class="nc" id="L223">       LOGGER.info(&quot;Closing down DtlsAS ...&quot;);</span>
+<span class="nc" id="L224">       this.token.close();</span>
+<span class="nc" id="L225">       this.introspect.close();</span>
+<span class="nc" id="L226">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

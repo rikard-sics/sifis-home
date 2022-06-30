@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MultiKey.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Cf-OSCORE</a> &gt; <a href="index.source.html" class="el_package">org.eclipse.californium.oscore.group</a> &gt; <span class="el_source">MultiKey.java</span></div><h1>MultiKey.java</h1><pre class="source lang-java linenums">package org.eclipse.californium.oscore.group;
+
+import java.util.Arrays;
+
+import org.eclipse.californium.cose.CoseException;
+import org.eclipse.californium.cose.OneKey;
+import org.eclipse.californium.elements.util.Bytes;
+
+import com.upokecenter.cbor.CBORObject;
+
+//TODO: Need clone?
+public class MultiKey {
+
+	private byte[] rawKeyBytes;
+	private OneKey coseKey;
+
+<span class="nc" id="L17">	public MultiKey(byte[] rawKeyBytes) {</span>
+<span class="nc" id="L18">		this.rawKeyBytes = rawKeyBytes.clone();</span>
+<span class="nc" id="L19">		coseKey = convertToCoseKey(rawKeyBytes, null);</span>
+
+<span class="nc" id="L21">	}</span>
+
+<span class="nc" id="L23">	public MultiKey(byte[] rawKeyBytes, byte[] privateKeyOnly) {</span>
+<span class="nc" id="L24">		this.rawKeyBytes = rawKeyBytes.clone();</span>
+<span class="nc" id="L25">		coseKey = convertToCoseKey(rawKeyBytes, privateKeyOnly);</span>
+
+<span class="nc" id="L27">	}</span>
+
+	public byte[] getRawKey() {
+<span class="nc" id="L30">		return rawKeyBytes.clone();</span>
+	}
+
+	public OneKey getCoseKey() {
+<span class="nc" id="L34">		return coseKey;</span>
+	}
+
+	private void addPrivate(byte[] privateKey) {
+<span class="nc" id="L38">		coseKey.add(CBORObject.FromObject(-4), CBORObject.FromObject(privateKey));</span>
+<span class="nc" id="L39">	}</span>
+
+	private OneKey convertToCoseKey(byte[] rawKeyBytes, byte[] privateKeyOnly) {
+<span class="nc" id="L42">		CBORObject cborKey = CBORObject.DecodeFromBytes(rawKeyBytes);</span>
+<span class="nc" id="L43">		OneKey keyy = null;</span>
+
+		// CWT claims set
+<span class="nc bnc" id="L46" title="All 4 branches missed.">		if (cborKey.get(8) != null &amp;&amp; cborKey.get(8).get(1) != null) {</span>
+
+			// System.out.println(&quot;*CWT claims set&quot;);
+
+			// System.out.println(cborKey.toString());
+
+<span class="nc" id="L52">			CBORObject test2 = cborKey.get(8);</span>
+
+			// System.out.println(test2.toString());
+
+<span class="nc" id="L56">			CBORObject test3 = test2.get(1);</span>
+			// Add private key
+<span class="nc bnc" id="L58" title="All 2 branches missed.">			if (privateKeyOnly != null) {</span>
+<span class="nc" id="L59">				test3.Add(CBORObject.FromObject(-4), CBORObject.FromObject(privateKeyOnly));</span>
+			}
+
+			// System.out.println(test3.toString());
+
+			try {
+<span class="nc" id="L65">				keyy = new OneKey(test3);</span>
+<span class="nc" id="L66">			} catch (CoseException e) {</span>
+<span class="nc" id="L67">				System.err.println(&quot;Error converting CWT claims set key bytes to COSE Key&quot;);</span>
+<span class="nc" id="L68">				e.printStackTrace();</span>
+<span class="nc" id="L69">			}</span>
+<span class="nc" id="L70">		} else {</span>
+			// COSE Key
+
+			// System.out.println(&quot;*COSE Key&quot;);
+			// System.out.println(cborKey.toString());
+
+			// Save private key and strip from byte array if present
+<span class="nc" id="L77">			byte[] privateKey = null;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">			if (cborKey.get(-4) != null) {</span>
+				// System.out.println(&quot;Has private part&quot;);
+
+<span class="nc" id="L81">				privateKey = cborKey.get(-4).GetByteString();</span>
+				// cborKey.Remove(CBORObject.FromObject(-4));
+
+<span class="nc" id="L84">				byte[] privateBytesHeader = new byte[] { 0x23, 0x58, 0x20 };</span>
+<span class="nc" id="L85">				byte[] privateBytes = Bytes.concatenate(privateBytesHeader, privateKey);</span>
+
+<span class="nc" id="L87">				int index = indexOf(rawKeyBytes, privateBytes);</span>
+
+				// System.out.println(&quot;index: &quot; + index);
+
+<span class="nc" id="L91">				byte[] part1 = Arrays.copyOf(rawKeyBytes, index);</span>
+<span class="nc" id="L92">				byte[] part2 = Arrays.copyOfRange(rawKeyBytes, index + privateBytes.length, rawKeyBytes.length);</span>
+
+				// System.out.println(&quot;Part 1: &quot; + Utils.bytesToHex(part1));
+				// System.out.println(&quot;Part 2: &quot; + Utils.bytesToHex(part2));
+
+<span class="nc" id="L97">				this.rawKeyBytes = Bytes.concatenate(part1, part2);</span>
+<span class="nc" id="L98">				this.rawKeyBytes[0]--; // Reduce array length</span>
+			}
+
+			try {
+<span class="nc" id="L102">				keyy = new OneKey(cborKey);</span>
+<span class="nc" id="L103">			} catch (CoseException e) {</span>
+<span class="nc" id="L104">				System.err.println(&quot;Error converting COSE Key key bytes to COSE Key&quot;);</span>
+<span class="nc" id="L105">				e.printStackTrace();</span>
+<span class="nc" id="L106">			}</span>
+
+			// if (cborKey.get(-4) != null) {
+			// System.out.println(&quot;Adding private part&quot;);
+			// if (privateKey == null) {
+			// System.err.println(&quot;Error adding private part&quot;);
+			// }
+			// keyy.add(CBORObject.FromObject(-4),
+			// CBORObject.FromObject(privateKey));
+			// }
+
+		}
+
+<span class="nc" id="L119">		return keyy;</span>
+	}
+
+	/**
+	 * Search the data byte array for the first occurrence of the byte array
+	 * pattern.
+	 */
+	public static int indexOf(byte[] data, byte[] pattern) {
+<span class="nc" id="L127">		int[] failure = computeFailure(pattern);</span>
+
+<span class="nc" id="L129">		int j = 0;</span>
+
+<span class="nc bnc" id="L131" title="All 2 branches missed.">		for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="nc bnc" id="L132" title="All 4 branches missed.">			while (j &gt; 0 &amp;&amp; pattern[j] != data[i]) {</span>
+<span class="nc" id="L133">				j = failure[j - 1];</span>
+			}
+<span class="nc bnc" id="L135" title="All 2 branches missed.">			if (pattern[j] == data[i]) {</span>
+<span class="nc" id="L136">				j++;</span>
+			}
+<span class="nc bnc" id="L138" title="All 2 branches missed.">			if (j == pattern.length) {</span>
+<span class="nc" id="L139">				return i - pattern.length + 1;</span>
+			}
+		}
+<span class="nc" id="L142">		return -1;</span>
+	}
+
+	/**
+	 * Computes the failure function using a boot-strapping process, where the
+	 * pattern is matched against itself.
+	 */
+	private static int[] computeFailure(byte[] pattern) {
+<span class="nc" id="L150">		int[] failure = new int[pattern.length];</span>
+
+<span class="nc" id="L152">		int j = 0;</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">		for (int i = 1; i &lt; pattern.length; i++) {</span>
+<span class="nc bnc" id="L154" title="All 4 branches missed.">			while (j &gt; 0 &amp;&amp; pattern[j] != pattern[i]) {</span>
+<span class="nc" id="L155">				j = failure[j - 1];</span>
+			}
+<span class="nc bnc" id="L157" title="All 2 branches missed.">			if (pattern[j] == pattern[i]) {</span>
+<span class="nc" id="L158">				j++;</span>
+			}
+<span class="nc" id="L160">			failure[i] = j;</span>
+		}
+
+<span class="nc" id="L163">		return failure;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

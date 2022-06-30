@@ -1,0 +1,1850 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Token.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ACE library</a> &gt; <a href="index.source.html" class="el_package">se.sics.ace.as</a> &gt; <span class="el_source">Token.java</span></div><h1>Token.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (c) 2019, RISE AB
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, 
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, 
+ *    this list of conditions and the following disclaimer in the documentation 
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+package se.sics.ace.as;
+
+import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
+import org.bouncycastle.crypto.InvalidCipherTextException;
+import org.eclipse.californium.elements.auth.RawPublicKeyIdentity;
+
+import com.upokecenter.cbor.CBORObject;
+import com.upokecenter.cbor.CBORType;
+
+import org.eclipse.californium.cose.CoseException;
+import org.eclipse.californium.cose.Encrypt0Message;
+import org.eclipse.californium.cose.HeaderKeys;
+import org.eclipse.californium.cose.KeyKeys;
+import org.eclipse.californium.cose.OneKey;
+
+import se.sics.ace.AccessToken;
+import se.sics.ace.AceException;
+import se.sics.ace.Constants;
+import se.sics.ace.Endpoint;
+import se.sics.ace.Message;
+import se.sics.ace.TimeProvider;
+import se.sics.ace.Util;
+import se.sics.ace.cwt.CWT;
+import se.sics.ace.cwt.CwtCryptoCtx;
+
+/**
+ * Implements the /token endpoint on the authorization server.
+ * 
+ * Note: If a client requests a scope that is not supported by (parts) of the 
+ * audience this endpoint will just ignore that, assuming that the client will
+ * be denied by the PDP anyway. This requires a default deny policy in the PDP.
+ * 
+ * Note: This endpoint assigns a cti to each issued token based on a counter. 
+ * The same value is also used as kid for the proof-of-possession key
+ * associated to the token by means of the 'cnf' claim.
+ * 
+ * Note: This endpoint assumes that the sender Id (the one you get from 
+ * Message.getSenderId()) for a secure session created with a raw public key
+ * is generated with 
+ * org.eclipse.californium.scandium.auth.RawPublicKeyIdentity.getName()
+ * 
+ * @author Ludwig Seitz and Marco Tiloca
+ *
+ */
+public class Token implements Endpoint, AutoCloseable {
+    
+    /**
+     * The logger
+     */
+<span class="fc" id="L95">    private static final Logger LOGGER </span>
+<span class="fc" id="L96">        = Logger.getLogger(Token.class.getName());</span>
+
+    /**
+     * Boolean for not verify
+     */
+<span class="fc" id="L101">    private static boolean sign = false;</span>
+    
+	/**
+	 * The PDP this endpoint uses to make access control decisions.
+	 */
+	private PDP pdp;
+	
+	/**
+	 * The database connector for storing and retrieving stuff.
+	 */
+	private DBConnector db;
+	
+	/**
+	 * The identifier of this AS for the iss claim.
+	 */
+	private String asId;
+	
+	/**
+	 * The time provider for this AS.
+	 */
+	private TimeProvider time;
+	
+	/**
+	 * The default expiration time of an access token
+	 */
+<span class="fc" id="L126">	private static long expiration = 1000 * 60 * 10; //10 minutes</span>
+	
+	/**
+	 * The counter for generating the cti
+	 */
+<span class="fc" id="L131">	private Long cti = 0L;</span>
+
+	/**
+	 * The private key of the AS or null if there isn't any
+	 */
+	private OneKey privateKey;
+    
+    /**
+     * The client credentials grant type as CBOR-integer
+     */
+<span class="fc" id="L141">	public static CBORObject clientCredentials </span>
+<span class="fc" id="L142">	    = CBORObject.FromObject(Constants.GT_CLI_CRED);</span>
+
+	/**
+	 * The authorizaton_code grant type as CBOR-integer
+	 */
+<span class="fc" id="L147">	public static CBORObject authzCode </span>
+<span class="fc" id="L148">	    = CBORObject.FromObject(Constants.GT_AUTHZ_CODE);</span>
+	
+	/**
+	 * Converter to create the byte array from the cti number
+	 */
+<span class="fc" id="L153">	 private static ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);</span>
+	 
+	 /**
+	  * The claim types included in tokens generated by this Token instance
+	  */
+	 private Set&lt;Short&gt; claims;
+	 	 
+<span class="fc" id="L160">	 private static Set&lt;Short&gt; defaultClaims = new HashSet&lt;&gt;();</span>
+	 
+	 static {
+<span class="fc" id="L163">	     defaultClaims.add(Constants.CTI);</span>
+<span class="fc" id="L164">	     defaultClaims.add(Constants.ISS);</span>
+<span class="fc" id="L165">	     defaultClaims.add(Constants.EXI);</span>
+<span class="fc" id="L166">	     defaultClaims.add(Constants.AUD);</span>
+<span class="fc" id="L167">	     defaultClaims.add(Constants.SCOPE);</span>
+<span class="fc" id="L168">	     defaultClaims.add(Constants.CNF);</span>
+<span class="fc" id="L169">	 }</span>
+	 
+	 /**
+	  * If true the AUD claim is inserted in the COSE header
+      * of a CWT generated by this AS in order to be able to retrieve the right
+      * keys when the CWT is presented by the client instead of the RS for 
+      * introspection
+	  */
+<span class="fc" id="L177">	 private boolean setAudHeader = false;</span>
+	 
+	 /**
+	 * Incremented after having released an Access Token including OSCORE input material
+	 * The current value is used for the 'id' parameter in the OSCORE Security Context object in 'cnf'
+	 */
+<span class="fc" id="L183">	 private int OSCORE_material_counter = 0;</span>
+	 
+	 /**
+	 * Store the association between the cti of an issued Access Token
+	 * and the target audience intended to consume it.
+	 */
+<span class="fc" id="L189">	 private Map&lt;String, String&gt; cti2aud = new HashMap&lt;&gt;();</span>
+
+	 /**
+	 * Store the association between the name of the Resource Server and the next value to use
+	 * as Sequence Number to build the 'cti' claim when the 'exi' claim is included in the Access Token
+	 * 
+	 * The entry for a Resource Server is created when the first Access Token including 'exi' is issues,
+	 * since the AS process has started. The initial value of the Sequence Number is retrieved from the database.
+	 */
+<span class="fc" id="L198">	 private Map&lt;String, Integer&gt; exiSequenceNumbers = new HashMap&lt;&gt;();</span>
+	 
+	 /**
+	 * Relevant only when the DTLS profile is used with symmetric PoP key
+	 * 
+	 * Store the association between the cti of an issued Acced Token and
+	 * the 'kid' of the associated symmetric PoP key generated by the AS
+	 */
+<span class="fc" id="L206">	 private Map&lt;String, CBORObject&gt; cti2kid = new HashMap&lt;&gt;();</span>
+	 
+	 /**
+	 * Relevant only when the OSCORE profile is used
+	 * 
+	 * Store the association between the cti of an issued Acced Token
+	 * and the ID identifying the OSCORE Input Material. Such an ID
+	 * is stored as a CBOR byte string.
+	 */
+<span class="fc" id="L215">	 private Map&lt;String, CBORObject&gt; cti2oscId = new HashMap&lt;&gt;();</span>
+	 
+	 /**
+	  * Relevant only when the OSCORE profile is used
+	  * 
+	  * The size in bytes of the OSCORE Master Salt to provide to the Client
+	  * and to include in the Token. It can be 0, to not provide a Master Salt.
+	  */
+	 private short masterSaltSize;
+	 
+	 /**
+	  * Relevant only when the OSCORE profile is used
+	  * 
+	  * True if the OSCORE Id Context has to be provided, false otherwise
+	  */
+	 private boolean provideIdContext;
+	 
+	 /**
+	  * Relevant only when the OSCORE profile is used
+	  * 
+	  * It specifies information on the next Id Context to assign for each Resource Server
+	  */
+<span class="fc" id="L237">	 private Map&lt;String, IdContextInfo&gt; idContextInfoMap = new HashMap&lt;&gt;(); </span>
+	 
+	 /**
+	  * Mapping between security identities of the peers and their names; it can be null
+	  * 
+	  * This is relevant especially for the OSCORE profile, since all peers are registered in the
+	  * AS database by nicknames. Instead, their OSCORE identities as retrieved from incoming OSCORE
+	  * messages are structured base64 strings encoding the Context ID and Sender ID for that peer 
+	 */ 
+<span class="fc" id="L246">	private Map&lt;String, String&gt; peerIdentitiesToNames = null;</span>
+	 
+	 
+	/**
+	 * Constructor using default set of claims.
+	 * 
+	 * @param asId  the identifier of this AS
+	 * @param pdp   the PDP for deciding access
+	 * @param db  the database connector
+	 * @param time  the time provider
+	 * @param privateKey  the private key of the AS or null if there isn't any
+	 * @param peerIdentitiesToNames  mapping between security identities of the peers and their names; it can be null
+	 * 
+	 * @throws AceException  if fetching the cti from the database fails
+	 */	
+	public Token(String asId, PDP pdp, DBConnector db, 
+	        TimeProvider time, OneKey privateKey,
+	        Map&lt;String, String&gt; peerIdentitiesToNames) throws AceException {
+<span class="fc" id="L264">	    this(asId, pdp, db, time, privateKey, defaultClaims, false, (short)0, false, peerIdentitiesToNames);</span>
+<span class="fc" id="L265">	}</span>
+	
+	/**   
+     * Constructor that allows configuration of the claims included in the token.
+     *  
+     * @param asId  the identifier of this AS
+     * @param pdp   the PDP for deciding access
+     * @param db  the database connector
+     * @param time  the time provider
+     * @param privateKey  the private key of the AS or null if there isn't any
+     * @param claims  the claim types to include in tokens issued by this 
+     *                Token instance
+     * @param setAudInCwtHeader  if true the AUD claim is inserted in the COSE 
+     * header of a CWT generated by this AS in order to be able to retrieve the
+     * right keys when the CWT is presented by the client instead of the RS for
+     * introspection
+     * @param peerIdentitiesToNames  mapping between security identities of the peers and their names; it can be null
+     * 
+     * @throws AceException  if fetching the cti from the database fails
+     */
+    public Token(String asId, PDP pdp, DBConnector db, 
+            TimeProvider time, OneKey privateKey,
+            Set&lt;Short&gt; claims, boolean setAudInCwtHeader,
+            Map&lt;String, String&gt; peerIdentitiesToNames) throws AceException {
+<span class="fc" id="L289">        this(asId, pdp, db, time, privateKey, claims, setAudInCwtHeader, (short)0, false, peerIdentitiesToNames);</span>
+<span class="fc" id="L290">    }</span>
+	
+	
+	/**   
+	 * Constructor that allows configuration of everything.
+	 * 
+     * @param asId  the identifier of this AS
+     * @param pdp   the PDP for deciding access
+     * @param db  the database connector
+     * @param time  the time provider
+     * @param privateKey  the private key of the AS or null if there isn't any
+     * @param claims  the claim types to include in tokens issued by this 
+     *                Token instance
+     * @param setAudInCwtHeader  if true the AUD claim is inserted in the COSE 
+     * header of a CWT generated by this AS in order to be able to retrieve the
+     * right keys when the CWT is presented by the client instead of the RS for
+     * introspection
+     * @param masterSaltSize  the size in bytes of the OSCORE Master Salt
+     * @param provideIdContext  true if the OSCORE Id Context has to be provided, false otherwise
+     * @param peerIdentitiesToNames  mapping between security identities of the peers and their names; it can be null
+     * 
+     * @throws AceException  if fetching the cti from the database fails
+	 */
+	public Token(String asId, PDP pdp, DBConnector db, 
+            TimeProvider time, OneKey privateKey, Set&lt;Short&gt; claims, 
+            boolean setAudInCwtHeader, short masterSaltSize, boolean provideIdContext,
+<span class="fc" id="L316">            Map&lt;String, String&gt; peerIdentitiesToNames) throws AceException {</span>
+		
+<span class="fc" id="L318">		Set&lt;Short&gt; localClaims = claims;</span>
+        
+<span class="fc bfc" id="L320" title="All 2 branches covered.">		if(localClaims == null) {</span>
+<span class="fc" id="L321">			localClaims = defaultClaims;</span>
+		}
+
+	    //Time for checks
+<span class="pc bpc" id="L325" title="2 of 4 branches missed.">        if (asId == null || asId.isEmpty()) {</span>
+<span class="nc" id="L326">            LOGGER.severe(&quot;Token endpoint's AS identifier was null or empty&quot;);</span>
+<span class="nc" id="L327">            throw new AceException(</span>
+                    &quot;AS identifier must be non-null and non-empty&quot;);
+        }
+<span class="pc bpc" id="L330" title="1 of 2 branches missed.">        if (pdp == null) {</span>
+<span class="nc" id="L331">            LOGGER.severe(&quot;Token endpoint's PDP was null&quot;);</span>
+<span class="nc" id="L332">            throw new AceException(</span>
+                    &quot;Token endpoint's PDP must be non-null&quot;);
+        }
+<span class="pc bpc" id="L335" title="1 of 2 branches missed.">        if (db == null) {</span>
+<span class="nc" id="L336">            LOGGER.severe(&quot;Token endpoint's DBConnector was null&quot;);</span>
+<span class="nc" id="L337">            throw new AceException(</span>
+                    &quot;Token endpoint's DBConnector must be non-null&quot;);
+        }
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">        if (time == null) {</span>
+<span class="nc" id="L341">            LOGGER.severe(&quot;Token endpoint's TimeProvider was null&quot;);</span>
+<span class="nc" id="L342">            throw new AceException(&quot;Token endpoint's TimeProvider &quot;</span>
+                    + &quot;must be non-null&quot;);
+        }
+        //All checks passed
+<span class="fc" id="L346">        this.asId = asId;</span>
+<span class="fc" id="L347">        this.pdp = pdp;</span>
+<span class="fc" id="L348">        this.db = db;</span>
+<span class="fc" id="L349">        this.time = time;</span>
+<span class="fc" id="L350">        this.privateKey = privateKey;</span>
+<span class="fc" id="L351">        this.cti = db.getCtiCounter();</span>
+<span class="fc" id="L352">        this.claims = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L353">        this.claims.addAll(localClaims);</span>
+<span class="fc" id="L354">        this.setAudHeader = setAudInCwtHeader;</span>
+<span class="fc" id="L355">        this.masterSaltSize = masterSaltSize;</span>
+<span class="fc" id="L356">        this.provideIdContext = provideIdContext;</span>
+<span class="fc" id="L357">        this.peerIdentitiesToNames = peerIdentitiesToNames;</span>
+        
+<span class="fc" id="L359">	}</span>
+
+	@Override
+	public Message processMessage(Message msg) {
+		// Purge expired tokens from the database
+		try {
+<span class="fc" id="L365">			this.db.purgeExpiredTokens(this.time.getCurrentTime());</span>
+<span class="nc" id="L366">		} catch (AceException e) {</span>
+<span class="nc" id="L367">			LOGGER.severe(&quot;Database error: &quot; + e.getMessage());</span>
+<span class="nc" id="L368">			return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L369">		}</span>
+		
+<span class="pc bpc" id="L371" title="1 of 2 branches missed.">	    if (msg == null) {//This should not happen</span>
+<span class="nc" id="L372">	        LOGGER.severe(&quot;Token.processMessage() received null message&quot;);</span>
+<span class="nc" id="L373">	        return null;</span>
+	    }
+<span class="fc" id="L375">	    LOGGER.log(Level.INFO, &quot;Token received message: &quot; </span>
+<span class="fc" id="L376">	            + msg.getParameters());</span>
+	    
+	    //1. Check if this client can request tokens
+<span class="fc" id="L379">		String id = msg.getSenderId();  </span>
+<span class="pc bpc" id="L380" title="1 of 2 branches missed.">		if (id == null) {</span>
+<span class="nc" id="L381">            CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L382">            map.Add(Constants.ERROR, Constants.UNAUTHORIZED_CLIENT);</span>
+<span class="nc" id="L383">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                    + &quot;unauthorized client: &quot; + id);
+<span class="nc" id="L385">            return msg.failReply(Message.FAIL_UNAUTHORIZED, map);</span>
+		}
+		
+<span class="fc bfc" id="L388" title="All 2 branches covered.">		if (peerIdentitiesToNames != null) {</span>
+<span class="fc" id="L389">		    id = peerIdentitiesToNames.get(id);</span>
+<span class="pc bpc" id="L390" title="1 of 2 branches missed.">		    if (id == null) {</span>
+<span class="nc" id="L391">	            CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L392">	            map.Add(Constants.ERROR, Constants.UNAUTHORIZED_CLIENT);</span>
+<span class="nc" id="L393">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+	                    + &quot;unauthorized client: &quot; + id);
+<span class="nc" id="L395">	            return msg.failReply(Message.FAIL_UNAUTHORIZED, map);</span>
+		    }
+		}
+		
+		try {
+<span class="fc bfc" id="L400" title="All 2 branches covered.">            if (!this.pdp.canAccessToken(id)) {</span>
+<span class="fc" id="L401">                CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L402">                map.Add(Constants.ERROR, Constants.UNAUTHORIZED_CLIENT);</span>
+<span class="fc" id="L403">                LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                        + &quot;unauthorized client: &quot; + id);
+<span class="fc" id="L405">            	return msg.failReply(Message.FAIL_UNAUTHORIZED, map);</span>
+            }
+<span class="nc" id="L407">        } catch (AceException e) {</span>
+<span class="nc" id="L408">            LOGGER.severe(&quot;Database error: &quot;</span>
+<span class="nc" id="L409">                    + e.getMessage());</span>
+<span class="nc" id="L410">            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L411">        }</span>
+   
+	    //2. Check that this is a supported grant type
+<span class="fc bfc" id="L414" title="All 2 branches covered.">	    if (msg.getParameter(Constants.GRANT_TYPE) == null</span>
+            //grant type == client credentials implied
+<span class="fc" id="L416">	        || msg.getParameter(</span>
+<span class="fc bfc" id="L417" title="All 2 branches covered.">	                Constants.GRANT_TYPE).equals(clientCredentials)) {</span>
+<span class="fc" id="L418">	        return processCC(msg);</span>
+<span class="pc bpc" id="L419" title="1 of 2 branches missed.">	    } else if (msg.getParameter(Constants.GRANT_TYPE).equals(authzCode)) {</span>
+<span class="fc" id="L420">	        return processAC(msg);</span>
+	    }
+<span class="nc" id="L422">	    CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L423">	    map.Add(Constants.ERROR, Constants.UNSUPPORTED_GRANT_TYPE);</span>
+<span class="nc" id="L424">	    LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+	            + &quot;unsupported_grant_type&quot;);
+<span class="nc" id="L426">	    return msg.failReply(Message.FAIL_BAD_REQUEST, map); 	    </span>
+	}
+	
+	/**
+	 * Process a Client Credentials grant.
+	 * 
+	 * @param msg  the message
+	 * @param id  the identifier of the requester
+	 * 
+	 * @return  the reply
+	 */
+	private Message processCC(Message msg) {
+<span class="fc" id="L438">	    String id = msg.getSenderId();</span>
+	    
+<span class="fc bfc" id="L440" title="All 2 branches covered.">		if (peerIdentitiesToNames != null) {</span>
+<span class="fc" id="L441">		    id = peerIdentitiesToNames.get(id);</span>
+<span class="pc bpc" id="L442" title="1 of 2 branches missed.">		    if (id == null) {</span>
+<span class="nc" id="L443">	            CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L444">	            map.Add(Constants.ERROR, Constants.UNAUTHORIZED_CLIENT);</span>
+<span class="nc" id="L445">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+	                    + &quot;unauthorized client: &quot; + id);
+<span class="nc" id="L447">	            return msg.failReply(Message.FAIL_UNAUTHORIZED, map);</span>
+		    }
+		}
+	    
+		//3. Check if the request has a scope
+<span class="fc" id="L452">		CBORObject cbor = msg.getParameter(Constants.SCOPE);</span>
+<span class="fc" id="L453">		Object scope = null;</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">		if (cbor == null) {</span>
+			try {
+<span class="fc" id="L456">                scope = this.db.getDefaultScope(id);</span>
+<span class="nc" id="L457">            } catch (AceException e) {</span>
+<span class="nc" id="L458">                LOGGER.severe(&quot;Message processing aborted (checking scope): &quot;</span>
+<span class="nc" id="L459">                        + e.getMessage());</span>
+<span class="nc" id="L460">                return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L461">            }</span>
+		} else {
+<span class="fc bfc" id="L463" title="All 2 branches covered.">		    if (cbor.getType().equals(CBORType.TextString)) {</span>
+<span class="fc" id="L464">		        scope = cbor.AsString();</span>
+<span class="pc bpc" id="L465" title="1 of 2 branches missed.">		    } else if (cbor.getType().equals(CBORType.ByteString)) {</span>
+<span class="fc" id="L466">		        scope = cbor.GetByteString();		        </span>
+		    } else {
+<span class="nc" id="L468">		        CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L469">		        map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L470">	            map.Add(Constants.ERROR_DESCRIPTION, </span>
+	                    &quot;Invalid datatype for scope&quot;);
+<span class="nc" id="L472">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+	                    + &quot;Invalid datatype for scope in message&quot;);
+<span class="nc" id="L474">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		    }
+		}
+<span class="fc bfc" id="L477" title="All 2 branches covered.">		if (scope == null) {</span>
+<span class="fc" id="L478">		    CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L479">            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="fc" id="L480">            map.Add(Constants.ERROR_DESCRIPTION, &quot;No scope found for message&quot;);</span>
+<span class="fc" id="L481">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                    + &quot;No scope found for message&quot;);
+<span class="fc" id="L483">		    return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		}
+		
+		//4. Check if the request has an audience or if there is a default audience
+<span class="fc" id="L487">		cbor = msg.getParameter(Constants.AUDIENCE);</span>
+		
+		// The audience has to be a text string. A set is built for compatibility with other methods
+<span class="fc" id="L490">		Set&lt;String&gt; aud = new HashSet&lt;&gt;();</span>
+		
+<span class="fc" id="L492">		String audStr = &quot;&quot;; // used to save the audience for later, for possible update of access rights</span>
+<span class="fc" id="L493">		String oldCti = &quot;&quot;; // used to track the cti of a Token to supersede, in case of update of access rights</span>
+		
+<span class="fc bfc" id="L495" title="All 2 branches covered.">		if (cbor == null) {</span>
+		    try {
+<span class="fc" id="L497">		        String dAud = this.db.getDefaultAudience(id);</span>
+<span class="fc bfc" id="L498" title="All 2 branches covered.">		        if (dAud != null) {</span>
+<span class="fc" id="L499">		            aud.add(dAud);</span>
+<span class="fc" id="L500">		            audStr = new String(dAud);</span>
+		        }
+<span class="nc" id="L502">            } catch (AceException e) {</span>
+<span class="nc" id="L503">                LOGGER.severe(&quot;Message processing aborted (checking aud): &quot;</span>
+<span class="nc" id="L504">                        + e.getMessage());</span>
+<span class="nc" id="L505">                return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L506">            }</span>
+		} else {
+<span class="pc bpc" id="L508" title="1 of 2 branches missed.">			  if (cbor.getType().equals(CBORType.TextString)) {</span>
+<span class="fc" id="L509">				  aud.add(cbor.AsString());</span>
+<span class="fc" id="L510">				  audStr = new String(cbor.AsString());</span>
+		    } else {//error
+<span class="nc" id="L512">		        CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L513">	            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L514">	            map.Add(Constants.ERROR_DESCRIPTION, </span>
+	                    &quot;Audience malformed&quot;);
+<span class="nc" id="L516">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+	                    + &quot;Audience malformed&quot;);
+<span class="nc" id="L518">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		    }
+		}
+<span class="fc bfc" id="L521" title="All 2 branches covered.">		if (aud.isEmpty()) {</span>
+<span class="fc" id="L522">		    CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L523">		    map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="fc" id="L524">		    map.Add(Constants.ERROR_DESCRIPTION, </span>
+		            &quot;No audience found for message&quot;);
+<span class="fc" id="L526">		    LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+		            + &quot;No audience found for message&quot;);
+<span class="fc" id="L528">		    return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		}
+		
+
+		//5. Check if the scope is allowed
+<span class="fc" id="L533">		Object allowedScopes = null;</span>
+        try {
+<span class="fc" id="L535">            allowedScopes = this.pdp.canAccess(id, aud, scope);</span>
+<span class="nc" id="L536">        } catch (AceException e) {</span>
+<span class="nc" id="L537">            LOGGER.severe(&quot;Message processing aborted (checking permissions): &quot;</span>
+<span class="nc" id="L538">                    + e.getMessage());</span>
+<span class="nc" id="L539">            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L540">        }</span>
+<span class="fc bfc" id="L541" title="All 2 branches covered.">		if (allowedScopes == null) {	</span>
+<span class="fc" id="L542">		    CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L543">		    map.Add(Constants.ERROR, Constants.INVALID_SCOPE);</span>
+<span class="fc" id="L544">		    LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+		            + &quot;invalid_scope&quot;);
+<span class="fc" id="L546">		    return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		}
+		
+		//6. Create token
+		//Find supported token type
+<span class="fc" id="L551">		Short tokenType = null;</span>
+        try {
+<span class="fc" id="L553">            tokenType = this.db.getSupportedTokenType(aud);</span>
+<span class="nc" id="L554">        } catch (AceException e) {</span>
+<span class="nc" id="L555">            LOGGER.severe(&quot;Message processing aborted (creating token): &quot;</span>
+<span class="nc" id="L556">                    + e.getMessage());</span>
+<span class="nc" id="L557">            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L558">        }</span>
+<span class="fc bfc" id="L559" title="All 2 branches covered.">		if (tokenType == null) {</span>
+<span class="fc" id="L560">            CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L561">            map.Add(Constants.ERROR, &quot;Audience incompatible on token type&quot;);</span>
+<span class="fc" id="L562">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                    + &quot;Audience incompatible on token type&quot;);
+<span class="fc" id="L564">		    return msg.failReply(Message.FAIL_BAD_REQUEST, </span>
+		           map);
+		}
+		
+<span class="fc" id="L568">		boolean includeExi = this.claims.contains(Constants.EXI);</span>
+		// If the 'exi' claim is included, ensure that the 'cti' claim is also included 
+<span class="fc bfc" id="L570" title="All 2 branches covered.">		if (includeExi) {</span>
+<span class="fc" id="L571">			this.claims.add(Constants.CTI);</span>
+		}
+		
+		// The construction of 'cti' depends on the presence/absence of the 'exi' claim.
+		//
+		// If the 'exi' claim is not present, 'cti' is the serialization of a global counter.
+		//
+		// If the 'exi' claim is present, 'cti' is the serialization of two concatenated strings,
+		// i.e., the name of the Resource Server and the current value of the Exi Sequence Number
+<span class="fc" id="L580">		byte[] ctiB = null;</span>
+<span class="fc" id="L581">		String ctiStr = null;</span>
+<span class="fc" id="L582">		String rsName = null;</span>
+<span class="fc" id="L583">		int exiSeqNum = -1;</span>
+<span class="fc bfc" id="L584" title="All 2 branches covered.">		if (!includeExi) {</span>
+			// The 'exi' claim is not included in the Access Token.
+			// Thus, 'cti' can be easily built by using the related single counter
+<span class="fc" id="L587">			ctiB = buffer.putLong(0, this.cti).array();</span>
+<span class="fc" id="L588">	        ctiStr = Base64.getEncoder().encodeToString(ctiB);</span>
+<span class="fc" id="L589">	        this.cti++;</span>
+		}
+		else {
+			// The 'exi' claim is included in the Access Token.
+			// Thus, 'cti' has to be built according to a particular semantics, as the
+			// serialization of the text string S1 = (S2 | S3), where S2 is the name of
+			// the Resource Server and S3 is the text encoding of the Exi Sequence Number
+			// to use for that Resource Server.
+			
+			// Determine the name of the Resource Server associated to the specified Audience
+<span class="fc" id="L599">			Set&lt;String&gt; rsSet = new HashSet&lt;&gt;();</span>
+			try {
+<span class="fc" id="L601">				rsSet = db.getRSS(audStr);</span>
+<span class="nc" id="L602">			} catch (AceException e) {</span>
+<span class="nc" id="L603">                LOGGER.severe(&quot;Message processing aborted: Error when retrieving the name&quot;</span>
+<span class="nc" id="L604">                		+ &quot; of the Resource Server with Audience &quot; + audStr + &quot; from the database.\n&quot; + e.getMessage());</span>
+<span class="nc" id="L605">			    return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L606">			}</span>
+			// Check the the specified Audience is associated to exactly one Resource Server
+<span class="pc bpc" id="L608" title="1 of 2 branches missed.">			if (rsSet.size() != 1) {</span>
+<span class="nc" id="L609">	            CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L610">	            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L611">	            map.Add(Constants.ERROR_DESCRIPTION, &quot;The 'exi' claim has to be included, thus Audience must contain&quot;</span>
+	            		+ &quot; exactly one Resource Server&quot;);
+<span class="nc" id="L613">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: The 'exi' claim has to be included,&quot;</span>
+	            		+ &quot;thus Audience must contain exactly one Resource Server&quot;);
+<span class="nc" id="L615">			    return msg.failReply(Message.FAIL_BAD_REQUEST, </span>
+			           map);
+			}
+<span class="fc bfc" id="L618" title="All 2 branches covered.">			for (String rs : rsSet)</span>
+<span class="fc" id="L619">				rsName = new String(rs);</span>
+			
+			// Retrieve the value of the Exi Sequence Number to use for this Resource Server
+<span class="fc bfc" id="L622" title="All 2 branches covered.">			if (exiSequenceNumbers.containsKey(rsName)) {</span>
+<span class="fc" id="L623">				exiSeqNum = exiSequenceNumbers.get(rsName).intValue();</span>
+			}
+			else {
+				// This is going to be the first Access Token including the 'exi' claim issued to
+				// this Resource Server since the AS process started. Then, retrieve the current
+				// Exi Sequence Number value for this Resource Server from the database.
+				try {
+<span class="fc" id="L630">					exiSeqNum = db.getExiSequenceNumber(rsName);</span>
+<span class="nc" id="L631">				} catch (AceException e) {</span>
+<span class="nc" id="L632">	                LOGGER.severe(&quot;Message processing aborted: Error when retrieving the Exi Sequence Number&quot;</span>
+<span class="nc" id="L633">	                		+ &quot; for the Resource Server with Audience &quot; + audStr + &quot; from the database.\n&quot; + e.getMessage());</span>
+<span class="nc" id="L634">				    return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L635">				}</span>
+			}
+
+			// Update the local collection of Exi Sequence Numbers
+<span class="fc" id="L639">			Integer newSeqNum = Integer.valueOf(exiSeqNum + 1);</span>
+<span class="fc" id="L640">			exiSequenceNumbers.put(rsName, newSeqNum);</span>
+			
+<span class="fc" id="L642">			String rawCti = new String(rsName + String.valueOf(exiSeqNum));</span>
+<span class="fc" id="L643">			ctiB = rawCti.getBytes(Constants.charset);</span>
+<span class="fc" id="L644">	        ctiStr = Base64.getEncoder().encodeToString(ctiB);</span>
+			
+		}
+        
+
+        //Find supported profile
+
+<span class="fc" id="L651">        String profileStr = null;</span>
+        try {
+<span class="fc" id="L653">            profileStr = this.db.getSupportedProfile(id, aud);</span>
+<span class="nc" id="L654">        } catch (AceException e) {</span>
+<span class="nc bnc" id="L655" title="All 2 branches missed.">        	if (!includeExi) {</span>
+<span class="nc" id="L656">        		this.cti--; //roll-back</span>
+        	}
+        	else {
+        		//roll-back
+<span class="nc" id="L660">        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+        	}
+<span class="nc" id="L662">            LOGGER.severe(&quot;Message processing aborted (finding profile): &quot;</span>
+<span class="nc" id="L663">                    + e.getMessage());</span>
+<span class="nc" id="L664">            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L665">        }</span>
+<span class="fc bfc" id="L666" title="All 2 branches covered.">        if (profileStr == null) {</span>
+<span class="pc bpc" id="L667" title="1 of 2 branches missed.">        	if (!includeExi) {</span>
+<span class="nc" id="L668">        		this.cti--; //roll-back</span>
+        	}
+        	else {
+        		//roll-back
+<span class="fc" id="L672">        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+        	}
+<span class="fc" id="L674">            CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L675">            map.Add(Constants.ERROR, Constants.INCOMPATIBLE_PROFILES);</span>
+<span class="fc" id="L676">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                    + &quot;No compatible profile found&quot;);
+<span class="fc" id="L678">            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+        }
+<span class="fc" id="L680">        short profile = Constants.getProfileAbbrev(profileStr);</span>
+                
+<span class="fc bfc" id="L682" title="All 4 branches covered.">        if (tokenType != AccessTokenFactory.CWT_TYPE &amp;&amp; tokenType != AccessTokenFactory.REF_TYPE) {</span>
+<span class="pc bpc" id="L683" title="1 of 2 branches missed.">        	if (!includeExi) {</span>
+<span class="nc" id="L684">        		this.cti--; //roll-back</span>
+        	}
+        	else {
+        		//roll-back
+<span class="fc" id="L688">        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+        	}
+<span class="fc" id="L690">            CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L691">            map.Add(Constants.ERROR, &quot;Unsupported token type&quot;);</span>
+<span class="fc" id="L692">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                    + &quot;Unsupported token type&quot;);
+<span class="fc" id="L694">            return msg.failReply(Message.FAIL_NOT_IMPLEMENTED, map);</span>
+        }
+       
+        // This flag will be set to true if the Token is intended to update access rights
+<span class="fc" id="L698">        boolean updateAccessRights = false;</span>
+        
+<span class="fc" id="L700">        String keyType = null; //Save the key type for later</span>
+<span class="fc" id="L701">		Map&lt;Short, CBORObject&gt; claims = new HashMap&lt;&gt;();</span>
+		
+		//ISS SUB AUD EXP NBF IAT CTI SCOPE CNF RS_CNF PROFILE EXI
+<span class="fc bfc" id="L704" title="All 2 branches covered.">        for (Short c : this.claims) {</span>
+<span class="pc bpc" id="L705" title="7 of 13 branches missed.">		    switch (c) {</span>
+		    case Constants.ISS:
+<span class="fc" id="L707">		        claims.put(Constants.ISS, CBORObject.FromObject(this.asId));        </span>
+<span class="fc" id="L708">		        break;</span>
+            case Constants.SUB:
+<span class="nc" id="L710">                claims.put(Constants.SUB, CBORObject.FromObject(id));</span>
+<span class="nc" id="L711">                break;</span>
+		    case Constants.AUD:
+		        //Check if AUDIENCE is a singleton
+<span class="pc bpc" id="L714" title="1 of 2 branches missed.">		        if (aud.size() == 1) {</span>
+<span class="fc" id="L715">		            claims.put(Constants.AUD, CBORObject.FromObject(</span>
+<span class="fc" id="L716">		                    aud.iterator().next()));</span>
+		        } else {
+<span class="nc" id="L718">		            claims.put(Constants.AUD, CBORObject.FromObject(aud));</span>
+		        }
+<span class="nc" id="L720">		        break;</span>
+		    case Constants.EXP:
+<span class="nc" id="L722">		        long now = this.time.getCurrentTime();</span>
+<span class="nc" id="L723">		        long exp = Long.MAX_VALUE;</span>
+		        try {
+<span class="nc" id="L725">		            exp = this.db.getExpTime(aud);</span>
+<span class="nc" id="L726">		        } catch (AceException e) {</span>
+<span class="nc" id="L727">		            LOGGER.severe(&quot;Message processing aborted (setting exp): &quot;</span>
+<span class="nc" id="L728">		                    + e.getMessage());</span>
+<span class="nc" id="L729">		            return msg.failReply(</span>
+		                    Message.FAIL_INTERNAL_SERVER_ERROR, null);
+<span class="nc" id="L731">		        }</span>
+<span class="nc bnc" id="L732" title="All 2 branches missed.">		        if (exp == Long.MAX_VALUE) { // == No expiration time found</span>
+		            //using default
+<span class="nc" id="L734">		            exp = now + expiration;</span>
+		        } else {
+<span class="nc" id="L736">		            exp = now + exp;</span>
+		        }
+<span class="nc" id="L738">		        claims.put(Constants.EXP, CBORObject.FromObject(exp));</span>
+<span class="nc" id="L739">		        break;</span>
+		    case Constants.EXI:
+<span class="fc" id="L741">		        long exi = Long.MAX_VALUE;</span>
+		        try {
+<span class="fc" id="L743">                    exi = this.db.getExpTime(aud);</span>
+<span class="nc" id="L744">                } catch (AceException e) {</span>
+<span class="nc" id="L745">                    LOGGER.severe(&quot;Message processing aborted (setting exp): &quot;</span>
+<span class="nc" id="L746">                            + e.getMessage());</span>
+<span class="nc" id="L747">                    return msg.failReply(</span>
+                            Message.FAIL_INTERNAL_SERVER_ERROR, null);
+<span class="fc" id="L749">                }</span>
+<span class="pc bpc" id="L750" title="1 of 2 branches missed.">		        if (exi == Long.MAX_VALUE) { // == No expiration time found</span>
+		            //using default
+<span class="nc" id="L752">		            exi = expiration;</span>
+		        }
+<span class="fc" id="L754">		        claims.put(Constants.EXI, CBORObject.FromObject(exi)); </span>
+<span class="fc" id="L755">		        break;</span>
+		    case Constants.NBF:
+		        //XXX: NBF is not configurable in this version
+<span class="nc" id="L758">		        now = this.time.getCurrentTime();</span>
+<span class="nc" id="L759">		        claims.put(Constants.NBF, CBORObject.FromObject(now));</span>
+<span class="nc" id="L760">		        break;</span>
+		    case Constants.IAT:
+<span class="nc" id="L762">		        now = this.time.getCurrentTime();</span>
+<span class="nc" id="L763">		        claims.put(Constants.IAT, CBORObject.FromObject(now));</span>
+<span class="nc" id="L764">		        break;</span>
+		    case Constants.CTI:
+<span class="fc" id="L766">		        claims.put(Constants.CTI, CBORObject.FromObject(ctiB));</span>
+<span class="fc" id="L767">		        break;</span>
+		    case Constants.SCOPE:
+<span class="fc" id="L769">		        claims.put(Constants.SCOPE, </span>
+<span class="fc" id="L770">		                CBORObject.FromObject(allowedScopes));</span>
+<span class="fc" id="L771">		        break;</span>
+		    case Constants.CNF:
+<span class="fc" id="L773">		    	CBORObject cnf = msg.getParameter(Constants.REQ_CNF);</span>
+<span class="fc bfc" id="L774" title="All 2 branches covered.">		        if (cnf == null) { //The client wants to use PSK</span>
+<span class="fc" id="L775">		            keyType = &quot;PSK&quot;; //save for later</span>
+		            
+		            //check if PSK is supported for proof-of-possession
+		            try {
+<span class="fc bfc" id="L779" title="All 2 branches covered.">		                if (!isSupported(keyType, aud)) {</span>
+<span class="pc bpc" id="L780" title="1 of 2 branches missed.">		                	if (!includeExi) {</span>
+<span class="nc" id="L781">		                		this.cti--; //roll-back</span>
+		                	}
+		                	else {
+		                		//roll-back
+<span class="fc" id="L785">		                		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		                	}
+<span class="fc" id="L787">	                        CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L788">	                        map.Add(Constants.ERROR, </span>
+<span class="fc" id="L789">	                                Constants.UNSUPPORTED_POP_KEY);</span>
+<span class="fc" id="L790">	                        LOGGER.log(Level.INFO, </span>
+	                                &quot;Message processing aborted: &quot;
+	                                + &quot;Unsupported pop key type PSK&quot;);
+<span class="fc" id="L793">	                        return msg.failReply(</span>
+	                                Message.FAIL_BAD_REQUEST, map);
+		                }
+<span class="nc" id="L796">		            } catch (AceException e) {</span>
+<span class="nc bnc" id="L797" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="nc" id="L798">		            		this.cti--; //roll-back</span>
+		            	}
+		               	else {
+		            		//roll-back
+<span class="nc" id="L802">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		            	}
+<span class="nc" id="L804">                        LOGGER.severe(&quot;Message processing aborted &quot;</span>
+                                + &quot;(finding key type): &quot;
+<span class="nc" id="L806">                                + e.getMessage());</span>
+<span class="nc" id="L807">                        return msg.failReply(</span>
+                                Message.FAIL_INTERNAL_SERVER_ERROR, null);
+<span class="fc" id="L809">                    }   </span>
+ 
+		            //Audience supports PSK, make a new PSK
+                    try {
+<span class="fc" id="L813">                        KeyGenerator kg = KeyGenerator.getInstance(&quot;AES&quot;);</span>
+                        
+                    	// Check if the new Token is intended to update the access rights for this client
+<span class="fc" id="L816">                        Set&lt;String&gt; ctiSet = new HashSet&lt;&gt;();</span>
+                    	try {
+<span class="fc" id="L818">                            ctiSet = this.db.getCtis4Client(id);</span>
+                            
+<span class="nc" id="L820">						} catch (AceException e) {</span>
+<span class="nc bnc" id="L821" title="All 2 branches missed.">							if (!includeExi) {</span>
+<span class="nc" id="L822">								this.cti--; //roll-back</span>
+							}
+					       	else {
+				        		//roll-back
+<span class="nc" id="L826">				        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+				        	}
+<span class="nc" id="L828">	                        LOGGER.severe(&quot;Message processing aborted &quot;</span>
+	                                + &quot;(finding cti of issues tokens): &quot;
+<span class="nc" id="L830">	                                + e.getMessage());</span>
+<span class="nc" id="L831">	                        return msg.failReply(</span>
+	                                Message.FAIL_INTERNAL_SERVER_ERROR, null);
+<span class="fc" id="L833">						}</span>
+
+<span class="fc bfc" id="L835" title="All 2 branches covered.">                    	if (ctiSet.size() != 0) {</span>
+                    		// Some Tokens have been issued to this client.
+                    		
+<span class="fc bfc" id="L838" title="All 2 branches covered.">                    		for (String myCti : ctiSet) {</span>
+                    			
+                    			// Check that not only the Token was released at some point in time,
+                    			// but that it is also currently stored in the Database. If so, it
+                    			// is possible to retrieve a non empty set of claims through its cti. 
+                    			try {
+<span class="fc bfc" id="L844" title="All 2 branches covered.">									if (this.db.getClaims(myCti).size() == 0) {</span>
+										// A Token with this cti is not active anymore.
+										// Continue with checking the next Token.
+										
+										// But first take the opportunity to clean up some other
+										// data structures, which might not have happened already
+<span class="fc" id="L850">								        this.cti2aud.remove(myCti);</span>
+<span class="fc" id="L851">								        this.cti2oscId.remove(myCti);</span>
+<span class="fc" id="L852">								        this.cti2kid.remove(myCti);</span>
+										
+<span class="fc" id="L854">										continue;</span>
+									}
+<span class="nc" id="L856">								} catch (AceException e) {</span>
+<span class="nc bnc" id="L857" title="All 2 branches missed.">									if (!includeExi) {</span>
+<span class="nc" id="L858">										this.cti--; //roll-back</span>
+									}
+							       	else {
+						        		//roll-back
+<span class="nc" id="L862">						        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+						        	}
+<span class="nc" id="L864">			                        LOGGER.severe(&quot;Message processing aborted &quot;</span>
+			                                + &quot;(finding previously released token): &quot;
+<span class="nc" id="L866">			                                + e.getMessage());</span>
+<span class="nc" id="L867">			                        return msg.failReply(</span>
+			                                Message.FAIL_INTERNAL_SERVER_ERROR, null);
+<span class="fc" id="L869">								}</span>
+                    			
+<span class="fc" id="L871">                    			String myAud = this.cti2aud.get(myCti);</span>
+                    			
+                        		// Check especially if the previously released Token was intended to
+                        		// the same Resource Server intended to consume the just requested Token
+<span class="fc bfc" id="L875" title="All 4 branches covered.">                    			if (myAud != null &amp;&amp; audStr.equals(myAud)) {</span>
+                            		// The new Token is intended to update access rights
+                    				
+<span class="fc" id="L878">                            		updateAccessRights = true;</span>
+<span class="fc" id="L879">                            		oldCti = new String(myCti);</span>
+<span class="fc" id="L880">                            		break;</span>
+                    			}
+                    			
+<span class="fc" id="L883">                    		}</span>
+                    	}
+
+                        //check if profile == OSCORE
+<span class="fc bfc" id="L887" title="All 2 branches covered.">                        if (profile == Constants.COAP_OSCORE) {</span>
+                        	
+                            //Generate OSCORE cnf
+<span class="fc bfc" id="L890" title="All 2 branches covered.">                        	if (updateAccessRights == false) {</span>
+<span class="fc" id="L891">	                        	SecretKey key = kg.generateKey();</span>
+<span class="fc" id="L892">	                            byte[] masterSecret = key.getEncoded();</span>
+<span class="fc" id="L893">	                            CBORObject osc = makeOscoreCnf(masterSecret, audStr);</span>
+<span class="fc" id="L894">	                            claims.put(Constants.CNF, osc);</span>
+<span class="fc" id="L895">                        	}</span>
+                        	else {
+                        		// The new Token is intended to update access rights
+<span class="fc" id="L898">                        		CBORObject oscId = this.cti2oscId.get(oldCti);</span>
+<span class="pc bpc" id="L899" title="1 of 2 branches missed.">                        		if (oscId == null) {</span>
+<span class="nc bnc" id="L900" title="All 2 branches missed.">                        			if (!includeExi) {</span>
+<span class="nc" id="L901">                        				this.cti--; //roll-back</span>
+                        			}
+                        	       	else {
+                                		//roll-back
+<span class="nc" id="L905">                                		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+                                	}
+<span class="nc" id="L907">        	                        LOGGER.severe(&quot;Message processing aborted &quot;</span>
+        	                                + &quot;(finding OSCORE ID when updating access rights)&quot;);
+<span class="nc" id="L909">        	                        return msg.failReply(</span>
+        	                                Message.FAIL_INTERNAL_SERVER_ERROR, null);
+                        		}
+<span class="fc" id="L912">	                            CBORObject osc = makeOscoreCnfUpdateAccessRights(oscId);</span>
+<span class="fc" id="L913">	                            claims.put(Constants.CNF, osc);</span>
+<span class="fc" id="L914">                        	}</span>
+                            
+                        }
+                        
+                        else {//Make a DTLS style psk
+<span class="fc" id="L919">                        	CBORObject keyData = CBORObject.NewMap();</span>
+<span class="fc" id="L920">                            CBORObject coseKey = CBORObject.NewMap();</span>
+
+<span class="fc bfc" id="L922" title="All 2 branches covered.">                        	if (updateAccessRights == false) {</span>
+<span class="fc" id="L923">	                            keyData.Add(KeyKeys.KeyType.AsCBOR(), KeyKeys.KeyType_Octet);</span>
+	                            
+	                            //Note: kid is the same as cti 
+<span class="fc" id="L926">	                            byte[] kid = ctiB;</span>
+<span class="fc" id="L927">	                        	keyData.Add(KeyKeys.KeyId.AsCBOR(), kid);</span>
+	                            
+<span class="fc" id="L929">	                        	SecretKey key = kg.generateKey();</span>
+<span class="fc" id="L930">	                        	keyData.Add(KeyKeys.Octet_K.AsCBOR(), </span>
+<span class="fc" id="L931">                                    	CBORObject.FromObject(key.getEncoded()));</span>
+	                            
+<span class="fc" id="L933">	                        	OneKey psk = new OneKey(keyData);</span>
+<span class="fc" id="L934">	                            coseKey.Add(Constants.COSE_KEY, psk.AsCBOR());</span>
+<span class="fc" id="L935">	                            claims.put(Constants.CNF, coseKey);</span>
+<span class="fc" id="L936">                        	}</span>
+                        	else {
+                        		// The new Token is intended to update access rights
+<span class="fc" id="L939">                            	keyData.Add(KeyKeys.KeyType.AsCBOR(), KeyKeys.KeyType_Octet);</span>
+                            	
+<span class="fc" id="L941">                        		CBORObject kidCbor = this.cti2kid.get(oldCti);</span>
+                        		
+<span class="fc" id="L943">                            	keyData.Add(KeyKeys.KeyId.AsCBOR(), kidCbor);</span>
+                            	
+<span class="fc" id="L945">                            	coseKey.Add(Constants.COSE_KEY, keyData);</span>
+<span class="fc" id="L946">                                claims.put(Constants.CNF, coseKey);</span>
+                        	}
+                        	
+                        }
+<span class="nc" id="L950">                    } catch (NoSuchAlgorithmException | CoseException e) {</span>
+<span class="nc bnc" id="L951" title="All 2 branches missed.">                    	if (!includeExi) {</span>
+<span class="nc" id="L952">                    		this.cti--; //roll-back</span>
+                    	}
+                       	else {
+                    		//roll-back
+<span class="nc" id="L956">                    		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+                    	}
+<span class="nc" id="L958">                        LOGGER.severe(&quot;Message processing aborted &quot;</span>
+<span class="nc" id="L959">                                + &quot;(making PSK): &quot; + e.getMessage());</span>
+<span class="nc" id="L960">                        return msg.failReply(</span>
+                                Message.FAIL_INTERNAL_SERVER_ERROR, null);
+<span class="fc" id="L962">                    }</span>
+		            
+<span class="pc bpc" id="L964" title="1 of 2 branches missed.">		        } else if (cnf.ContainsKey(Constants.COSE_KID_CBOR)) {</span>
+		            // The client requested a specific kid,
+	                // assume the client knows what it's doing
+	                // i.e. that the RS has that key and can process it
+		            
+		            //Check that the kid is well-formed
+<span class="fc" id="L970">		            CBORObject kidC = cnf.get(Constants.COSE_KID_CBOR);</span>
+<span class="pc bpc" id="L971" title="1 of 2 branches missed.">		            if (!kidC.getType().equals(CBORType.ByteString)) {</span>
+<span class="nc bnc" id="L972" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="nc" id="L973">		            		this.cti--; //roll-back</span>
+		            	}
+		               	else {
+		            		//roll-back
+<span class="nc" id="L977">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		            	}
+<span class="nc" id="L979">		                LOGGER.info(&quot;Message processing aborted: &quot;</span>
+		                        + &quot; Malformed kid in request parameter 'cnf'&quot;);
+<span class="nc" id="L981">		                CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L982">		                map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L983">		                map.Add(Constants.ERROR_DESCRIPTION, </span>
+		                        &quot;Malformed kid in 'cnf' parameter&quot;);
+<span class="nc" id="L985">		                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		            }
+<span class="fc" id="L987">		            keyType = &quot;KID&quot;;</span>
+<span class="fc" id="L988">		            claims.put(Constants.CNF, cnf);</span>
+<span class="fc" id="L989">		        } else {//Client has provided a key </span>
+		            //Check what key the client provided
+<span class="nc" id="L991">		            OneKey key = null;</span>
+		            try {
+<span class="nc" id="L993">		                key = getKey(cnf, id);</span>
+<span class="nc" id="L994">		            } catch (AceException | CoseException e) {</span>
+<span class="nc bnc" id="L995" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="nc" id="L996">		            		this.cti--; //roll-back</span>
+		            	}
+		               	else {
+		            		//roll-back
+<span class="nc" id="L1000">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		            	}
+<span class="nc" id="L1002">		                LOGGER.severe(&quot;Message processing aborted: &quot;</span>
+<span class="nc" id="L1003">		                        + e.getMessage());</span>
+<span class="nc bnc" id="L1004" title="All 2 branches missed.">		                if (e.getMessage().startsWith(&quot;Malformed&quot;)) {</span>
+<span class="nc" id="L1005">		                    CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1006">		                    map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L1007">		                    map.Add(Constants.ERROR_DESCRIPTION, </span>
+		                            &quot;Malformed 'cnf' parameter in request&quot;);
+<span class="nc" id="L1009">		                    return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		                } 
+<span class="nc" id="L1011">		                return msg.failReply(</span>
+		                        Message.FAIL_INTERNAL_SERVER_ERROR, null);
+<span class="nc" id="L1013">		            }</span>
+<span class="nc bnc" id="L1014" title="All 2 branches missed.">		            if (key == null) {</span>
+<span class="nc bnc" id="L1015" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="nc" id="L1016">		            		this.cti--; //roll-back</span>
+		            	}
+		               	else {
+		            		//roll-back
+<span class="nc" id="L1020">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		            	}
+<span class="nc" id="L1022">		                CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1023">		                map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L1024">		                map.Add(Constants.ERROR_DESCRIPTION, </span>
+		                        &quot;Couldn't retrieve RPK&quot;);
+<span class="nc" id="L1026">		                LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+		                        + &quot;Couldn't retrieve RPK&quot;);
+<span class="nc" id="L1028">		                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		            }
+		            
+<span class="nc bnc" id="L1031" title="All 2 branches missed.">		            if (key.get(KeyKeys.KeyType).equals(KeyKeys.KeyType_Octet)) {</span>
+		                //Client tried to submit a symmetric key =&gt; reject
+<span class="nc bnc" id="L1033" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="nc" id="L1034">		            		this.cti--; //roll-back</span>
+		            	}
+		               	else {
+		            		//roll-back
+<span class="nc" id="L1038">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		            	}
+<span class="nc" id="L1040">		                CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1041">		                map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L1042">		                map.Add(Constants.ERROR_DESCRIPTION, </span>
+		                        &quot;Client tried to provide cnf PSK&quot;);
+<span class="nc" id="L1044">		                LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+		                        + &quot;Client tried to provide cnf PSK&quot;);
+<span class="nc" id="L1046">		                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+		            }
+                    
+		            //At this point we assume the client wants to use RPK
+<span class="nc" id="L1050">		            keyType = &quot;RPK&quot;;</span>
+		            
+		            //Check that the client used this RPK to create this session
+		            try {
+<span class="nc" id="L1054">                        RawPublicKeyIdentity rpkId = new RawPublicKeyIdentity(</span>
+<span class="nc" id="L1055">                                key.AsPublicKey());</span>
+<span class="nc bnc" id="L1056" title="All 2 branches missed.">                        if (!rpkId.getName().equals(id)) {</span>
+<span class="nc bnc" id="L1057" title="All 2 branches missed.">                        	if (!includeExi) {</span>
+<span class="nc" id="L1058">                        		this.cti--; //roll-back</span>
+                        	}
+                           	else {
+                        		//roll-back
+<span class="nc" id="L1062">                        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+                        	}
+<span class="nc" id="L1064">                            CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1065">                            map.Add(Constants.ERROR, </span>
+<span class="nc" id="L1066">                                Constants.UNSUPPORTED_POP_KEY);</span>
+<span class="nc" id="L1067">                            LOGGER.log(Level.INFO, </span>
+                                    &quot;Message processing aborted: &quot;
+                                       + &quot;Client used unauthenticated RPK&quot;);
+<span class="nc" id="L1070">                            return msg.failReply(</span>
+                                    Message.FAIL_BAD_REQUEST, map);
+                        }
+                        
+<span class="nc" id="L1074">                    } catch (CoseException e) {</span>
+<span class="nc bnc" id="L1075" title="All 2 branches missed.">                    	if (!includeExi) {</span>
+<span class="nc" id="L1076">                    		this.cti--; //roll-back</span>
+                    	}
+                       	else {
+                    		//roll-back
+<span class="nc" id="L1080">                    		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+                    	}
+<span class="nc" id="L1082">                        CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1083">                        map.Add(Constants.ERROR, </span>
+<span class="nc" id="L1084">                            Constants.UNSUPPORTED_POP_KEY);</span>
+<span class="nc" id="L1085">                        LOGGER.log(Level.INFO, </span>
+                                &quot;Message processing aborted: &quot;
+                                        + &quot;Unsupported pop key type RPK&quot;);
+<span class="nc" id="L1088">                        LOGGER.log(Level.FINEST, e.getMessage());</span>
+<span class="nc" id="L1089">                        return msg.failReply(</span>
+                                Message.FAIL_BAD_REQUEST, map);
+<span class="nc" id="L1091">                    }</span>
+                       
+		            //Can the audience support this?
+		            try {
+<span class="nc bnc" id="L1095" title="All 2 branches missed.">		                if (!isSupported(keyType, aud)) {</span>
+<span class="nc bnc" id="L1096" title="All 2 branches missed.">		                	if (!includeExi) {</span>
+<span class="nc" id="L1097">		                		this.cti--; //roll-back</span>
+		                	}
+		                   	else {
+		                		//roll-back
+<span class="nc" id="L1101">		                		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		                	}
+<span class="nc" id="L1103">		                    CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1104">		                    map.Add(Constants.ERROR, </span>
+<span class="nc" id="L1105">                                Constants.UNSUPPORTED_POP_KEY);</span>
+<span class="nc" id="L1106">		                    LOGGER.log(Level.INFO, </span>
+		                            &quot;Message processing aborted: &quot;
+		                                    + &quot;Unsupported pop key type RPK&quot;);
+<span class="nc" id="L1109">		                    return msg.failReply(</span>
+		                            Message.FAIL_BAD_REQUEST, map);
+		                }
+<span class="nc" id="L1112">		            } catch (AceException e) {</span>
+<span class="nc bnc" id="L1113" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="nc" id="L1114">		            		this.cti--; //roll-back</span>
+		            	}
+		               	else {
+		            		//roll-back
+<span class="nc" id="L1118">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		            	}
+<span class="nc" id="L1120">		                LOGGER.severe(&quot;Message processing aborted: &quot;</span>
+<span class="nc" id="L1121">		                        + e.getMessage());</span>
+<span class="nc" id="L1122">		                return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="nc" id="L1123">		            }   </span>
+                    
+		            //Audience support RPK, use provided RPK
+<span class="nc" id="L1126">		            CBORObject coseKey = CBORObject.NewMap();</span>
+<span class="nc" id="L1127">		            coseKey.Add(Constants.COSE_KEY, key.AsCBOR());</span>
+<span class="nc" id="L1128">		            claims.put(Constants.CNF, coseKey);</span>
+		        }
+<span class="nc" id="L1130">		        break;</span>
+		    case Constants.PROFILE:
+<span class="nc" id="L1132">		        claims.put(Constants.PROFILE, CBORObject.FromObject(profile));</span>
+<span class="nc" id="L1133">		        break;</span>
+		    case Constants.RS_CNF:
+<span class="nc bnc" id="L1135" title="All 4 branches missed.">		        if (keyType != null &amp;&amp; keyType.equals(&quot;RPK&quot;)) {</span>
+		           try {
+<span class="nc" id="L1137">		               Set&lt;CBORObject&gt; rscnfs = makeRsCnf(aud);</span>
+<span class="nc bnc" id="L1138" title="All 2 branches missed.">		               for (CBORObject rscnf : rscnfs) {</span>
+<span class="nc" id="L1139">	                       claims.put(Constants.RS_CNF, rscnf);</span>
+<span class="nc" id="L1140">	                   }</span>
+<span class="nc" id="L1141">		           } catch (AceException e) {</span>
+<span class="nc bnc" id="L1142" title="All 2 branches missed.">		        	   if (!includeExi) {</span>
+<span class="nc" id="L1143">		        		   this.cti--; //roll-back</span>
+		        	   }
+		              	else {
+		            		//roll-back
+<span class="nc" id="L1147">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+		            	}
+		               
+		               // If the OSCORE profile is used, and this was a first-released Token
+		               // to this client for RS in question, roll-back the counter used for
+		               // the 'id' parameter in the OSCORE Security Context and the
+				        // Id Context value assigned for this Resource Server
+<span class="nc bnc" id="L1154" title="All 4 branches missed.">		               if (profile == Constants.COAP_OSCORE &amp;&amp; updateAccessRights == false) {</span>
+<span class="nc" id="L1155">		            	   this.OSCORE_material_counter--;</span>
+<span class="nc bnc" id="L1156" title="All 2 branches missed.">		            	   if (this.idContextInfoMap.containsKey(audStr)) {</span>
+<span class="nc" id="L1157">		            		   this.idContextInfoMap.get(audStr).rollback();</span>
+		            	   }
+		               }
+		               
+<span class="nc" id="L1161">                       LOGGER.severe(&quot;Message processing aborted: &quot; + e.getMessage());</span>
+<span class="nc" id="L1162">                       return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="nc" id="L1163">		           }</span>
+		        }
+		        break;
+		    default :
+<span class="nc" id="L1167">		       LOGGER.severe(&quot;Unknown claim type in /token endpoint configuration: &quot; + c);</span>
+<span class="nc" id="L1168">		       return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);   </span>
+		    }
+<span class="fc" id="L1170">		}</span>
+
+<span class="fc" id="L1172">		AccessToken token = null;</span>
+		try {
+<span class="fc" id="L1174">		    token = AccessTokenFactory.generateToken(tokenType, claims);</span>
+<span class="nc" id="L1175">		} catch (AceException e) {</span>
+<span class="nc bnc" id="L1176" title="All 2 branches missed.">			if (!includeExi) {</span>
+<span class="nc" id="L1177">				this.cti--; //roll-back</span>
+			}
+	       	else {
+        		//roll-back
+<span class="nc" id="L1181">        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+        	}
+		    
+            // If the OSCORE profile is used, and this was a first-released Token
+            // to this client for RS in question, roll-back the counter used for
+            // the 'id' parameter in the OSCORE Security Context and the
+	        // Id Context value assigned for this Resource Server
+<span class="nc bnc" id="L1188" title="All 4 branches missed.">            if (profile == Constants.COAP_OSCORE &amp;&amp; updateAccessRights == false) {</span>
+<span class="nc" id="L1189">         	   this.OSCORE_material_counter--;</span>
+<span class="nc bnc" id="L1190" title="All 2 branches missed.">        	   if (this.idContextInfoMap.containsKey(audStr)) {</span>
+<span class="nc" id="L1191">        		   this.idContextInfoMap.get(audStr).rollback();</span>
+        	   }
+            }
+		    
+<span class="nc" id="L1195">		    LOGGER.severe(&quot;Message processing aborted: &quot;</span>
+<span class="nc" id="L1196">		            + e.getMessage());</span>
+<span class="nc" id="L1197">		    return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L1198">		}</span>
+		
+<span class="fc" id="L1200">		CBORObject rsInfo = CBORObject.NewMap();</span>
+		try {
+			
+<span class="fc" id="L1203">			boolean includeProfile = false;</span>
+			
+<span class="fc bfc" id="L1205" title="All 2 branches covered.">		    if (!this.db.hasDefaultProfile(id)) {</span>
+		    	// This client supports multiple profiles; need to specify the exact one to use
+<span class="fc" id="L1207">		    	includeProfile = true;</span>
+		    }
+		    else {
+<span class="fc" id="L1210">		    	CBORObject profileParameter = msg.getParameter(Constants.PROFILE);</span>
+<span class="pc bpc" id="L1211" title="3 of 4 branches missed.">		    	if (profileParameter != null &amp;&amp; profileParameter.equals(CBORObject.Null)) {</span>
+			    	// The client has requested an explicit indication of the profile to use
+<span class="nc" id="L1213">		    		includeProfile = true;</span>
+		    	}
+		    }
+
+<span class="fc bfc" id="L1217" title="All 2 branches covered.">		    if (includeProfile == true) {</span>
+<span class="fc" id="L1218">		    	rsInfo.Add(Constants.PROFILE, CBORObject.FromObject(profile));</span>
+		    }
+		    // Otherwise, no need to explicitly indicate the used profile
+		    
+<span class="nc" id="L1222">		} catch (AceException e) {</span>
+<span class="nc bnc" id="L1223" title="All 2 branches missed.">			if (!includeExi) {</span>
+<span class="nc" id="L1224">				this.cti--; //roll-back</span>
+			}
+	       	else {
+        		//roll-back
+<span class="nc" id="L1228">        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+        	}
+		    
+            // If the OSCORE profile is used, and this was a first-released Token
+            // to this client for RS in question, roll-back the counter used for
+            // the 'id' parameter in the OSCORE Security Context and the
+	        // Id Context value assigned for this Resource Server
+<span class="nc bnc" id="L1235" title="All 4 branches missed.">            if (profile == Constants.COAP_OSCORE &amp;&amp; updateAccessRights == false) {</span>
+<span class="nc" id="L1236">         	   this.OSCORE_material_counter--;</span>
+<span class="nc bnc" id="L1237" title="All 2 branches missed.">        	   if (this.idContextInfoMap.containsKey(audStr)) {</span>
+<span class="nc" id="L1238">        		   this.idContextInfoMap.get(audStr).rollback();</span>
+        	   }
+            }
+		    
+<span class="nc" id="L1242">		    LOGGER.severe(&quot;Message processing aborted: &quot;</span>
+<span class="nc" id="L1243">		            + e.getMessage());</span>
+<span class="nc" id="L1244">		    return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L1245">		}</span>
+
+<span class="fc bfc" id="L1247" title="All 4 branches covered.">		if (keyType != null &amp;&amp; keyType.equals(&quot;PSK&quot;)) {</span>
+<span class="fc bfc" id="L1248" title="All 2 branches covered.">			if (profile == Constants.COAP_OSCORE) {</span>
+				
+<span class="fc bfc" id="L1250" title="All 2 branches covered.">				if (updateAccessRights == false) {</span>
+<span class="fc" id="L1251">					rsInfo.Add(Constants.CNF, claims.get(Constants.CNF));</span>
+				}
+				// Do not add 'cnf' if the OSCORE profile is used and
+				// the Token is released for updating access rights
+				
+			}
+			else {
+<span class="fc" id="L1258">				rsInfo.Add(Constants.CNF, claims.get(Constants.CNF));</span>
+			}
+<span class="pc bpc" id="L1260" title="1 of 4 branches missed.">		}  else if (keyType != null &amp;&amp; keyType.equals(&quot;RPK&quot;)) {</span>
+<span class="nc" id="L1261">		    Set&lt;CBORObject&gt; rscnfs = new HashSet&lt;&gt;();</span>
+            try {
+<span class="nc" id="L1263">                rscnfs = makeRsCnf(aud);</span>
+<span class="nc" id="L1264">            } catch (AceException e) {</span>
+<span class="nc bnc" id="L1265" title="All 2 branches missed.">            	if (!includeExi) {</span>
+<span class="nc" id="L1266">            		this.cti--; //roll-back</span>
+            	}
+               	else {
+            		//roll-back
+<span class="nc" id="L1270">            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+            	}
+                
+                // If the OSCORE profile is used, and this was a first-released Token
+                // to this client for RS in question, roll-back the counter used for
+                // the 'id' parameter in the OSCORE Security Context and the
+		        // Id Context value assigned for this Resource Server
+<span class="nc bnc" id="L1277" title="All 4 branches missed.">                if (profile == Constants.COAP_OSCORE &amp;&amp; updateAccessRights == false) {</span>
+<span class="nc" id="L1278">             	    this.OSCORE_material_counter--;</span>
+<span class="nc bnc" id="L1279" title="All 2 branches missed.">            	    if (this.idContextInfoMap.containsKey(audStr)) {</span>
+<span class="nc" id="L1280">            	 	    this.idContextInfoMap.get(audStr).rollback();</span>
+            	    }
+                }
+                
+<span class="nc" id="L1284">                LOGGER.severe(&quot;Message processing aborted: &quot;</span>
+<span class="nc" id="L1285">                        + e.getMessage());</span>
+<span class="nc" id="L1286">                return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="nc" id="L1287">            }</span>
+<span class="nc bnc" id="L1288" title="All 2 branches missed.">		    for (CBORObject rscnf : rscnfs) {</span>
+<span class="nc" id="L1289">		        rsInfo.Add(Constants.RS_CNF, rscnf);</span>
+<span class="nc" id="L1290">		    }</span>
+		} //Skip cnf if client requested specific KID.
+
+		// Handle &quot;scope&quot; both as String and as Byte Array
+<span class="fc bfc" id="L1294" title="All 4 branches covered.">		if (scope instanceof String &amp;&amp; !allowedScopes.equals(scope)) {</span>
+<span class="fc" id="L1295">		    rsInfo.Add(Constants.SCOPE, CBORObject.FromObject(allowedScopes));</span>
+		}
+<span class="fc bfc" id="L1297" title="All 4 branches covered.">		if (scope instanceof byte[] &amp;&amp; !(Arrays.equals((byte[])allowedScopes, (byte[])scope))) {</span>
+<span class="fc" id="L1298">		    rsInfo.Add(Constants.SCOPE, CBORObject.FromObject(allowedScopes));</span>
+		}
+
+<span class="fc bfc" id="L1301" title="All 2 branches covered.">		if (token instanceof CWT) {</span>
+
+<span class="fc" id="L1303">		    CwtCryptoCtx ctx = null;</span>
+		    try {
+<span class="fc" id="L1305">		        ctx = EndpointUtils.makeCommonCtx(aud, this.db, </span>
+		                this.privateKey, sign);
+<span class="nc" id="L1307">		    } catch (AceException | CoseException e) {</span>
+<span class="nc bnc" id="L1308" title="All 2 branches missed.">		    	if (!includeExi) {</span>
+<span class="nc" id="L1309">		    		this.cti--; //roll-back</span>
+		    	}
+		       	else {
+	        		//roll-back
+<span class="nc" id="L1313">	        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+	        	}
+		        
+                // If the OSCORE profile is used, and this was a first-released Token
+                // to this client for RS in question, roll-back the counter used for
+                // the 'id' parameter in the OSCORE Security Context and the
+		        // Id Context value assigned for this Resource Server
+<span class="nc bnc" id="L1320" title="All 4 branches missed.">                if (profile == Constants.COAP_OSCORE &amp;&amp; updateAccessRights == false) {</span>
+<span class="nc" id="L1321">            	    this.OSCORE_material_counter--;</span>
+<span class="nc bnc" id="L1322" title="All 2 branches missed.">            	    if (this.idContextInfoMap.containsKey(audStr)) {</span>
+<span class="nc" id="L1323">            	 	    this.idContextInfoMap.get(audStr).rollback();</span>
+            	    }
+                }
+		        
+<span class="nc" id="L1327">		        LOGGER.severe(&quot;Message processing aborted: &quot;</span>
+<span class="nc" id="L1328">		                + e.getMessage());</span>
+<span class="nc" id="L1329">		        return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L1330">		    }</span>
+<span class="fc bfc" id="L1331" title="All 2 branches covered.">		    if (ctx == null) {</span>
+<span class="pc bpc" id="L1332" title="1 of 2 branches missed.">		    	if (!includeExi) {</span>
+<span class="nc" id="L1333">		    		this.cti--; //roll-back</span>
+		    	}
+		       	else {
+	        		//roll-back
+<span class="fc" id="L1337">	        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+	        	}
+		        
+	            // If the OSCORE profile is used, and this was a first-released Token
+	            // to this client for RS in question, roll-back the counter used for
+	            // the 'id' parameter in the OSCORE Security Context and the
+		        // Id Context value assigned for this Resource Server
+<span class="pc bpc" id="L1344" title="2 of 4 branches missed.">	            if (profile == Constants.COAP_OSCORE &amp;&amp; updateAccessRights == false) {</span>
+<span class="fc" id="L1345">	            	this.OSCORE_material_counter--;</span>
+<span class="pc bpc" id="L1346" title="1 of 2 branches missed.">            	    if (this.idContextInfoMap.containsKey(audStr)) {</span>
+<span class="nc" id="L1347">            	 	    this.idContextInfoMap.get(audStr).rollback();</span>
+            	    }
+	            }
+		        
+<span class="fc" id="L1351">		        CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L1352">		        map.Add(Constants.ERROR, &quot;No common security context found for audience&quot;);</span>
+<span class="fc" id="L1353">		        LOGGER.log(Level.INFO, &quot;Message processing aborted: No common security context found for audience&quot;);</span>
+<span class="fc" id="L1354">		        return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, map);</span>
+		    }
+<span class="fc" id="L1356">		    CWT cwt = (CWT)token;</span>
+<span class="fc" id="L1357">		    Map&lt;HeaderKeys, CBORObject&gt; uHeaders = null;</span>
+<span class="pc bpc" id="L1358" title="1 of 2 branches missed.">		    if (this.setAudHeader) {</span>
+		        // Add the audience as the KID in the header, so it can be referenced by introspection requests.
+<span class="nc" id="L1360">		        CBORObject requestedAud = CBORObject.NewArray();</span>
+<span class="nc bnc" id="L1361" title="All 2 branches missed.">		        for (String a : aud) {</span>
+<span class="nc" id="L1362">		            requestedAud.Add(a);</span>
+<span class="nc" id="L1363">		        }</span>
+<span class="nc" id="L1364">		        uHeaders = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L1365">		        uHeaders.put(HeaderKeys.KID, requestedAud);</span>
+		    }
+		    try {
+<span class="fc" id="L1368">		        rsInfo.Add(Constants.ACCESS_TOKEN, cwt.encode(ctx, null, uHeaders).EncodeToBytes());</span>
+<span class="nc" id="L1369">		    } catch (IllegalStateException | InvalidCipherTextException | CoseException | AceException e) {</span>
+<span class="nc bnc" id="L1370" title="All 2 branches missed.">		    	if (!includeExi) {</span>
+<span class="nc" id="L1371">		    		this.cti--; //roll-back</span>
+		    	}
+		       	else {
+	        		//roll-back		       		
+<span class="nc" id="L1375">	        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+	        	}
+		        
+	            // If the OSCORE profile is used, and this was a first-released Token
+	            // to this client for RS in question, roll-back the counter used for
+	            // the 'id' parameter in the OSCORE Security Context and the
+		        // Id Context value assigned for this Resource Server
+<span class="nc bnc" id="L1382" title="All 4 branches missed.">	            if (profile == Constants.COAP_OSCORE &amp;&amp; updateAccessRights == false) {</span>
+<span class="nc" id="L1383">	            	this.OSCORE_material_counter--;</span>
+<span class="nc bnc" id="L1384" title="All 2 branches missed.">            	    if (this.idContextInfoMap.containsKey(audStr)) {</span>
+<span class="nc" id="L1385">            	 	    this.idContextInfoMap.get(audStr).rollback();</span>
+            	    }
+	            }
+		        
+<span class="nc" id="L1389">		        LOGGER.severe(&quot;Message processing aborted: &quot;</span>
+<span class="nc" id="L1390">		                + e.getMessage());</span>
+<span class="nc" id="L1391">		        return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L1392">		    }		    </span>
+<span class="fc" id="L1393">		} else {</span>
+<span class="fc" id="L1394">		    rsInfo.Add(Constants.ACCESS_TOKEN, token.encode().EncodeToBytes());</span>
+		}
+
+		try {
+			
+			// If the claim set includes EXI but not EXP, then extend the claim set to be stored as follows:
+			//
+			// 1. Add an EXP claim, computed as current time plus the EXI value.
+			//    This allows to purge the token if expired, even though it was created without the EXP claim.
+			//
+			// 2. Add an internal &quot;sentinel claim&quot; to signal the presence of the artificially added EXP claim.
+			//    In case of introspection, this allows the Authorization Server to return the Access Token
+			//    like it was originally issued, i.e., without the EXI claim if this was artificially added.
+<span class="pc bpc" id="L1407" title="1 of 4 branches missed.">			if (claims.containsKey(Constants.EXI) &amp;&amp; !claims.containsKey(Constants.EXP)) {</span>
+				
+<span class="fc" id="L1409">				Long now = this.time.getCurrentTime();</span>
+<span class="fc" id="L1410">				Long exp = now + claims.get(Constants.EXI).AsInt64();</span>
+				
+<span class="fc" id="L1412">				claims.put(Constants.EXP, CBORObject.FromObject(exp));</span>
+				
+				// Add the &quot;sentinel claim&quot; 
+<span class="fc" id="L1415">				claims.put(Constants.LATE_ADDED_EXP, CBORObject.True);</span>
+			}
+			
+<span class="fc" id="L1418">		    this.db.addToken(ctiStr, claims);</span>
+<span class="fc" id="L1419">		    this.db.addCti2Client(ctiStr, id);</span>
+<span class="fc bfc" id="L1420" title="All 2 branches covered.">		    if (!includeExi) {</span>
+<span class="fc" id="L1421">		    	this.db.saveCtiCounter(this.cti);</span>
+		    }
+		    else {
+<span class="fc" id="L1424">		    	this.db.saveExiSequenceNumber(exiSeqNum+1, rsName);</span>
+		    }
+
+		    // In case the client has asked to use a PSK, store further associations,
+		    // to support the issuing of Access Tokens for updating access rights
+<span class="fc bfc" id="L1429" title="All 4 branches covered.">		    if (keyType != null &amp;&amp; keyType.equals(&quot;PSK&quot;)) {</span>
+		    
+<span class="fc" id="L1431">			    this.cti2aud.put(ctiStr, audStr);</span>
+			    
+<span class="fc bfc" id="L1433" title="All 2 branches covered.">			    if (profile == Constants.COAP_OSCORE) {</span>
+			    	CBORObject oscId;
+<span class="fc bfc" id="L1435" title="All 2 branches covered.">			    	if (updateAccessRights == false) {</span>
+			    		// The Token is not updating access rights, hence the identifier of the OSCORE
+			    		// Input Material is the 'id' 'OSCORE_Input_Material' element of the 'cnf' claim			    		
+<span class="fc" id="L1438">			    		oscId = claims.get(Constants.CNF).get(Constants.OSCORE_Input_Material).get(Constants.OS_ID);</span>
+			    	}
+			    	else {
+			    		// The Token is updating access rights, hence the identifier of the
+			    		// OSCORE Input Material is used as 'kid' in the 'cnf' claim of the Token
+<span class="fc" id="L1443">			    		oscId = claims.get(Constants.CNF).get(Constants.COSE_KID_CBOR);</span>
+			    	}
+			    	
+            		// A deep copy is needed
+<span class="fc" id="L1447">			    	byte[] oscIdCopy = Arrays.copyOf(oscId.GetByteString(), oscId.GetByteString().length);</span>
+<span class="fc" id="L1448">			    	this.cti2oscId.put(ctiStr, CBORObject.FromObject(oscIdCopy));</span>
+			    	
+<span class="fc" id="L1450">	            }</span>
+<span class="pc bpc" id="L1451" title="1 of 2 branches missed.">			    else if (profile == Constants.COAP_DTLS) {</span>
+		    		// Regardless if the Token is updating access rights or not, the identifier of the
+		    		// PoP key is the 'kid' parameter inside the 'COSE_Key' parameter of the 'cnf' claim	
+<span class="fc" id="L1454">			    	CBORObject kid = claims.get(Constants.CNF).get(Constants.COSE_KEY).get(KeyKeys.KeyId.AsCBOR());</span>
+			    	
+            		// A deep copy is needed
+<span class="fc" id="L1457">            		byte[] kidCopy = Arrays.copyOf(kid.GetByteString(), kid.GetByteString().length);</span>
+<span class="fc" id="L1458">            		this.cti2kid.put(ctiStr, CBORObject.FromObject(kidCopy));</span>
+            		
+			    }
+			    
+			    // The just issued Token is updating access rights, hence delete the superseded Token
+<span class="fc bfc" id="L1463" title="All 2 branches covered.">			    if (updateAccessRights == true) {</span>
+<span class="fc" id="L1464">			    	removeToken(oldCti);</span>
+			    }
+		    
+			}
+		    
+		    
+<span class="fc" id="L1470">		} catch (AceException e) {</span>
+<span class="pc bpc" id="L1471" title="1 of 2 branches missed.">			if (!includeExi) {</span>
+<span class="nc" id="L1472">				this.cti--; //roll-back</span>
+			}
+	       	else {
+        		//roll-back
+<span class="fc" id="L1476">        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+        	}
+		    
+<span class="fc" id="L1479">            this.cti2aud.remove(ctiStr);</span>
+            
+<span class="pc bpc" id="L1481" title="2 of 4 branches missed.">            if (keyType != null &amp;&amp; keyType.equals(&quot;PSK&quot;)) {</span>
+            	
+<span class="pc bpc" id="L1483" title="1 of 2 branches missed.">            	if (profile == Constants.COAP_OSCORE) {</span>
+<span class="pc bpc" id="L1484" title="1 of 2 branches missed.">	            	if (updateAccessRights == false) {</span>
+	            		// Roll-back the counter used for the 'id' parameter in the OSCORE Security Context
+	            		// and the Id Context value assigned for this Resource Server
+<span class="nc" id="L1487">	            		this.OSCORE_material_counter--;</span>
+<span class="nc bnc" id="L1488" title="All 2 branches missed.">	            	    if (this.idContextInfoMap.containsKey(audStr)) {</span>
+<span class="nc" id="L1489">	            	 	    this.idContextInfoMap.get(audStr).rollback();</span>
+	            	    }
+	            	}
+
+<span class="fc" id="L1493">	            	this.cti2oscId.remove(ctiStr);</span>
+            	}
+<span class="nc bnc" id="L1495" title="All 2 branches missed.">            	else if (profile == Constants.COAP_DTLS) {</span>
+<span class="nc" id="L1496">            		this.cti2kid.remove(ctiStr);</span>
+            	}
+            	
+            }
+            
+<span class="fc" id="L1501">		    LOGGER.severe(&quot;Message processing aborted: &quot; + e.getMessage());</span>
+<span class="fc" id="L1502">		    return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L1503">		}</span>
+<span class="fc" id="L1504">		LOGGER.log(Level.INFO, &quot;Returning token: &quot; + ctiStr);</span>
+		
+		// If the EXP claim was added after the actual creation of the Access Token,
+		// then print all the claims except for EXP and the sentinel claim.
+<span class="fc bfc" id="L1508" title="All 2 branches covered.">		if (claims.containsKey(Constants.LATE_ADDED_EXP)) {</span>
+<span class="fc" id="L1509">			Map&lt;Short, CBORObject&gt; actualClaims = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L1510" title="All 2 branches covered.">			for (Short s : claims.keySet()) {</span>
+<span class="fc" id="L1511">				actualClaims.put(s, claims.get(s));</span>
+<span class="fc" id="L1512">			}</span>
+<span class="fc" id="L1513">			LOGGER.log(Level.FINEST, &quot;Claims: &quot; + actualClaims.toString());</span>
+		}
+<span class="fc" id="L1515">		return msg.successReply(Message.CREATED, rsInfo);</span>
+	}
+	
+	/**
+	 * Populate RS_CNF
+	 * @throws AceException 
+	 */
+	private Set&lt;CBORObject&gt; makeRsCnf(Set&lt;String&gt; aud) throws AceException {
+<span class="nc" id="L1523">	    Set&lt;String&gt; rss = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L1524">	    Set&lt;CBORObject&gt; rscnfs = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L1525" title="All 2 branches missed.">	    for (String audE : aud) {           </span>
+<span class="nc" id="L1526">	        rss.addAll(this.db.getRSS(audE));</span>
+<span class="nc" id="L1527">	    }</span>
+<span class="nc bnc" id="L1528" title="All 2 branches missed.">	    for (String rs : rss) {</span>
+<span class="nc" id="L1529">	        OneKey rsKey = this.db.getRsRPK(rs);</span>
+<span class="nc" id="L1530">	        CBORObject rscnf = CBORObject.NewMap();</span>
+<span class="nc" id="L1531">	        rscnf.Add(Constants.COSE_KEY_CBOR, rsKey.AsCBOR());</span>
+<span class="nc" id="L1532">	        rscnfs.add(rscnf);</span>
+
+<span class="nc" id="L1534">	    }</span>
+<span class="nc" id="L1535">	    return rscnfs;</span>
+	}
+	
+	/**
+	 * Create the value of a 'cnf' claim as an &quot;OSCORE_Input_Material&quot; CBOR object.
+	 * 
+	 * @param masterSecret  the OSCORE Master Secret
+	 * @param rsName  the name of the Resource Server
+	 * 
+	 * @return the value of a 'cnf' claim as an &quot;OSCORE_Input_Material&quot; CBOR object
+	 */
+	synchronized private CBORObject makeOscoreCnf(byte[] masterSecret, String rsName) {
+<span class="fc" id="L1547">	    CBORObject osccnf = CBORObject.NewMap();</span>
+<span class="fc" id="L1548">	    CBORObject osc = CBORObject.NewMap();</span>
+	    
+<span class="fc" id="L1550">	    osc.Add(Constants.OS_MS, masterSecret);</span>
+	    
+<span class="fc" id="L1552">	    osc.Add(Constants.OS_ID, Util.intToBytes(OSCORE_material_counter));</span>
+<span class="fc" id="L1553">	    OSCORE_material_counter++;</span>
+	    
+<span class="fc bfc" id="L1555" title="All 2 branches covered.">	    if (masterSaltSize != 0) {</span>
+<span class="fc" id="L1556">	        byte[] masterSalt = new byte[masterSaltSize];</span>
+<span class="fc" id="L1557">	        new SecureRandom().nextBytes(masterSalt);</span>
+<span class="fc" id="L1558">	        osc.Add(Constants.OS_SALT, masterSalt);</span>
+	    }
+
+<span class="fc bfc" id="L1561" title="All 2 branches covered.">	    if (this.provideIdContext == true) {</span>
+	    	
+	    	IdContextInfo idContextInfo;
+<span class="pc bpc" id="L1564" title="1 of 2 branches missed.">	    	if (this.idContextInfoMap.containsKey(rsName)) {</span>
+<span class="nc" id="L1565">		    	idContextInfo = this.idContextInfoMap.get(rsName);</span>
+	    	}
+	    	else {
+			    // This is the first Access Token for this Resource Server
+<span class="fc" id="L1569">	    		idContextInfo = new IdContextInfo();</span>
+<span class="fc" id="L1570">	    		this.idContextInfoMap.put(rsName, idContextInfo);</span>
+	    	}
+	    	
+<span class="fc" id="L1573">	    	byte[] idContext = idContextInfo.getIdContext();</span>
+<span class="fc" id="L1574">	    	osc.Add(Constants.OS_CONTEXTID, idContext);</span>
+	    	
+	    }
+	    
+<span class="fc" id="L1578">	    osccnf.Add(Constants.OSCORE_Input_Material, osc);</span>
+<span class="fc" id="L1579">	    return osccnf;  </span>
+	}
+	
+	
+	/**
+	 * Create the value of a 'cnf' claim as a &quot;kid&quot; CBOR object.
+	 * 
+	 * @param oscId  the Identifier of the OSCORE Input Material object
+	 * 
+	 * @return the value of a 'cnf' claim as a &quot;kid&quot; CBOR object
+	 */
+	private CBORObject makeOscoreCnfUpdateAccessRights(CBORObject oscId) {
+<span class="fc" id="L1591">	    CBORObject osccnf = CBORObject.NewMap();</span>
+	    
+<span class="fc" id="L1593">	    osccnf.Add(Constants.COSE_KID_CBOR, oscId);</span>
+<span class="fc" id="L1594">	    return osccnf;  </span>
+	}
+
+
+	/**
+	 * Process an authorization grant message
+	 * 
+	 * @param msg  the message
+	 * 
+	 * @return the reply
+	 */
+	private Message processAC(Message msg) {
+	       //3. Check if the request has a grant
+<span class="fc" id="L1607">        CBORObject cbor = msg.getParameter(Constants.CODE);</span>
+<span class="pc bpc" id="L1608" title="1 of 2 branches missed.">        if (cbor == null ) {</span>
+<span class="nc" id="L1609">            CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1610">            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L1611">            map.Add(Constants.ERROR_DESCRIPTION, &quot;No code found for message&quot;);</span>
+<span class="nc" id="L1612">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                    + &quot;No code found for message&quot;);
+<span class="nc" id="L1614">            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+        }
+<span class="pc bpc" id="L1616" title="1 of 2 branches missed.">        if (!cbor.getType().equals(CBORType.TextString)) {</span>
+<span class="nc" id="L1617">            CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1618">            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="nc" id="L1619">            map.Add(Constants.ERROR_DESCRIPTION, &quot;Invalid grant format&quot;);</span>
+<span class="nc" id="L1620">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                    + &quot;Invalid grant format&quot;);
+<span class="nc" id="L1622">            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+        }
+<span class="fc" id="L1624">        String code = cbor.AsString();</span>
+        
+	    //4. Check if grant valid and unused
+        try {
+<span class="pc bpc" id="L1628" title="1 of 2 branches missed.">            if (!this.db.isGrantValid(code)) {</span>
+<span class="nc" id="L1629">                CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1630">                map.Add(Constants.ERROR, Constants.INVALID_GRANT);</span>
+<span class="nc" id="L1631">                LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+                        + &quot;Invalid grant&quot;);
+<span class="nc" id="L1633">                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+            }
+<span class="nc" id="L1635">        } catch (AceException e) {</span>
+<span class="nc" id="L1636">            LOGGER.log(Level.SEVERE, &quot;Message processing aborted &quot;</span>
+<span class="nc" id="L1637">                    + &quot;(checking grant): &quot; + e.getMessage());</span>
+<span class="nc" id="L1638">            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L1639">        }</span>
+        
+	    //5. Mark grant invalid
+        try {
+<span class="fc" id="L1643">            this.db.useGrant(code);</span>
+<span class="nc" id="L1644">        } catch (AceException e) {</span>
+<span class="nc" id="L1645">            LOGGER.log(Level.SEVERE, &quot;Message processing aborted &quot;</span>
+<span class="nc" id="L1646">                    + &quot;(marking grant invalid): &quot; + e.getMessage());</span>
+<span class="nc" id="L1647">            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L1648">        }</span>
+        
+	    //6. Return the RS Information
+<span class="fc" id="L1651">        CBORObject rsInfo = CBORObject.NewMap();</span>
+       
+        try {
+<span class="fc" id="L1654">            Map&lt;Short, CBORObject&gt; rsInfoDB = this.db.getRsInfo(code);</span>
+<span class="fc bfc" id="L1655" title="All 2 branches covered.">            for (Map.Entry&lt;Short, CBORObject&gt; e : rsInfoDB.entrySet()) {</span>
+<span class="fc" id="L1656">                rsInfo.Add(e.getKey(), e.getValue());</span>
+<span class="fc" id="L1657">            }</span>
+<span class="nc" id="L1658">        } catch (AceException e) {</span>
+<span class="nc" id="L1659">            LOGGER.log(Level.SEVERE, &quot;Message processing aborted &quot;</span>
+<span class="nc" id="L1660">                    + &quot;(collecting RS Info&quot; + e.getMessage());</span>
+<span class="nc" id="L1661">            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="fc" id="L1662">        }</span>
+       
+<span class="pc bpc" id="L1664" title="2 of 4 branches missed.">        if (rsInfo == null || !rsInfo.getType().equals(CBORType.Map)) {</span>
+<span class="nc" id="L1665">            LOGGER.log(Level.SEVERE, &quot;Message processing aborted: &quot;</span>
+                    + &quot;no RS information found for grant: &quot; + code);
+<span class="nc" id="L1667">            CBORObject map = CBORObject.NewMap();</span>
+<span class="nc" id="L1668">            map.Add(Constants.ERROR, Constants.INVALID_GRANT);</span>
+<span class="nc" id="L1669">            map.Add(Constants.ERROR_DESCRIPTION, </span>
+                    &quot;No token found for grant&quot;);
+<span class="nc" id="L1671">            return msg.failReply(Message.FAIL_BAD_REQUEST, map);  </span>
+        }
+<span class="fc" id="L1673">        return msg.successReply(Message.CREATED, rsInfo);</span>
+	}
+
+	private boolean isSupported(String keyType, Set&lt;String&gt; aud) 
+	        throws AceException {
+<span class="fc" id="L1678">	    Set&lt;String&gt; keyTypes = this.db.getSupportedPopKeyTypes(aud);</span>
+<span class="fc" id="L1679">	    return keyTypes.contains(keyType);	    </span>
+	}
+
+	/**
+	 * Retrieves a key from a cnf structure.
+	 * 
+	 * @param cnf  the cnf structure
+	 * 
+	 * @return  the key
+	 * 
+	 * @throws AceException 
+	 * @throws CoseException 
+	 */
+	private OneKey getKey(CBORObject cnf, String id) 
+	        throws AceException, CoseException {
+<span class="nc" id="L1694">	    CBORObject crpk = null; </span>
+<span class="nc bnc" id="L1695" title="All 2 branches missed.">	    if (cnf.ContainsKey(Constants.COSE_KEY_CBOR)) {</span>
+<span class="nc" id="L1696">	        crpk = cnf.get(Constants.COSE_KEY_CBOR);</span>
+<span class="nc bnc" id="L1697" title="All 2 branches missed.">	        if (crpk == null) {</span>
+<span class="nc" id="L1698">	            return null;</span>
+	        }
+<span class="nc" id="L1700">	        return new OneKey(crpk);</span>
+<span class="nc bnc" id="L1701" title="All 2 branches missed.">	    } else if (cnf.ContainsKey(Constants.COSE_ENCRYPTED_CBOR)) {</span>
+<span class="nc" id="L1702">	        Encrypt0Message msg = new Encrypt0Message();</span>
+<span class="nc" id="L1703">            CBORObject encC = cnf.get(Constants.COSE_ENCRYPTED_CBOR);</span>
+          try {
+<span class="nc" id="L1705">              msg.DecodeFromCBORObject(encC);</span>
+<span class="nc" id="L1706">              OneKey psk = this.db.getCPSK(id);</span>
+<span class="nc bnc" id="L1707" title="All 2 branches missed.">              if (psk == null) {</span>
+<span class="nc" id="L1708">                  LOGGER.severe(&quot;Couldn't find a key to decrypt cnf parameter&quot;);</span>
+<span class="nc" id="L1709">                  throw new AceException(</span>
+                          &quot;No key found to decrypt cnf parameter&quot;);
+              }
+<span class="nc" id="L1712">              CBORObject key = psk.get(KeyKeys.Octet_K);</span>
+<span class="nc bnc" id="L1713" title="All 4 branches missed.">              if (key == null || !key.getType().equals(CBORType.ByteString)) {</span>
+<span class="nc" id="L1714">                  LOGGER.severe(&quot;Corrupt key retrieved from database&quot;);</span>
+<span class="nc" id="L1715">                  throw new AceException(&quot;Key error in the database&quot;);  </span>
+              }
+<span class="nc" id="L1717">              msg.decrypt(key.GetByteString());</span>
+<span class="nc" id="L1718">              CBORObject keyData = CBORObject.DecodeFromBytes(msg.GetContent());</span>
+<span class="nc" id="L1719">              return new OneKey(keyData);</span>
+<span class="nc" id="L1720">          } catch (CoseException e) {</span>
+<span class="nc" id="L1721">              LOGGER.severe(&quot;Error while decrypting a cnf claim: &quot;</span>
+<span class="nc" id="L1722">                      + e.getMessage());</span>
+<span class="nc" id="L1723">              throw new AceException(&quot;Error while decrypting a cnf parameter&quot;);</span>
+          }
+	    } //Note: We checked the COSE_KID_CBOR case before 
+<span class="nc" id="L1726">	    throw new AceException(&quot;Malformed cnf structure&quot;);</span>
+    }
+
+	/**
+	 * Removes a token from the registry
+	 * 
+	 * @param cti  the token identifier Base64 encoded
+	 * @throws AceException 
+	 */
+	public void removeToken(String cti) throws AceException {
+<span class="fc" id="L1736">	    this.db.deleteToken(cti);</span>
+	    
+<span class="fc" id="L1738">        this.cti2aud.remove(cti);</span>
+<span class="fc" id="L1739">        this.cti2oscId.remove(cti);</span>
+<span class="fc" id="L1740">        this.cti2kid.remove(cti);</span>
+	    
+	    //FIXME: Add the token to the TRL
+<span class="fc" id="L1743">	}</span>
+
+    @Override
+    public void close() throws AceException {
+<span class="nc" id="L1747">        this.db.saveCtiCounter(this.cti);</span>
+        
+<span class="nc bnc" id="L1749" title="All 2 branches missed.">        for (String rs : exiSequenceNumbers.keySet())</span>
+<span class="nc" id="L1750">        	this.db.saveExiSequenceNumber(exiSequenceNumbers.get(rs).intValue(), rs);</span>
+        
+<span class="nc" id="L1752">        this.db.close();</span>
+<span class="nc" id="L1753">    }</span>
+    
+	 /**
+	  * Relevant only when the OSCORE profile is used
+	  * 
+	  * An instance of this class tracks the status of 
+	  * OSCORE Id Contexts assigned to a Resource Server
+	  */
+	 class IdContextInfo {
+		 
+		 short currentSize;
+		 int currentValue;
+		 
+<span class="fc" id="L1766">		 public IdContextInfo() {</span>
+<span class="fc" id="L1767">			 currentSize = 1;</span>
+<span class="fc" id="L1768">			 currentValue = 0;</span>
+<span class="fc" id="L1769">		 }</span>
+		 
+		 // Retrieve the next unassigned IdContext for this Resource Server,
+		 // using the smallest possible size in bytes.
+		 // That is, first consume all the Id Contexts of 1 byte in size, then
+		 // all the Id Contexts of 2 bytes in size, and so on up to 4 bytes in size.
+		 synchronized public byte[] getIdContext() {
+
+			 // Check if the size has to be changed
+<span class="pc bpc" id="L1778" title="2 of 3 branches missed.">			 switch (currentSize) {</span>
+			 
+			 	case 1: // Max value: 2^8 - 1
+			 	case 2: // Max value: 2^16 - 1
+			 	case 3: // Max value: 2^24 - 1
+<span class="pc bpc" id="L1783" title="1 of 2 branches missed.">			 		if (currentValue == ((1 &lt;&lt; (currentSize * 8)) - 1)) {</span>
+<span class="nc" id="L1784">			 			currentSize++;</span>
+<span class="nc" id="L1785">			 			currentValue = 0;</span>
+			 		}
+			 		break;
+			 	case 4: // Max value: 2^31 - 1  --- The other half is for negative integers
+<span class="nc bnc" id="L1789" title="All 2 branches missed.">			 		if (currentValue == ((1 &lt;&lt; ((currentSize *8) - 1)) - 1)) {</span>
+<span class="nc" id="L1790">			 			currentSize = 1;</span>
+<span class="nc" id="L1791">			 			currentValue = 0;</span>
+			 		}
+			 		break;
+			 	default:
+<span class="nc" id="L1795">			 		return null;</span>
+			 }
+		 	 
+<span class="fc" id="L1798">			 byte[] idContext = null;</span>
+<span class="pc bpc" id="L1799" title="4 of 5 branches missed.">			 switch (currentSize) {</span>
+			 	case 1:
+<span class="fc" id="L1801">			 		idContext = new byte[] { (byte) (currentValue) };</span>
+<span class="fc" id="L1802">			 		break;</span>
+			 	case 2:
+<span class="nc" id="L1804">			 		idContext = new byte[] { (byte) (currentValue &gt;&gt;&gt; 8),</span>
+			 				                 (byte) currentValue };
+<span class="nc" id="L1806">			 		break;</span>
+			 	case 3:
+<span class="nc" id="L1808">			 		idContext = new byte[] { (byte) (currentValue &gt;&gt;&gt; 16),</span>
+			 				                 (byte) (currentValue &gt;&gt;&gt; 8),
+			 				                 (byte) currentValue };
+<span class="nc" id="L1811">			 		break;</span>
+			 	case 4:
+<span class="nc" id="L1813">			 		idContext = new byte[] { (byte) (currentValue &gt;&gt;&gt; 24),</span>
+			 				                 (byte) (currentValue &gt;&gt;&gt; 16),
+			 				                 (byte) (currentValue &gt;&gt;&gt; 8),
+			 				                 (byte) currentValue };
+			 		break;
+			 }
+			 
+<span class="fc" id="L1820">			 currentValue++;</span>
+<span class="fc" id="L1821">			 return idContext;</span>
+				 
+		 }
+		 
+		 // Free up the Id Context latest assigned for this Resource Server
+		 synchronized public void rollback() {
+			 
+<span class="nc bnc" id="L1828" title="All 2 branches missed.">			 if (currentValue != 0) {</span>
+<span class="nc" id="L1829">				 currentValue--; </span>
+			 }
+			 else { 
+<span class="nc bnc" id="L1832" title="All 3 branches missed.">				 switch (currentSize) {</span>
+				 	case 1: // Restore the maximum value: 2^31 - 1  --- The other half is for negative integers
+<span class="nc" id="L1834">				 		currentSize = 4;</span>
+<span class="nc" id="L1835">				 		currentValue = (1 &lt;&lt; ((currentSize *8) - 1)) - 1;</span>
+<span class="nc" id="L1836">				 		break;</span>
+				 	case 2: // Restore the maximum value: 2^8 - 1
+				 	case 3: // Restore the maximum value: 2^16 - 1
+				 	case 4: // Restore the maximum value: 2^24 - 1
+<span class="nc" id="L1840">				 		currentSize--;</span>
+<span class="nc" id="L1841">				 		currentValue = (1 &lt;&lt; (currentSize * 8)) - 1;</span>
+				 		break;
+				 }
+			 }
+<span class="nc" id="L1845">		 }</span>
+		 
+	 }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SignCommon.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Cf-OSCORE</a> &gt; <a href="index.source.html" class="el_package">org.eclipse.californium.cose</a> &gt; <span class="el_source">SignCommon.java</span></div><h1>SignCommon.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.eclipse.californium.cose;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.util.Arrays;
+
+import org.eclipse.californium.core.Utils;
+
+
+/**
+ *
+ * @author jimsch
+ */
+
+<span class="nc" id="L22">public abstract class SignCommon extends Message {</span>
+    protected String contextString;
+
+    byte[] computeSignature(byte[] rgbToBeSigned, OneKey cnKey) throws CoseException {
+<span class="nc" id="L26">        AlgorithmID alg = AlgorithmID.FromCBOR(findAttribute(HeaderKeys.Algorithm));</span>
+<span class="nc" id="L27">        return computeSignature(alg, rgbToBeSigned, cnKey);</span>
+    }
+
+    static byte[] computeSignature(AlgorithmID alg, byte[] rgbToBeSigned, OneKey cnKey) throws CoseException {
+<span class="fc" id="L31">        String      algName = null;</span>
+<span class="fc" id="L32">        int         sigLen = 0;</span>
+        
+<span class="pc bpc" id="L34" title="1 of 5 branches missed.">        switch (alg) {</span>
+            case ECDSA_256:
+<span class="fc" id="L36">                algName = &quot;SHA256withECDSA&quot;;</span>
+<span class="fc" id="L37">                sigLen = 32;</span>
+<span class="fc" id="L38">                break;</span>
+            case ECDSA_384:
+<span class="fc" id="L40">                algName = &quot;SHA384withECDSA&quot;;</span>
+<span class="fc" id="L41">                sigLen = 48;</span>
+<span class="fc" id="L42">                break;</span>
+            case ECDSA_512:
+<span class="fc" id="L44">                algName = &quot;SHA512withECDSA&quot;;</span>
+<span class="fc" id="L45">                sigLen = 66;</span>
+<span class="fc" id="L46">                break;</span>
+            case EDDSA:
+<span class="fc" id="L48">                algName = &quot;NonewithEdDSA&quot;;</span>
+<span class="fc" id="L49">                break;</span>
+                
+            default:
+<span class="nc" id="L52">                throw new CoseException(&quot;Unsupported Algorithm Specified&quot;);</span>
+        }
+        
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if (cnKey == null) {</span>
+<span class="nc" id="L56">            throw new NullPointerException();</span>
+        }
+        
+<span class="fc" id="L59">        PrivateKey  privKey = cnKey.AsPrivateKey();</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (privKey == null) {</span>
+<span class="nc" id="L61">            throw new CoseException(&quot;Private key required to sign&quot;);</span>
+        }
+        
+<span class="fc" id="L64">        byte[]      result = null;</span>
+        try {
+<span class="fc" id="L66">            Signature sig = Signature.getInstance(algName);</span>
+<span class="fc" id="L67">            sig.initSign(privKey);</span>
+<span class="fc" id="L68">            sig.update(rgbToBeSigned);</span>
+            
+<span class="fc" id="L70">			System.out.println(&quot;COSE: To be signed: &quot; + Utils.toHexString(rgbToBeSigned));</span>
+            
+<span class="fc" id="L72">            result = sig.sign();</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">            if (sigLen &gt; 0) {</span>
+<span class="fc" id="L74">                result = convertDerToConcat(result, sigLen);</span>
+            }
+<span class="nc" id="L76">        } catch (NoSuchAlgorithmException ex) {</span>
+<span class="nc" id="L77">            throw new CoseException(&quot;Algorithm not supported&quot;, ex);</span>
+<span class="nc" id="L78">        } catch (Exception ex) {</span>
+<span class="nc" id="L79">            throw new CoseException(&quot;Signature failure&quot;, ex);</span>
+<span class="fc" id="L80">        }</span>
+                
+<span class="fc" id="L82">        return result;</span>
+    }
+    
+    private static byte[] convertDerToConcat(byte[] der, int len) throws CoseException {
+        // this is far too naive
+<span class="fc" id="L87">        byte[] concat = new byte[len * 2];</span>
+
+        // assumes SEQUENCE is organized as &quot;R + S&quot;
+<span class="fc" id="L90">        int kLen = 4;</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if (der[0] != 0x30) {</span>
+<span class="nc" id="L92">            throw new CoseException(&quot;Unexpected signature input&quot;);</span>
+        }
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if ((der[1] &amp; 0x80) != 0) {</span>
+            // offset actually 4 + (7-bits of byte 1)
+<span class="fc" id="L96">            kLen = 4 + (der[1] &amp; 0x7f);</span>
+        }
+        
+        // calculate start/end of R
+<span class="fc" id="L100">        int rOff = kLen;</span>
+<span class="fc" id="L101">        int rLen = der[rOff - 1];</span>
+<span class="fc" id="L102">        int rPad = 0;</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (rLen &gt; len) {</span>
+<span class="fc" id="L104">            rOff += (rLen - len);</span>
+<span class="fc" id="L105">            rLen = len;</span>
+        } else {
+<span class="fc" id="L107">            rPad = (len - rLen);</span>
+        }
+        // copy R
+<span class="fc" id="L110">        System.arraycopy(der, rOff, concat, rPad, rLen);</span>
+        
+        // calculate start/end of S
+<span class="fc" id="L113">        int sOff = rOff + rLen + 2;</span>
+<span class="fc" id="L114">        int sLen = der[sOff - 1];</span>
+<span class="fc" id="L115">        int sPad = 0;</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        if (sLen &gt; len) {</span>
+<span class="fc" id="L117">            sOff += (sLen - len);</span>
+<span class="fc" id="L118">            sLen = len;</span>
+        } else {
+<span class="fc" id="L120">            sPad = (len - sLen);</span>
+        }
+        // copy S
+<span class="fc" id="L123">        System.arraycopy(der, sOff, concat, len + sPad, sLen);</span>
+        
+<span class="fc" id="L125">        return concat;</span>
+    }
+    
+    boolean validateSignature(byte[] rgbToBeSigned, byte[] rgbSignature, OneKey cnKey) throws CoseException {
+<span class="nc" id="L129">        AlgorithmID alg = AlgorithmID.FromCBOR(findAttribute(HeaderKeys.Algorithm));</span>
+<span class="nc" id="L130">        return validateSignature(alg, rgbToBeSigned, rgbSignature, cnKey);</span>
+    }
+
+    static boolean validateSignature(AlgorithmID alg, byte[] rgbToBeSigned, byte[] rgbSignature, OneKey cnKey) throws CoseException {
+<span class="fc" id="L134">        String algName = null;</span>
+<span class="fc" id="L135">        boolean convert = false;</span>
+
+<span class="pc bpc" id="L137" title="1 of 5 branches missed.">        switch (alg) {</span>
+        case ECDSA_256:
+<span class="fc" id="L139">            algName = &quot;SHA256withECDSA&quot;;</span>
+<span class="fc" id="L140">            convert = true;</span>
+<span class="fc" id="L141">            break;</span>
+        case ECDSA_384:
+<span class="fc" id="L143">            algName = &quot;SHA384withECDSA&quot;;</span>
+<span class="fc" id="L144">            convert = true;</span>
+<span class="fc" id="L145">            break;</span>
+        case ECDSA_512:
+<span class="fc" id="L147">            algName = &quot;SHA512withECDSA&quot;;</span>
+<span class="fc" id="L148">            convert = true;</span>
+<span class="fc" id="L149">            break;</span>
+            
+        case EDDSA:
+<span class="fc" id="L152">            algName = &quot;NonewithEdDSA&quot;;</span>
+<span class="fc" id="L153">            break;</span>
+
+        default:
+<span class="nc" id="L156">            throw new CoseException(&quot;Unsupported Algorithm Specified&quot;);</span>
+        }
+
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (cnKey == null) {</span>
+<span class="nc" id="L160">            throw new NullPointerException();</span>
+        }
+
+<span class="fc" id="L163">        PublicKey pubKey = cnKey.AsPublicKey();</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        if (pubKey == null) {</span>
+<span class="nc" id="L165">            throw new CoseException(&quot;Public key required to verify&quot;);</span>
+        }
+
+<span class="fc" id="L168">        boolean result = false;</span>
+        try {
+<span class="fc" id="L170">            Signature sig = Signature.getInstance(algName);</span>
+<span class="fc" id="L171">            sig.initVerify(pubKey);</span>
+<span class="fc" id="L172">            sig.update(rgbToBeSigned);</span>
+            
+<span class="fc" id="L174">			System.out.println(&quot;COSE: To be signed (checked): &quot; + Utils.toHexString(rgbToBeSigned));</span>
+
+<span class="fc bfc" id="L176" title="All 2 branches covered.">            if (convert) {</span>
+<span class="fc" id="L177">                rgbSignature = convertConcatToDer(rgbSignature);</span>
+            }
+<span class="fc" id="L179">            result = sig.verify(rgbSignature);</span>
+<span class="nc" id="L180">        } catch (NoSuchAlgorithmException ex) {</span>
+<span class="nc" id="L181">            throw new CoseException(&quot;Algorithm not supported&quot;, ex);</span>
+<span class="nc" id="L182">        } catch (Exception ex) {</span>
+<span class="nc" id="L183">            throw new CoseException(&quot;Signature verification failure&quot;, ex);</span>
+<span class="fc" id="L184">        }</span>
+
+<span class="fc" id="L186">        return result;</span>
+    }
+
+    private static byte[] convertConcatToDer(byte[] concat) throws CoseException {
+<span class="fc" id="L190">        int len = concat.length / 2;</span>
+<span class="fc" id="L191">        byte[] r = Arrays.copyOfRange(concat, 0, len);</span>
+<span class="fc" id="L192">        byte[] s = Arrays.copyOfRange(concat, len, concat.length);</span>
+
+<span class="fc" id="L194">        return ASN1.EncodeSignature(r, s);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
