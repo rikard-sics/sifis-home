@@ -35,7 +35,8 @@ import java.util.Map;
 
 import org.eclipse.californium.oscore.OSCoreCtx;
 import org.eclipse.californium.oscore.OSCoreCtxDB;
-import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -96,19 +97,27 @@ public class TestOscoreIntrospection {
     /**
      * This sets up everything for the tests including the server
      */
-    @Before
+    @BeforeClass
     public static void setUp() {
         ctxDB = new org.eclipse.californium.oscore.HashMapCtxDB();
     	
         srv = new RunTestServer();
         srv.run();
     }
+    
+    /**
+    * Cleanup before each individual test.
+    */
+    @Before
+    public void cleanOscoreCtxDB() {
+        ctxDB.purge();
+    }
 
     /**
      * Deletes the test DB after the tests
      * @throws Exception 
      */
-    @After
+    @AfterClass
     public static void tearDown() throws Exception {
         srv.stop();
     }
