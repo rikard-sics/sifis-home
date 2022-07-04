@@ -171,6 +171,18 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			<!-- Rikard: Works locally but not on Github <plugin> <groupId>org.apache.maven.plugins</groupId> 
+				<artifactId>maven-surefire-plugin</artifactId> <version>2.12.4</version> 
+				<configuration> <forkMode>always</forkMode> </configuration> </plugin> -->
+			<plugin> <!-- Rikard: Working settings for tests on Github -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<configuration>
+					<reuseForks>false</reuseForks>
+					<forkCount>1</forkCount>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
