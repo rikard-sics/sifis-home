@@ -44,7 +44,7 @@ fi
 cd ace
 echo "*** Building and running ACE JUnit tests ***"
 # mvn clean install | tee mvn_res
-mvn clean org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent install org.jacoco:jacoco-maven-plugin:0.8.6:report | tee mvn_res
+mvn --fail-at-end clean org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent install org.jacoco:jacoco-maven-plugin:0.8.6:report | tee mvn_res
 if grep 'BUILD FAILURE' mvn_res;then exit 1; fi;
 if grep 'BUILD SUCCESS' mvn_res;then exit 0; else exit 1; fi;
 rm mvn_res
