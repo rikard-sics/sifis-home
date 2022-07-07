@@ -1283,5 +1283,14 @@ import java.security.Security;
 		
 	}
 	
+	/**
+	 * Install EdDSA crypto provider
+	 */
+	public static void installCryptoProvider() {
+<span class="nc" id="L1290">		Provider EdDSA = new EdDSASecurityProvider();</span>
+		// Insert EdDSA security provider
+<span class="nc" id="L1292">		Security.insertProviderAt(EdDSA, 1);</span>
+<span class="nc" id="L1293">	}</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
