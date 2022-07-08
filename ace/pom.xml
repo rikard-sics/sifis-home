@@ -22,10 +22,6 @@
 			<url>https://repo.eclipse.org/content/repositories/californium/</url>
 		</repository>
 		<repository> <!-- Rikard: Added this -->
-			<id>public</id>
-			<url>https://maven.wso2.org/nexus/content/groups/public/</url>
-		</repository>
-		<repository> <!-- Rikard: Added this -->
 			<id>wso2-public</id>
 			<url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
 		</repository>
