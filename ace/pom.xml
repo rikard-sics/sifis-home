@@ -22,6 +22,14 @@
 			<url>https://repo.eclipse.org/content/repositories/californium/</url>
 		</repository>
 		<repository> <!-- Rikard: Added this -->
+			<id>public</id>
+			<url>https://maven.wso2.org/nexus/content/groups/public/</url>
+		</repository>
+		<repository> <!-- Rikard: Added this -->
+			<id>wso2-public</id>
+			<url>https://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+		</repository>
+		<repository> <!-- Rikard: Added this -->
 			<id>central</id>
 			<url>https://repo1.maven.org/maven2/</url>
 		</repository>
@@ -98,6 +106,11 @@
 			<groupId>com.github.peteroupc</groupId>
 			<artifactId>numbers</artifactId>
 			<version>1.4.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.balana</groupId>
+			<artifactId>org.wso2.balana</artifactId>
+			<version>1.1.14</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
