@@ -1,6 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 Cf-OSCORE,org.eclipse.californium.oscore.group,OneKeyDecoder,349,162,41,13,75,41,27,8,4,4
-Cf-OSCORE,org.eclipse.californium.oscore.group,SharedSecretCalculation,2631,493,8,12,197,99,8,16,4,10
+Cf-OSCORE,org.eclipse.californium.oscore.group,SharedSecretCalculation,44,493,0,12,10,99,2,16,2,10
 Cf-OSCORE,org.eclipse.californium.oscore.group,GroupSenderCtx,283,112,1,5,61,25,18,12,17,10
 Cf-OSCORE,org.eclipse.californium.oscore.group,GroupDynamicContextDerivation,7,94,1,5,3,21,2,4,1,2
 Cf-OSCORE,org.eclipse.californium.oscore.group,GroupCtx,314,517,27,29,60,124,28,27,8,16
