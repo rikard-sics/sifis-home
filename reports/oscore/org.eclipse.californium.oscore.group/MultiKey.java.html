@@ -14,24 +14,24 @@ public class MultiKey {
 	private byte[] rawKeyBytes;
 	private OneKey coseKey;
 
-<span class="nc" id="L17">	public MultiKey(byte[] rawKeyBytes) {</span>
-<span class="nc" id="L18">		this.rawKeyBytes = rawKeyBytes.clone();</span>
-<span class="nc" id="L19">		coseKey = convertToCoseKey(rawKeyBytes, null);</span>
+<span class="fc" id="L17">	public MultiKey(byte[] rawKeyBytes) {</span>
+<span class="fc" id="L18">		this.rawKeyBytes = rawKeyBytes.clone();</span>
+<span class="fc" id="L19">		coseKey = convertToCoseKey(rawKeyBytes, null);</span>
 
-<span class="nc" id="L21">	}</span>
+<span class="fc" id="L21">	}</span>
 
-<span class="nc" id="L23">	public MultiKey(byte[] rawKeyBytes, byte[] privateKeyOnly) {</span>
-<span class="nc" id="L24">		this.rawKeyBytes = rawKeyBytes.clone();</span>
-<span class="nc" id="L25">		coseKey = convertToCoseKey(rawKeyBytes, privateKeyOnly);</span>
+<span class="fc" id="L23">	public MultiKey(byte[] rawKeyBytes, byte[] privateKeyOnly) {</span>
+<span class="fc" id="L24">		this.rawKeyBytes = rawKeyBytes.clone();</span>
+<span class="fc" id="L25">		coseKey = convertToCoseKey(rawKeyBytes, privateKeyOnly);</span>
 
-<span class="nc" id="L27">	}</span>
+<span class="fc" id="L27">	}</span>
 
 	public byte[] getRawKey() {
-<span class="nc" id="L30">		return rawKeyBytes.clone();</span>
+<span class="fc" id="L30">		return rawKeyBytes.clone();</span>
 	}
 
 	public OneKey getCoseKey() {
-<span class="nc" id="L34">		return coseKey;</span>
+<span class="fc" id="L34">		return coseKey;</span>
 	}
 
 	private void addPrivate(byte[] privateKey) {
@@ -39,35 +39,35 @@ public class MultiKey {
 <span class="nc" id="L39">	}</span>
 
 	private OneKey convertToCoseKey(byte[] rawKeyBytes, byte[] privateKeyOnly) {
-<span class="nc" id="L42">		CBORObject cborKey = CBORObject.DecodeFromBytes(rawKeyBytes);</span>
-<span class="nc" id="L43">		OneKey keyy = null;</span>
+<span class="fc" id="L42">		CBORObject cborKey = CBORObject.DecodeFromBytes(rawKeyBytes);</span>
+<span class="fc" id="L43">		OneKey keyy = null;</span>
 
 		// CWT claims set
-<span class="nc bnc" id="L46" title="All 4 branches missed.">		if (cborKey.get(8) != null &amp;&amp; cborKey.get(8).get(1) != null) {</span>
+<span class="pc bpc" id="L46" title="2 of 4 branches missed.">		if (cborKey.get(8) != null &amp;&amp; cborKey.get(8).get(1) != null) {</span>
 
 			// System.out.println(&quot;*CWT claims set&quot;);
 
 			// System.out.println(cborKey.toString());
 
-<span class="nc" id="L52">			CBORObject test2 = cborKey.get(8);</span>
+<span class="fc" id="L52">			CBORObject test2 = cborKey.get(8);</span>
 
 			// System.out.println(test2.toString());
 
-<span class="nc" id="L56">			CBORObject test3 = test2.get(1);</span>
+<span class="fc" id="L56">			CBORObject test3 = test2.get(1);</span>
 			// Add private key
-<span class="nc bnc" id="L58" title="All 2 branches missed.">			if (privateKeyOnly != null) {</span>
-<span class="nc" id="L59">				test3.Add(CBORObject.FromObject(-4), CBORObject.FromObject(privateKeyOnly));</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">			if (privateKeyOnly != null) {</span>
+<span class="fc" id="L59">				test3.Add(CBORObject.FromObject(-4), CBORObject.FromObject(privateKeyOnly));</span>
 			}
 
 			// System.out.println(test3.toString());
 
 			try {
-<span class="nc" id="L65">				keyy = new OneKey(test3);</span>
+<span class="fc" id="L65">				keyy = new OneKey(test3);</span>
 <span class="nc" id="L66">			} catch (CoseException e) {</span>
 <span class="nc" id="L67">				System.err.println(&quot;Error converting CWT claims set key bytes to COSE Key&quot;);</span>
 <span class="nc" id="L68">				e.printStackTrace();</span>
-<span class="nc" id="L69">			}</span>
-<span class="nc" id="L70">		} else {</span>
+<span class="fc" id="L69">			}</span>
+<span class="fc" id="L70">		} else {</span>
 			// COSE Key
 
 			// System.out.println(&quot;*COSE Key&quot;);
@@ -116,7 +116,7 @@ public class MultiKey {
 
 		}
 
-<span class="nc" id="L119">		return keyy;</span>
+<span class="fc" id="L119">		return keyy;</span>
 	}
 
 	/**

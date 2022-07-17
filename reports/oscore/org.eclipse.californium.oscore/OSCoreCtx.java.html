@@ -296,13 +296,13 @@ public class OSCoreCtx {
 
 		//Set digest value depending on HKDF
 <span class="fc" id="L298">		String digest = null;</span>
-<span class="pc bpc" id="L299" title="2 of 3 branches missed.">		switch (this.kdf) {</span>
+<span class="pc bpc" id="L299" title="1 of 3 branches missed.">		switch (this.kdf) {</span>
 		case HKDF_HMAC_SHA_256:
 <span class="fc" id="L301">			digest = &quot;SHA256&quot;;</span>
 <span class="fc" id="L302">			break;</span>
 		case HKDF_HMAC_SHA_512:
-<span class="nc" id="L304">			digest = &quot;SHA512&quot;;</span>
-<span class="nc" id="L305">			break;</span>
+<span class="fc" id="L304">			digest = &quot;SHA512&quot;;</span>
+<span class="fc" id="L305">			break;</span>
 		case HKDF_HMAC_AES_128:
 		case HKDF_HMAC_AES_256:
 		default:
@@ -465,7 +465,7 @@ public class OSCoreCtx {
 	 * @return recipient replay window
 	 */
 	public int getRecipientReplayWindow() {
-<span class="nc" id="L468">		return recipient_replay_window;</span>
+<span class="fc" id="L468">		return recipient_replay_window;</span>
 	}
 
 	public byte[] getMasterSecret() {

@@ -1,13 +1,13 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-Cf-OSCORE,org.eclipse.californium.oscore.group,OneKeyDecoder,349,162,41,13,75,41,27,8,4,4
+Cf-OSCORE,org.eclipse.californium.oscore.group,OneKeyDecoder,83,162,15,13,29,41,13,8,3,4
 Cf-OSCORE,org.eclipse.californium.oscore.group,SharedSecretCalculation,44,493,0,12,10,99,2,16,2,10
-Cf-OSCORE,org.eclipse.californium.oscore.group,GroupSenderCtx,283,112,1,5,61,25,18,12,17,10
+Cf-OSCORE,org.eclipse.californium.oscore.group,GroupSenderCtx,276,119,0,6,59,27,16,14,16,11
 Cf-OSCORE,org.eclipse.californium.oscore.group,GroupDynamicContextDerivation,7,94,1,5,3,21,2,4,1,2
-Cf-OSCORE,org.eclipse.californium.oscore.group,GroupCtx,314,517,27,29,60,124,28,27,8,16
-Cf-OSCORE,org.eclipse.californium.oscore.group,GroupRecipientCtx,79,77,2,2,17,20,7,12,5,12
-Cf-OSCORE,org.eclipse.californium.oscore.group,MultiKey,258,0,26,0,60,0,21,0,8,0
+Cf-OSCORE,org.eclipse.californium.oscore.group,GroupCtx,168,663,24,32,33,151,22,33,3,21
+Cf-OSCORE,org.eclipse.californium.oscore.group,GroupRecipientCtx,76,80,1,3,16,21,6,13,5,12
+Cf-OSCORE,org.eclipse.californium.oscore.group,MultiKey,181,77,22,4,39,21,15,6,3,5
 Cf-OSCORE,org.eclipse.californium.oscore.group,OptionEncoder,3,60,0,4,1,14,1,7,1,5
-Cf-OSCORE,org.eclipse.californium.oscore.group,KeyRemapping,232,408,6,2,41,82,5,16,2,15
+Cf-OSCORE,org.eclipse.californium.oscore.group,KeyRemapping,3,408,0,2,1,82,1,16,1,15
 Cf-OSCORE,org.eclipse.californium.oscore.group,SharedSecretCalculation.Tuple,0,31,0,0,0,6,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.cose,ASN1.TagValue,18,0,0,0,8,0,2,0,2,0
 Cf-OSCORE,org.eclipse.californium.cose,AlgorithmID,10,421,2,4,1,53,2,7,0,6
@@ -46,7 +46,7 @@ Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.new Runnable
 Cf-OSCORE,org.eclipse.californium.oscore,ContextRederivation.PHASE,0,57,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSException,0,4,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCoapStackFactory,14,38,1,5,1,11,1,6,0,4
-Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCtx,189,899,23,58,50,207,28,74,9,52
+Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCtx,183,905,22,59,47,210,26,76,8,53
 Cf-OSCORE,org.eclipse.californium.oscore,ResponseEncryptor,30,107,7,17,5,29,8,7,1,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityLayer.new MessageObserverAdapter() {...},0,47,0,2,0,7,0,3,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreEndpointContextInfo,3,92,0,2,1,22,1,7,1,6

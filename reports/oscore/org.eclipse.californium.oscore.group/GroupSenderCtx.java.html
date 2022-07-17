@@ -53,8 +53,8 @@ public class GroupSenderCtx extends OSCoreCtx {
 
 <span class="fc" id="L54">		this.commonCtx = commonCtx;</span>
 <span class="fc" id="L55">		this.ownPrivateKey = ownPrivateKey;</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">		if (ownPublicKeyRaw != null) {</span>
-<span class="nc" id="L57">			this.ownPublicKeyRaw = ownPublicKeyRaw;</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">		if (ownPublicKeyRaw != null) {</span>
+<span class="fc" id="L57">			this.ownPublicKeyRaw = ownPublicKeyRaw;</span>
 		}
 
 <span class="fc" id="L60">		pairwiseSenderKeys = new HashMap&lt;ByteId, byte[]&gt;();</span>
@@ -149,7 +149,7 @@ public class GroupSenderCtx extends OSCoreCtx {
 	 * @return the length of the countersiganture
 	 */
 	public int getCountersignatureLen() {
-<span class="nc" id="L152">		return commonCtx.getCountersignatureLen();</span>
+<span class="fc" id="L152">		return commonCtx.getCountersignatureLen();</span>
 	}
 
 	/**
