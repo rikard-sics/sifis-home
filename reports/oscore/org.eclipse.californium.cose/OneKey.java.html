@@ -58,50 +58,50 @@ public class OneKey {
      * @param privKey - private key to use - may be null
      * @throws CoseException
      */
-<span class="nc" id="L61">    public OneKey(PublicKey pubKey, PrivateKey privKey) throws CoseException {</span>
-<span class="nc" id="L62">        keyMap = CBORObject.NewMap();</span>
+<span class="fc" id="L61">    public OneKey(PublicKey pubKey, PrivateKey privKey) throws CoseException {</span>
+<span class="fc" id="L62">        keyMap = CBORObject.NewMap();</span>
         
-<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (pubKey != null) {</span>
-<span class="nc" id="L65">            ArrayList&lt;ASN1.TagValue&gt; spki = ASN1.DecodeSubjectPublicKeyInfo(pubKey.getEncoded());</span>
-<span class="nc" id="L66">            ArrayList&lt;ASN1.TagValue&gt; alg = spki.get(0).list;</span>
-<span class="nc bnc" id="L67" title="All 2 branches missed.">            if (Arrays.equals(alg.get(0).value, ASN1.oid_ecPublicKey)) {</span>
-<span class="nc" id="L68">                byte[] oid = (byte[]) alg.get(1).value;</span>
-<span class="nc bnc" id="L69" title="All 2 branches missed.">                if (oid == null) throw new CoseException(&quot;Invalid SPKI structure&quot;);</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (pubKey != null) {</span>
+<span class="fc" id="L65">            ArrayList&lt;ASN1.TagValue&gt; spki = ASN1.DecodeSubjectPublicKeyInfo(pubKey.getEncoded());</span>
+<span class="fc" id="L66">            ArrayList&lt;ASN1.TagValue&gt; alg = spki.get(0).list;</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">            if (Arrays.equals(alg.get(0).value, ASN1.oid_ecPublicKey)) {</span>
+<span class="fc" id="L68">                byte[] oid = (byte[]) alg.get(1).value;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">                if (oid == null) throw new CoseException(&quot;Invalid SPKI structure&quot;);</span>
                 // EC2 Key
-<span class="nc" id="L71">                keyMap.Add(KeyKeys.KeyType.AsCBOR(), KeyKeys.KeyType_EC2);</span>
-<span class="nc bnc" id="L72" title="All 2 branches missed.">                if (Arrays.equals(oid, ASN1.Oid_secp256r1)) keyMap.Add(KeyKeys.EC2_Curve.AsCBOR(), KeyKeys.EC2_P256);</span>
+<span class="fc" id="L71">                keyMap.Add(KeyKeys.KeyType.AsCBOR(), KeyKeys.KeyType_EC2);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">                if (Arrays.equals(oid, ASN1.Oid_secp256r1)) keyMap.Add(KeyKeys.EC2_Curve.AsCBOR(), KeyKeys.EC2_P256);</span>
 <span class="nc bnc" id="L73" title="All 2 branches missed.">                else if (Arrays.equals(oid, ASN1.Oid_secp384r1)) keyMap.Add(KeyKeys.EC2_Curve.AsCBOR(), KeyKeys.EC2_P384);</span>
 <span class="nc bnc" id="L74" title="All 2 branches missed.">                else if (Arrays.equals(oid, ASN1.Oid_secp521r1)) keyMap.Add(KeyKeys.EC2_Curve.AsCBOR(), KeyKeys.EC2_P521);</span>
 <span class="nc" id="L75">                else throw new CoseException(&quot;Unsupported curve&quot;);</span>
 
-<span class="nc" id="L77">                byte[] keyData = (byte[]) spki.get(1).value;</span>
-<span class="nc bnc" id="L78" title="All 4 branches missed.">                if (keyData[1] == 2 || keyData[1] == 3) {</span>
+<span class="fc" id="L77">                byte[] keyData = (byte[]) spki.get(1).value;</span>
+<span class="pc bpc" id="L78" title="2 of 4 branches missed.">                if (keyData[1] == 2 || keyData[1] == 3) {</span>
 <span class="nc" id="L79">                    keyMap.Add(KeyKeys.EC2_X.AsCBOR(), Arrays.copyOfRange(keyData, 2, keyData.length));</span>
 <span class="nc bnc" id="L80" title="All 2 branches missed.">                    keyMap.Add(KeyKeys.EC2_Y.AsCBOR(), keyData[1] == 2 ? false : true);                </span>
                 }
-<span class="nc bnc" id="L82" title="All 2 branches missed.">                else if (keyData[1] == 4) {</span>
-<span class="nc" id="L83">                    int keyLength = (keyData.length - 2)/2;</span>
-<span class="nc" id="L84">                    keyMap.Add(KeyKeys.EC2_X.AsCBOR(), Arrays.copyOfRange(keyData, 2, 2+keyLength));</span>
-<span class="nc" id="L85">                    keyMap.Add(KeyKeys.EC2_Y.AsCBOR(), Arrays.copyOfRange(keyData, 2+keyLength, keyData.length));                    </span>
-<span class="nc" id="L86">                }</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">                else if (keyData[1] == 4) {</span>
+<span class="fc" id="L83">                    int keyLength = (keyData.length - 2)/2;</span>
+<span class="fc" id="L84">                    keyMap.Add(KeyKeys.EC2_X.AsCBOR(), Arrays.copyOfRange(keyData, 2, 2+keyLength));</span>
+<span class="fc" id="L85">                    keyMap.Add(KeyKeys.EC2_Y.AsCBOR(), Arrays.copyOfRange(keyData, 2+keyLength, keyData.length));                    </span>
+<span class="fc" id="L86">                }</span>
 <span class="nc" id="L87">                else throw new CoseException(&quot;Invalid key data&quot;);</span>
-<span class="nc" id="L88">            }</span>
+<span class="fc" id="L88">            }</span>
             else {
 <span class="nc" id="L90">                throw new CoseException(&quot;Unsupported Algorithm&quot;);</span>
             }
             
-<span class="nc" id="L93">            this.publicKey = pubKey;</span>
+<span class="fc" id="L93">            this.publicKey = pubKey;</span>
         }
         
-<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (privKey != null) {</span>
-<span class="nc" id="L97">            ArrayList&lt;ASN1.TagValue&gt; pkl = ASN1.DecodePKCS8(privKey.getEncoded());</span>
-<span class="nc bnc" id="L98" title="All 2 branches missed.">            if (pkl.get(0).tag != 2) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
-<span class="nc" id="L99">            ArrayList&lt;ASN1.TagValue&gt; alg = pkl.get(1).list;</span>
-<span class="nc bnc" id="L100" title="All 2 branches missed.">            if (Arrays.equals(alg.get(0).value, ASN1.oid_ecPublicKey)) {</span>
-<span class="nc" id="L101">                byte[] oid = (byte[]) alg.get(1).value;</span>
-<span class="nc bnc" id="L102" title="All 2 branches missed.">                if (oid == null) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (privKey != null) {</span>
+<span class="fc" id="L97">            ArrayList&lt;ASN1.TagValue&gt; pkl = ASN1.DecodePKCS8(privKey.getEncoded());</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">            if (pkl.get(0).tag != 2) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
+<span class="fc" id="L99">            ArrayList&lt;ASN1.TagValue&gt; alg = pkl.get(1).list;</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">            if (Arrays.equals(alg.get(0).value, ASN1.oid_ecPublicKey)) {</span>
+<span class="fc" id="L101">                byte[] oid = (byte[]) alg.get(1).value;</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                if (oid == null) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
                 // EC2 Key
-<span class="nc bnc" id="L104" title="All 2 branches missed.">                if (!keyMap.ContainsKey(KeyKeys.KeyType.AsCBOR())) {</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">                if (!keyMap.ContainsKey(KeyKeys.KeyType.AsCBOR())) {</span>
 <span class="nc" id="L105">                    keyMap.Add(KeyKeys.KeyType.AsCBOR(), KeyKeys.KeyType_EC2);</span>
 <span class="nc bnc" id="L106" title="All 2 branches missed.">                    if (Arrays.equals(oid, ASN1.Oid_secp256r1)) keyMap.Add(KeyKeys.EC2_Curve.AsCBOR(), KeyKeys.EC2_P256);</span>
 <span class="nc bnc" id="L107" title="All 2 branches missed.">                    else if (Arrays.equals(oid, ASN1.Oid_secp384r1)) keyMap.Add(KeyKeys.EC2_Curve.AsCBOR(), KeyKeys.EC2_P384);</span>
@@ -109,22 +109,22 @@ public class OneKey {
 <span class="nc" id="L109">                    else throw new CoseException(&quot;Unsupported curve&quot;);</span>
                 }
                 else {
-<span class="nc bnc" id="L112" title="All 2 branches missed.">                    if (!this.get(KeyKeys.KeyType).equals(KeyKeys.KeyType_EC2)) {</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                    if (!this.get(KeyKeys.KeyType).equals(KeyKeys.KeyType_EC2)) {</span>
 <span class="nc" id="L113">                        throw new CoseException(&quot;Public/Private key don't match&quot;);</span>
                     }
                 }
 
-<span class="nc bnc" id="L117" title="All 2 branches missed.">                if (pkl.get(2).list.get(1).tag != 4) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
-<span class="nc" id="L118">                byte[] keyData = (byte[]) (pkl.get(2).list).get(1).value;</span>
-<span class="nc" id="L119">                keyMap.Add(KeyKeys.EC2_D.AsCBOR(), keyData);</span>
-<span class="nc" id="L120">            }</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">                if (pkl.get(2).list.get(1).tag != 4) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
+<span class="fc" id="L118">                byte[] keyData = (byte[]) (pkl.get(2).list).get(1).value;</span>
+<span class="fc" id="L119">                keyMap.Add(KeyKeys.EC2_D.AsCBOR(), keyData);</span>
+<span class="fc" id="L120">            }</span>
             else {
 <span class="nc" id="L122">                throw new CoseException(&quot;Unsupported Algorithm&quot;);</span>
             }
             
-<span class="nc" id="L125">            this.privateKey = privKey;            </span>
+<span class="fc" id="L125">            this.privateKey = privKey;            </span>
         }
-<span class="nc" id="L127">    }</span>
+<span class="fc" id="L127">    }</span>
     
     public void add(KeyKeys keyValue, CBORObject value) {
 <span class="fc" id="L130">        keyMap.Add(keyValue.AsCBOR(), value);</span>
@@ -447,11 +447,11 @@ public class OneKey {
         String curveName;
         OneKey returnThis;
         
-<span class="nc bnc" id="L450" title="All 8 branches missed.">        switch (curve.AsInt32()) {</span>
+<span class="pc bpc" id="L450" title="7 of 8 branches missed.">        switch (curve.AsInt32()) {</span>
             case 1:
-<span class="nc" id="L452">                curveName = &quot;P-256&quot;;</span>
-<span class="nc" id="L453">                returnThis = generateECDHKey(curveName, curve);</span>
-<span class="nc" id="L454">                return returnThis;</span>
+<span class="fc" id="L452">                curveName = &quot;P-256&quot;;</span>
+<span class="fc" id="L453">                returnThis = generateECDHKey(curveName, curve);</span>
+<span class="fc" id="L454">                return returnThis;</span>
 
             case 2:
 <span class="nc" id="L457">                curveName = &quot;P-384&quot;;</span>
@@ -489,11 +489,11 @@ public class OneKey {
             
             int curveSize;
             
-<span class="nc bnc" id="L492" title="All 4 branches missed.">            switch (curveName) {</span>
+<span class="pc bpc" id="L492" title="3 of 4 branches missed.">            switch (curveName) {</span>
                 case &quot;P-256&quot;:
-<span class="nc" id="L494">                    curveName = &quot;secp256r1&quot;;</span>
-<span class="nc" id="L495">                    curveSize = 256;</span>
-<span class="nc" id="L496">                    break;</span>
+<span class="fc" id="L494">                    curveName = &quot;secp256r1&quot;;</span>
+<span class="fc" id="L495">                    curveSize = 256;</span>
+<span class="fc" id="L496">                    break;</span>
 
                 case &quot;P-384&quot;:
 <span class="nc" id="L499">                    curveName=&quot;secp384r1&quot;;</span>
@@ -509,29 +509,29 @@ public class OneKey {
 <span class="nc" id="L509">                    throw new CoseException(&quot;Internal Error&quot;);</span>
             }
 
-<span class="nc" id="L512">            ECGenParameterSpec paramSpec = new ECGenParameterSpec(curveName);</span>
-<span class="nc" id="L513">            KeyPairGenerator gen = KeyPairGenerator.getInstance(&quot;EC&quot;);</span>
-<span class="nc" id="L514">            gen.initialize(paramSpec);</span>
+<span class="fc" id="L512">            ECGenParameterSpec paramSpec = new ECGenParameterSpec(curveName);</span>
+<span class="fc" id="L513">            KeyPairGenerator gen = KeyPairGenerator.getInstance(&quot;EC&quot;);</span>
+<span class="fc" id="L514">            gen.initialize(paramSpec);</span>
             
-<span class="nc" id="L516">            KeyPair keyPair = gen.genKeyPair();</span>
+<span class="fc" id="L516">            KeyPair keyPair = gen.genKeyPair();</span>
             
-<span class="nc" id="L518">            ECPoint pubPoint = ((ECPublicKey) keyPair.getPublic()).getW();</span>
+<span class="fc" id="L518">            ECPoint pubPoint = ((ECPublicKey) keyPair.getPublic()).getW();</span>
                         
-<span class="nc" id="L520">            byte[] rgbX = ArrayFromBigNum(pubPoint.getAffineX(), curveSize);</span>
-<span class="nc" id="L521">            byte[] rgbY = ArrayFromBigNum(pubPoint.getAffineY(), curveSize);</span>
-<span class="nc" id="L522">            byte[] rgbD = ArrayFromBigNum(((ECPrivateKey) keyPair.getPrivate()).getS(), curveSize);</span>
+<span class="fc" id="L520">            byte[] rgbX = ArrayFromBigNum(pubPoint.getAffineX(), curveSize);</span>
+<span class="fc" id="L521">            byte[] rgbY = ArrayFromBigNum(pubPoint.getAffineY(), curveSize);</span>
+<span class="fc" id="L522">            byte[] rgbD = ArrayFromBigNum(((ECPrivateKey) keyPair.getPrivate()).getS(), curveSize);</span>
 
-<span class="nc" id="L524">            OneKey key = new OneKey();</span>
+<span class="fc" id="L524">            OneKey key = new OneKey();</span>
 
-<span class="nc" id="L526">            key.add(KeyKeys.KeyType, KeyKeys.KeyType_EC2);</span>
-<span class="nc" id="L527">            key.add(KeyKeys.EC2_Curve, curve);</span>
-<span class="nc" id="L528">            key.add(KeyKeys.EC2_X, CBORObject.FromObject(rgbX));</span>
-<span class="nc" id="L529">            key.add(KeyKeys.EC2_Y, CBORObject.FromObject(rgbY));</span>
-<span class="nc" id="L530">            key.add(KeyKeys.EC2_D, CBORObject.FromObject(rgbD));</span>
-<span class="nc" id="L531">            key.publicKey = keyPair.getPublic();</span>
-<span class="nc" id="L532">            key.privateKey = keyPair.getPrivate();</span>
+<span class="fc" id="L526">            key.add(KeyKeys.KeyType, KeyKeys.KeyType_EC2);</span>
+<span class="fc" id="L527">            key.add(KeyKeys.EC2_Curve, curve);</span>
+<span class="fc" id="L528">            key.add(KeyKeys.EC2_X, CBORObject.FromObject(rgbX));</span>
+<span class="fc" id="L529">            key.add(KeyKeys.EC2_Y, CBORObject.FromObject(rgbY));</span>
+<span class="fc" id="L530">            key.add(KeyKeys.EC2_D, CBORObject.FromObject(rgbD));</span>
+<span class="fc" id="L531">            key.publicKey = keyPair.getPublic();</span>
+<span class="fc" id="L532">            key.privateKey = keyPair.getPrivate();</span>
             
-<span class="nc" id="L534">            return key;</span>
+<span class="fc" id="L534">            return key;</span>
 
         }
 <span class="nc" id="L537">        catch (NoSuchAlgorithmException e) {</span>

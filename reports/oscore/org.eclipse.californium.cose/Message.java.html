@@ -161,7 +161,7 @@ import org.eclipse.californium.elements.util.StandardCharsets;
      * @throws CoseException Internal COSE Exception
      */
     public byte[] EncodeToBytes() throws CoseException {
-<span class="nc" id="L164">        return EncodeToCBORObject().EncodeToBytes();</span>
+<span class="fc" id="L164">        return EncodeToCBORObject().EncodeToBytes();</span>
     }
 
     /**
@@ -191,13 +191,13 @@ import org.eclipse.californium.elements.util.StandardCharsets;
     public CBORObject EncodeToCBORObject() throws CoseException {
         CBORObject obj;
         
-<span class="nc" id="L194">        obj = EncodeCBORObject();</span>
+<span class="fc" id="L194">        obj = EncodeCBORObject();</span>
         
-<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (emitTag) {</span>
-<span class="nc" id="L197">            obj = CBORObject.FromObjectAndTag(obj, messageTag.value);</span>
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">        if (emitTag) {</span>
+<span class="fc" id="L197">            obj = CBORObject.FromObjectAndTag(obj, messageTag.value);</span>
         }
         
-<span class="nc" id="L200">        return obj;</span>
+<span class="fc" id="L200">        return obj;</span>
     }
 
     /**

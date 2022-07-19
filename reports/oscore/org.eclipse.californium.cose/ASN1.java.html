@@ -24,15 +24,15 @@ import java.util.Arrays;
         public byte[] value;
         public ArrayList&lt;TagValue&gt; list;
         
-<span class="nc" id="L27">        public TagValue(int tagIn, byte[] valueIn) {</span>
-<span class="nc" id="L28">            tag = tagIn;</span>
-<span class="nc" id="L29">            value = valueIn;</span>
-<span class="nc" id="L30">        }</span>
+<span class="fc" id="L27">        public TagValue(int tagIn, byte[] valueIn) {</span>
+<span class="fc" id="L28">            tag = tagIn;</span>
+<span class="fc" id="L29">            value = valueIn;</span>
+<span class="fc" id="L30">        }</span>
         
-<span class="nc" id="L32">        public TagValue(int tagIn, ArrayList&lt;TagValue&gt; listIn) {</span>
-<span class="nc" id="L33">            tag = tagIn;</span>
-<span class="nc" id="L34">            list = listIn;</span>
-<span class="nc" id="L35">        }</span>
+<span class="fc" id="L32">        public TagValue(int tagIn, ArrayList&lt;TagValue&gt; listIn) {</span>
+<span class="fc" id="L33">            tag = tagIn;</span>
+<span class="fc" id="L34">            list = listIn;</span>
+<span class="fc" id="L35">        }</span>
     }
     
     // 1.2.840.10045.3.1.7
@@ -139,20 +139,20 @@ import java.util.Arrays;
      */
     public static ArrayList&lt;TagValue&gt; DecodeSubjectPublicKeyInfo(byte[] encoding) throws CoseException
     {
-<span class="nc" id="L142">        TagValue spki = DecodeCompound(0, encoding);</span>
-<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (spki.tag != 0x30) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
-<span class="nc" id="L144">        ArrayList&lt;TagValue&gt; tvl = spki.list;</span>
-<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (tvl.size() != 2) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
+<span class="fc" id="L142">        TagValue spki = DecodeCompound(0, encoding);</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if (spki.tag != 0x30) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
+<span class="fc" id="L144">        ArrayList&lt;TagValue&gt; tvl = spki.list;</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if (tvl.size() != 2) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
         
-<span class="nc bnc" id="L147" title="All 2 branches missed.">        if (tvl.get(0).tag != 0x30) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
-<span class="nc bnc" id="L148" title="All 4 branches missed.">        if (tvl.get(0).list.isEmpty() || tvl.get(0).list.size() &gt; 2) {</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (tvl.get(0).tag != 0x30) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
+<span class="pc bpc" id="L148" title="2 of 4 branches missed.">        if (tvl.get(0).list.isEmpty() || tvl.get(0).list.size() &gt; 2) {</span>
 <span class="nc" id="L149">            throw new CoseException(&quot;Invalid SPKI&quot;);</span>
         }
-<span class="nc bnc" id="L151" title="All 2 branches missed.">        if (tvl.get(0).list.get(0).tag != 6) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (tvl.get(0).list.get(0).tag != 6) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
         //  tvl.get(0).list.get(1).tag is an ANY so needs to be checked elsewhere
-<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (tvl.get(1).tag != 3) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">        if (tvl.get(1).tag != 3) throw new CoseException(&quot;Invalid SPKI&quot;);</span>
         
-<span class="nc" id="L155">        return tvl;</span>
+<span class="fc" id="L155">        return tvl;</span>
     }
     
     /**
@@ -174,41 +174,41 @@ import java.util.Arrays;
      */
     public static TagValue DecodeCompound(int offset, byte[] encoding) throws CoseException
     {
-<span class="nc" id="L177">        ArrayList&lt;TagValue&gt; result = new ArrayList&lt;TagValue&gt;();</span>
-<span class="nc" id="L178">        int retTag = encoding[offset];</span>
+<span class="fc" id="L177">        ArrayList&lt;TagValue&gt; result = new ArrayList&lt;TagValue&gt;();</span>
+<span class="fc" id="L178">        int retTag = encoding[offset];</span>
         
         //  We only decode objects which are compound objects.  That means that this bit must be set
         
-<span class="nc bnc" id="L182" title="All 2 branches missed.">        if ((encoding[offset] &amp; 0x20) != 0x20) throw new CoseException(&quot;Invalid structure&quot;);</span>
-<span class="nc" id="L183">        int[] l = DecodeLength(offset+1, encoding);</span>
-<span class="nc" id="L184">        int sequenceLength = l[1];</span>
-<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (offset + sequenceLength &gt; encoding.length) throw new CoseException(&quot;Invalid sequence&quot;);</span>
-<span class="nc" id="L186">        offset += l[0]+1;</span>
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">        if ((encoding[offset] &amp; 0x20) != 0x20) throw new CoseException(&quot;Invalid structure&quot;);</span>
+<span class="fc" id="L183">        int[] l = DecodeLength(offset+1, encoding);</span>
+<span class="fc" id="L184">        int sequenceLength = l[1];</span>
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">        if (offset + sequenceLength &gt; encoding.length) throw new CoseException(&quot;Invalid sequence&quot;);</span>
+<span class="fc" id="L186">        offset += l[0]+1;</span>
 
-<span class="nc bnc" id="L188" title="All 2 branches missed.">        while (sequenceLength &gt; 0) {</span>
-<span class="nc" id="L189">            int tag = encoding[offset];</span>
-<span class="nc" id="L190">            l = DecodeLength(offset+1, encoding);</span>
-<span class="nc bnc" id="L191" title="All 2 branches missed.">            if (l[1] &gt; sequenceLength) throw new CoseException(&quot;Invalid sequence&quot;);</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">        while (sequenceLength &gt; 0) {</span>
+<span class="fc" id="L189">            int tag = encoding[offset];</span>
+<span class="fc" id="L190">            l = DecodeLength(offset+1, encoding);</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">            if (l[1] &gt; sequenceLength) throw new CoseException(&quot;Invalid sequence&quot;);</span>
 
-<span class="nc bnc" id="L193" title="All 2 branches missed.">            if ((tag &amp; 0x20) != 0) {</span>
-<span class="nc" id="L194">                result.add(DecodeCompound(offset, encoding));</span>
-<span class="nc" id="L195">                offset += 1 + l[0] + l[1];</span>
-<span class="nc" id="L196">                sequenceLength -= 1 + l[0] + l[1];                    </span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">            if ((tag &amp; 0x20) != 0) {</span>
+<span class="fc" id="L194">                result.add(DecodeCompound(offset, encoding));</span>
+<span class="fc" id="L195">                offset += 1 + l[0] + l[1];</span>
+<span class="fc" id="L196">                sequenceLength -= 1 + l[0] + l[1];                    </span>
             }
             else {
                 // At some point we might want to fix this.
-<span class="nc bnc" id="L200" title="All 2 branches missed.">                if (tag == 6) {</span>
-<span class="nc" id="L201">                    result.add(new TagValue(tag, Arrays.copyOfRange(encoding, offset, offset+l[1]+l[0]+1)));                </span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">                if (tag == 6) {</span>
+<span class="fc" id="L201">                    result.add(new TagValue(tag, Arrays.copyOfRange(encoding, offset, offset+l[1]+l[0]+1)));                </span>
                 }
                 else {
-<span class="nc" id="L204">                    result.add(new TagValue(tag, Arrays.copyOfRange(encoding, offset+l[0]+1, offset+1+l[0]+l[1])));</span>
+<span class="fc" id="L204">                    result.add(new TagValue(tag, Arrays.copyOfRange(encoding, offset+l[0]+1, offset+1+l[0]+l[1])));</span>
                 }
-<span class="nc" id="L206">                offset += 1 + l[0] + l[1];</span>
-<span class="nc" id="L207">                sequenceLength -= 1 + l[0] + l[1];</span>
+<span class="fc" id="L206">                offset += 1 + l[0] + l[1];</span>
+<span class="fc" id="L207">                sequenceLength -= 1 + l[0] + l[1];</span>
             }
-<span class="nc" id="L209">        }</span>
+<span class="fc" id="L209">        }</span>
         
-<span class="nc" id="L211">        return new TagValue(retTag, result);</span>
+<span class="fc" id="L211">        return new TagValue(retTag, result);</span>
     }
     
     /**
@@ -259,62 +259,62 @@ import java.util.Arrays;
      */
     public static ArrayList&lt;TagValue&gt; DecodePKCS8(byte[] encodedData) throws CoseException 
     {
-<span class="nc" id="L262">        TagValue pkcs8 = DecodeCompound(0, encodedData);</span>
-<span class="nc bnc" id="L263" title="All 2 branches missed.">        if (pkcs8.tag != 0x30) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
-<span class="nc" id="L264">        ArrayList&lt;TagValue&gt; retValue = pkcs8.list;</span>
-<span class="nc bnc" id="L265" title="All 4 branches missed.">        if (retValue.size() != 3 &amp;&amp; retValue.size() != 4) {</span>
+<span class="fc" id="L262">        TagValue pkcs8 = DecodeCompound(0, encodedData);</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">        if (pkcs8.tag != 0x30) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
+<span class="fc" id="L264">        ArrayList&lt;TagValue&gt; retValue = pkcs8.list;</span>
+<span class="pc bpc" id="L265" title="3 of 4 branches missed.">        if (retValue.size() != 3 &amp;&amp; retValue.size() != 4) {</span>
 <span class="nc" id="L266">            throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
         }
 
         // Version number - we currently only support one version
-<span class="nc bnc" id="L270" title="All 4 branches missed.">        if (retValue.get(0).tag != 2 &amp;&amp; ((byte[]) retValue.get(0).value)[0] != 0) {</span>
+<span class="pc bpc" id="L270" title="3 of 4 branches missed.">        if (retValue.get(0).tag != 2 &amp;&amp; ((byte[]) retValue.get(0).value)[0] != 0) {</span>
 <span class="nc" id="L271">            throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
         }
 
         // Algorithm identifier
-<span class="nc bnc" id="L275" title="All 2 branches missed.">        if (retValue.get(1).tag != 0x30) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
-<span class="nc bnc" id="L276" title="All 4 branches missed.">        if (retValue.get(1).list.isEmpty() || retValue.get(1).list.size() &gt; 2) {</span>
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">        if (retValue.get(1).tag != 0x30) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
+<span class="pc bpc" id="L276" title="2 of 4 branches missed.">        if (retValue.get(1).list.isEmpty() || retValue.get(1).list.size() &gt; 2) {</span>
 <span class="nc" id="L277">            throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
         }
-<span class="nc bnc" id="L279" title="All 2 branches missed.">        if (retValue.get(1).list.get(0).tag != 6) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">        if (retValue.get(1).list.get(0).tag != 6) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
         //  Dont check the next item as it is an ANY
         
-<span class="nc bnc" id="L282" title="All 2 branches missed.">        if (retValue.get(2).tag != 4) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
+<span class="pc bpc" id="L282" title="1 of 2 branches missed.">        if (retValue.get(2).tag != 4) throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
         
         // This is attributes, but we are not going to check for correctness.
-<span class="nc bnc" id="L285" title="All 4 branches missed.">        if (retValue.size() == 4 &amp;&amp; retValue.get(3).tag != 0xa0) {</span>
+<span class="pc bpc" id="L285" title="3 of 4 branches missed.">        if (retValue.size() == 4 &amp;&amp; retValue.get(3).tag != 0xa0) {</span>
 <span class="nc" id="L286">            throw new CoseException(&quot;Invalid PKCS8 structure&quot;);</span>
         }
         
         //  Decode the contents of the octet string PrivateKey
         
-<span class="nc" id="L291">        byte[] pk = (byte[]) retValue.get(2).value;</span>
-<span class="nc" id="L292">        TagValue pkd = DecodeCompound(0, pk);</span>
-<span class="nc" id="L293">        ArrayList&lt;TagValue&gt; pkdl = pkd.list;</span>
-<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (pkd.tag != 0x30) throw new CoseException(&quot;Invalid ECPrivateKey&quot;);</span>
-<span class="nc bnc" id="L295" title="All 4 branches missed.">        if (pkdl.size() &lt; 2 || pkdl.size() &gt; 4) throw new CoseException(&quot;Invalid ECPrivateKey&quot;);</span>
+<span class="fc" id="L291">        byte[] pk = (byte[]) retValue.get(2).value;</span>
+<span class="fc" id="L292">        TagValue pkd = DecodeCompound(0, pk);</span>
+<span class="fc" id="L293">        ArrayList&lt;TagValue&gt; pkdl = pkd.list;</span>
+<span class="pc bpc" id="L294" title="1 of 2 branches missed.">        if (pkd.tag != 0x30) throw new CoseException(&quot;Invalid ECPrivateKey&quot;);</span>
+<span class="pc bpc" id="L295" title="2 of 4 branches missed.">        if (pkdl.size() &lt; 2 || pkdl.size() &gt; 4) throw new CoseException(&quot;Invalid ECPrivateKey&quot;);</span>
         
-<span class="nc bnc" id="L297" title="All 4 branches missed.">        if (pkdl.get(0).tag != 2 &amp;&amp; ((byte[]) retValue.get(0).value)[0] != 1) {</span>
+<span class="pc bpc" id="L297" title="3 of 4 branches missed.">        if (pkdl.get(0).tag != 2 &amp;&amp; ((byte[]) retValue.get(0).value)[0] != 1) {</span>
 <span class="nc" id="L298">            throw new CoseException(&quot;Invalid ECPrivateKey&quot;);</span>
         }
         
-<span class="nc bnc" id="L301" title="All 2 branches missed.">        if (pkdl.get(1).tag != 4) throw new CoseException(&quot;Invalid ECPrivateKey&quot;);</span>
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">        if (pkdl.get(1).tag != 4) throw new CoseException(&quot;Invalid ECPrivateKey&quot;);</span>
         
-<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (pkdl.size() &gt; 2) {</span>
-<span class="nc bnc" id="L304" title="All 2 branches missed.">            if ((pkdl.get(2).tag &amp; 0xff) != 0xA0) {</span>
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">        if (pkdl.size() &gt; 2) {</span>
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">            if ((pkdl.get(2).tag &amp; 0xff) != 0xA0) {</span>
 <span class="nc bnc" id="L305" title="All 4 branches missed.">                if (pkdl.size() != 3 || (pkdl.get(2).tag &amp; 0xff) != 0xa1) {</span>
 <span class="nc" id="L306">                    throw new CoseException(&quot;Invalid ECPrivateKey&quot;);</span>
                 }
             } else {
-<span class="nc bnc" id="L309" title="All 4 branches missed.">                if (pkdl.size() == 4 &amp;&amp; (pkdl.get(3).tag &amp; 0xff) != 0xa1) throw new CoseException(&quot;Invalid ECPrivateKey&quot;);                </span>
+<span class="pc bpc" id="L309" title="3 of 4 branches missed.">                if (pkdl.size() == 4 &amp;&amp; (pkdl.get(3).tag &amp; 0xff) != 0xa1) throw new CoseException(&quot;Invalid ECPrivateKey&quot;);                </span>
             }
         }
         
-<span class="nc" id="L313">        retValue.get(2).list = pkdl;</span>
-<span class="nc" id="L314">        retValue.get(2).value = null;</span>
-<span class="nc" id="L315">        retValue.get(2).tag = 0x30;</span>
+<span class="fc" id="L313">        retValue.get(2).list = pkdl;</span>
+<span class="fc" id="L314">        retValue.get(2).value = null;</span>
+<span class="fc" id="L315">        retValue.get(2).tag = 0x30;</span>
         
-<span class="nc" id="L317">        return retValue;</span>
+<span class="fc" id="L317">        return retValue;</span>
     }
     
     public static byte[] EncodeSignature(byte[] r, byte[] s) throws CoseException {
@@ -396,7 +396,7 @@ import java.util.Arrays;
         int length;
         int i;
         
-<span class="nc bnc" id="L399" title="All 2 branches missed.">        if ((data[offset] &amp; 0x80) == 0) return new int[]{1, data[offset]};</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">        if ((data[offset] &amp; 0x80) == 0) return new int[]{1, data[offset]};</span>
 <span class="nc bnc" id="L400" title="All 2 branches missed.">        if (data[offset] == 0x80) {</span>
 <span class="nc" id="L401">            throw new CoseException(&quot;Indefinite length encoding not supported&quot;);</span>
         }
