@@ -249,9 +249,9 @@ public class OneKey {
 <span class="pc bpc" id="L249" title="2 of 4 branches missed.">		if ((val == null) || (val.getType() != CBORType.Integer))</span>
 <span class="nc" id="L250">			throw new CoseException(&quot;Missing or incorrect key type field&quot;);</span>
         
-<span class="pc bpc" id="L252" title="1 of 2 branches missed.">        if (val.equals(KeyKeys.KeyType_Octet)) {</span>
-<span class="nc" id="L253">            val = OneKey.this.get(KeyKeys.Octet_K);</span>
-<span class="nc bnc" id="L254" title="All 4 branches missed.">            if ((val== null) || (val.getType() != CBORType.ByteString)) throw new CoseException(&quot;Malformed key structure&quot;);</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">        if (val.equals(KeyKeys.KeyType_Octet)) {</span>
+<span class="fc" id="L253">            val = OneKey.this.get(KeyKeys.Octet_K);</span>
+<span class="pc bpc" id="L254" title="2 of 4 branches missed.">            if ((val== null) || (val.getType() != CBORType.ByteString)) throw new CoseException(&quot;Malformed key structure&quot;);</span>
         }
 <span class="fc bfc" id="L256" title="All 2 branches covered.">        else if (val.equals(KeyKeys.KeyType_EC2)) {</span>
 <span class="fc" id="L257">            CheckECKey();</span>
