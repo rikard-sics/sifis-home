@@ -26,23 +26,24 @@ public class ChatClientEndpoint {
 	@OnOpen
 	public void onOpen(Session session) {
 		System.out.println("--- Connected " + session.getId());
-		try {
-			session.getBasicRemote().sendText("start");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		// try {
+		// session.getBasicRemote().sendText("start");
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
 	}
 
 	@OnMessage
 	public String onMessage(String message, Session session) {
 		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-		try {
+		// try {
 			System.out.println("--- Received " + message);
-			String userInput = bufferRead.readLine();
-			return userInput;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+			// String userInput = bufferRead.readLine();
+			// return userInput;
+		return null; // Sent as response to DHT
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
 	}
 
 	@OnClose
@@ -52,10 +53,11 @@ public class ChatClientEndpoint {
 	}
 
 	public static void main(String[] args) throws DeploymentException, IOException {
-		latch = new CountDownLatch(1);
+		latch = new CountDownLatch(1000);
 		ClientManager client = ClientManager.createClient();
 		try {
-			URI uri = new URI("wss://socketsbay.com/wss/v2/2/demo/");
+			// wss://socketsbay.com/wss/v2/2/demo/
+			URI uri = new URI("ws://localhost:3000/ws");
 			client.connectToServer(ChatClientEndpoint.class, uri);
 			latch.await();
 		} catch (DeploymentException | URISyntaxException | InterruptedException e) {
