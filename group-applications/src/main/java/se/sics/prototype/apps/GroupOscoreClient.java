@@ -16,9 +16,7 @@
  ******************************************************************************/
 package se.sics.prototype.apps;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URI;
@@ -131,6 +129,7 @@ public class GroupOscoreClient {
 
 	private static CountDownLatch latch;
 	private static CoapClient client;
+	private static String clientName;
 
 	/**
 	 * Initialize and start Group OSCORE client.
@@ -138,10 +137,12 @@ public class GroupOscoreClient {
 	 * @param derivedCtx the Group OSCORE context
 	 * @param multicastIP multicast IP to send to
 	 * @param useDht use input/output from/to DHT
+	 * @param setClientName name of this client (Client1 / Client2)
 	 * 
 	 * @throws Exception on failure
 	 */
-	public static void start(GroupCtx derivedCtx, InetAddress multicastIP, boolean useDht) throws Exception {
+	public static void start(GroupCtx derivedCtx, InetAddress multicastIP, String setClientName, boolean useDht)
+			throws Exception {
 		/**
 		 * URI to perform request against. Need to check for IPv6 to surround it
 		 * with []
@@ -152,6 +153,7 @@ public class GroupOscoreClient {
 		} else {
 			requestURI = "coap://" + multicastIP.getHostAddress() + ":" + destinationPort + requestResource;
 		}
+		clientName = setClientName;
 
 		// Install cryptographic providers
 		InstallCryptoProviders.installProvider();
@@ -351,24 +353,21 @@ public class GroupOscoreClient {
 
 	@OnMessage
 	public String onMessage(String message, Session session) {
-		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+		// BufferedReader bufferRead = new BufferedReader(new
+		// InputStreamReader(System.in));
 		// try {
 		System.out.println("--- Received " + message);
 
-		// TODO: Make sure client 1 sends only to group 1, and client 2 to group
-		// 2
-
 		// Device 1 filter
-		if (message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev1\"}}}")) {
+		if (clientName.equals("Client1")
+				&& message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev1\"}}}")) {
 			System.out.println("Filter matched message (device 1)!");
 
 			// Send group requests etc. save answers as string
 			String response = sendRequest("on");
 			System.out.println("Response from servers (pre): " + response);
-			// response = response.replace("\n", "").replace("\r\n",
-			// "").replace("\"", "").replace("\\", "")
-			// .replace(",", "").replace("=", "").replace("-", "").replace(".",
-			// "");
+			response = response.replace("\n", "").replace("\r\n", "").replace("\"", "").replace("\\", "")
+					.replace(",", "").replace("=", "").replace("-", "").replace(".", "");
 			System.out.println("Response from servers (post): " + response);
 
 			// TODO: Make response data proper JSON
@@ -377,16 +376,15 @@ public class GroupOscoreClient {
 		}
 
 		// Device 2 filter
-		else if (message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev2\"}}}")) {
+		else if (clientName.equals("Client2")
+				&& message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev2\"}}}")) {
 			System.out.println("Filter matched message (device 2)!");
 
 			// Send group requests etc. save answers as string
 			String response = sendRequest("on");
 			System.out.println("Response from servers (pre): " + response);
-			// response = response.replace("\n", "").replace("\r\n",
-			// "").replace("\"", "").replace("\\", "")
-			// .replace(",", "").replace("=", "").replace("-", "").replace(".",
-			// "");
+			response = response.replace("\n", "").replace("\r\n", "").replace("\"", "").replace("\\", "")
+					.replace(",", "").replace("=", "").replace("-", "").replace(".", "");
 			System.out.println("Response from servers (post): " + response);
 
 			// TODO: Make response data proper JSON

@@ -270,7 +270,7 @@ public class OscoreAsRsClient {
 		// derived context
 		try {
 			if (memberName.equals("Client1") || memberName.equals("Client2")) {
-				GroupOscoreClient.start(derivedCtx, multicastIP, useDht);
+				GroupOscoreClient.start(derivedCtx, multicastIP, memberName, useDht);
 			} else {
 				GroupOscoreServer.start(derivedCtx, multicastIP);
 			}
