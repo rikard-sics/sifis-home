@@ -16,12 +16,15 @@
  ******************************************************************************/
 package se.sics.prototype.apps;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
@@ -42,10 +45,20 @@ import org.eclipse.californium.oscore.InstallCryptoProviders;
 import org.eclipse.californium.oscore.OSCoreCoapStackFactory;
 import org.eclipse.californium.oscore.Utility;
 import org.eclipse.californium.oscore.group.GroupCtx;
+import org.glassfish.tyrus.client.ClientManager;
+
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 
 /**
  * Group OSCORE client application.
  */
+@ClientEndpoint
 public class GroupOscoreClient {
 
 	/**
@@ -116,15 +129,19 @@ public class GroupOscoreClient {
 	 */
 	private final static HashMapCtxDB db = new HashMapCtxDB();
 
+	private static CountDownLatch latch;
+	private static CoapClient client;
+
 	/**
 	 * Initialize and start Group OSCORE client.
 	 * 
 	 * @param derivedCtx the Group OSCORE context
 	 * @param multicastIP multicast IP to send to
+	 * @param useDht use input/output from/to DHT
 	 * 
 	 * @throws Exception on failure
 	 */
-	public static void start(GroupCtx derivedCtx, InetAddress multicastIP) throws Exception {
+	public static void start(GroupCtx derivedCtx, InetAddress multicastIP, boolean useDht) throws Exception {
 		/**
 		 * URI to perform request against. Need to check for IPv6 to surround it
 		 * with []
@@ -154,7 +171,7 @@ public class GroupOscoreClient {
 		Configuration config = Configuration.createWithFile(CONFIG_FILE, CONFIG_HEADER, DEFAULTS);
 
 		CoapEndpoint endpoint = new CoapEndpoint.Builder().setConfiguration(config).build();
-		CoapClient client = new CoapClient();
+		client = new CoapClient();
 
 		client.setEndpoint(endpoint);
 		client.setURI(requestURI);
@@ -180,6 +197,23 @@ public class GroupOscoreClient {
 		// int count = 10;
 		// String payload = requestPayload;
 
+		if (useDht) {
+			System.out.println("Using DHT");
+
+			latch = new CountDownLatch(1000);
+			ClientManager dhtClient = ClientManager.createClient();
+			try {
+				// wss://socketsbay.com/wss/v2/2/demo/
+				URI uri = new URI("ws://localhost:3000/ws");
+				dhtClient.connectToServer(GroupOscoreClient.class, uri);
+				latch.await();
+			} catch (DeploymentException | URISyntaxException | InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			return;
+		}
+
 		Scanner scanner = new Scanner(System.in);
 		String command = "";
 
@@ -191,44 +225,65 @@ public class GroupOscoreClient {
 			if (command.equals("q")) {
 				break;
 			}
-
-			Request multicastRequest = Request.newPost();
-			multicastRequest.setPayload(command);
-			multicastRequest.getOptions().setContentFormat(MediaTypeRegistry.TEXT_PLAIN);
-			multicastRequest.setType(Type.NON);
-			if (useOSCORE) {
-				multicastRequest.getOptions().setOscore(Bytes.EMPTY);
-			}
-
-			try {
-				String host = new URI(client.getURI()).getHost();
-				int port = new URI(client.getURI()).getPort();
-				System.out.println("Sending to: " + host + ":" + port);
-			} catch (URISyntaxException e) {
-				System.err.println("Failed to parse destination URI");
-				e.printStackTrace();
-			}
-			System.out.println("Sending from: " + client.getEndpoint().getAddress());
-			System.out.println(Utils.prettyPrint(multicastRequest));
-
-			// sends a multicast request
-			client.advanced(handler, multicastRequest);
-			while (handler.waitOn(HANDLER_TIMEOUT)) {
-				// Wait for responses
-			}
-
-			Thread.sleep(1000);
-			// count--;
-			// if(payload.equals("on")) {
-			// payload = "off";
-			// } else {
-			// payload = "on";
-			// }
-
+			sendRequest(command);
 		}
 
 		scanner.close();
 
+	}
+
+	/**
+	 * 
+	 * /** Method for building and sending Group OSCORE requests.
+	 * 
+	 * @param client to use for sending
+	 * @param payload of the Group OSCORE request
+	 * @return string with responses from servers
+	 */
+	private static String sendRequest(String payload) {
+		Request multicastRequest = Request.newPost();
+		multicastRequest.setPayload(payload);
+		multicastRequest.getOptions().setContentFormat(MediaTypeRegistry.TEXT_PLAIN);
+		multicastRequest.setType(Type.NON);
+		if (useOSCORE) {
+			multicastRequest.getOptions().setOscore(Bytes.EMPTY);
+		}
+
+		System.out.println("In sendrequest");
+
+		handler.clearResponses();
+		try {
+			String host = new URI(client.getURI()).getHost();
+			int port = new URI(client.getURI()).getPort();
+			System.out.println("Sending to: " + host + ":" + port);
+		} catch (URISyntaxException e) {
+			System.err.println("Failed to parse destination URI");
+			e.printStackTrace();
+		}
+		System.out.println("Sending from: " + client.getEndpoint().getAddress());
+		System.out.println(Utils.prettyPrint(multicastRequest));
+
+		// sends a multicast request
+		client.advanced(handler, multicastRequest);
+		while (handler.waitOn(HANDLER_TIMEOUT)) {
+			// Wait for responses
+		}
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return handler.getResponses();
+
+		// count--;
+		// if(payload.equals("on")) {
+		// payload = "off";
+		// } else {
+		// payload = "on";
+		// }
 	}
 
 	private static final MultiCoapHandler handler = new MultiCoapHandler();
@@ -236,6 +291,7 @@ public class GroupOscoreClient {
 	private static class MultiCoapHandler implements CoapHandler {
 
 		private boolean on;
+		private StringBuilder responseMessages = new StringBuilder();
 
 		public synchronized boolean waitOn(long timeout) {
 			on = false;
@@ -252,6 +308,14 @@ public class GroupOscoreClient {
 			notifyAll();
 		}
 
+		private synchronized String getResponses() {
+			return responseMessages.toString();
+		}
+
+		private synchronized void clearResponses() {
+			responseMessages.setLength(0);
+		}
+
 		/**
 		 * Handle and parse incoming responses.
 		 */
@@ -263,12 +327,84 @@ public class GroupOscoreClient {
 			System.out.println("Receiving from: " + response.advanced().getSourceContext().getPeerAddress());
 
 			System.out.println(Utils.prettyPrint(response));
+
+			responseMessages.append(Utils.prettyPrint(response));
 		}
 
 		@Override
 		public void onError() {
 			System.err.println("error");
 		}
+	}
+
+	// DHT related methods
+
+	@OnOpen
+	public void onOpen(Session session) {
+		System.out.println("--- Connected " + session.getId());
+		// try {
+		// session.getBasicRemote().sendText("start");
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+	}
+
+	@OnMessage
+	public String onMessage(String message, Session session) {
+		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+		// try {
+		System.out.println("--- Received " + message);
+
+		// TODO: Make sure client 1 sends only to group 1, and client 2 to group
+		// 2
+
+		// Device 1 filter
+		if (message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev1\"}}}")) {
+			System.out.println("Filter matched message (device 1)!");
+
+			// Send group requests etc. save answers as string
+			String response = sendRequest("on");
+			System.out.println("Response from servers (pre): " + response);
+			// response = response.replace("\n", "").replace("\r\n",
+			// "").replace("\"", "").replace("\\", "")
+			// .replace(",", "").replace("=", "").replace("-", "").replace(".",
+			// "");
+			System.out.println("Response from servers (post): " + response);
+
+			// TODO: Make response data proper JSON
+			// return null;
+			return ("{\"RequestPubMessage\":{\"value\":{\"message\":\"" + response + "\",\"topic\":\"output_dev1\"}}}");
+		}
+
+		// Device 2 filter
+		else if (message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev2\"}}}")) {
+			System.out.println("Filter matched message (device 2)!");
+
+			// Send group requests etc. save answers as string
+			String response = sendRequest("on");
+			System.out.println("Response from servers (pre): " + response);
+			// response = response.replace("\n", "").replace("\r\n",
+			// "").replace("\"", "").replace("\\", "")
+			// .replace(",", "").replace("=", "").replace("-", "").replace(".",
+			// "");
+			System.out.println("Response from servers (post): " + response);
+
+			// TODO: Make response data proper JSON
+			return ("{\"RequestPubMessage\":{\"value\":{\"message\":\"" + response + "\",\"topic\":\"output_dev2\"}}}");
+		}
+
+		// String userInput = bufferRead.readLine();
+		// return userInput;
+		return null; // Sent as response to DHT
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+	}
+
+	@OnClose
+	public void onClose(Session session, CloseReason closeReason) {
+		System.out.println("Session " + session.getId() + " closed because " + closeReason);
+		latch.countDown();
 	}
 
 }
