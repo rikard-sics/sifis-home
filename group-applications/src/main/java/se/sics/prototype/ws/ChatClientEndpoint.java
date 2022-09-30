@@ -37,9 +37,41 @@ public class ChatClientEndpoint {
 	public String onMessage(String message, Session session) {
 		BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
 		// try {
-			System.out.println("--- Received " + message);
-			// String userInput = bufferRead.readLine();
-			// return userInput;
+		System.out.println("--- Received " + message);
+
+		// Device 1 filter
+		if (message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev1\"}}}")) {
+			System.out.println("Filter matched message (device 1)!");
+
+			// Send group requests etc. save answers as string
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			// return null;
+			return ("{\"RequestPubMessage\":{\"value\":{\"message\":\"hi\",\"topic\":\"output_dev1\"}}}");
+		}
+
+		// Device 2 filter
+		else if (message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev2\"}}}")) {
+			System.out.println("Filter matched message (device 2)!");
+
+			// Send group requests etc. save answers as string
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			return ("{\"RequestPubMessage\":{\"value\":{\"message\":\"hi\",\"topic\":\"output_dev2\"}}}");
+		}
+
+		// String userInput = bufferRead.readLine();
+		// return userInput;
 		return null; // Sent as response to DHT
 		// } catch (IOException e) {
 		// throw new RuntimeException(e);
