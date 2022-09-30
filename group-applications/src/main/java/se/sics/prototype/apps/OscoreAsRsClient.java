@@ -145,6 +145,9 @@ public class OscoreAsRsClient {
 			e.printStackTrace();
 		}
 
+		// Usage of DHT for controlling the client
+		boolean useDht = false;
+
 		// Set member name, AS and GM to use from command line arguments
 		String memberName = "Client1";
 		for (int i = 0; i < args.length; i += 2) {
@@ -156,6 +159,8 @@ public class OscoreAsRsClient {
 			} else if (args[i].equals("-as")) {
 				AS_HOST = new URI(args[i + 1]).getHost();
 				AS_PORT = new URI(args[i + 1]).getPort();
+			} else if (args[i].equals("-dht")) {
+				useDht = true;
 			}
 		}
 
@@ -265,7 +270,7 @@ public class OscoreAsRsClient {
 		// derived context
 		try {
 			if (memberName.equals("Client1") || memberName.equals("Client2")) {
-				GroupOscoreClient.start(derivedCtx, multicastIP);
+				GroupOscoreClient.start(derivedCtx, multicastIP, useDht);
 			} else {
 				GroupOscoreServer.start(derivedCtx, multicastIP);
 			}
