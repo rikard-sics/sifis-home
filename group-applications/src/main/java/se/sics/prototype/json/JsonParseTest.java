@@ -1,14 +1,6 @@
 package se.sics.prototype.json;
 
-import java.net.URI;
-import java.util.Map;
-
-import javax.websocket.ContainerProvider;
-import javax.websocket.WebSocketContainer;
-
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import se.sics.prototype.json.incoming.JsonIn;
 import se.sics.prototype.json.outgoing.JsonOut;
 import se.sics.prototype.json.outgoing.OutValue;
@@ -27,8 +19,9 @@ public class JsonParseTest {
 		// Deserialize incoming
 
 		String test1 = "{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev1\"}}}";
-		String test2 = "{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev1\"}}";
-		String test3 = "{\"key\": \"value\"}";
+		// String test2 =
+		// "{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev1\"}}";
+		// String test3 = "{\"key\": \"value\"}";
 
 		Gson gson = new Gson();
 		JsonIn parsed = gson.fromJson(test1, JsonIn.class);
