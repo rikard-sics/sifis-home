@@ -45,6 +45,8 @@ import org.eclipse.californium.oscore.Utility;
 import org.eclipse.californium.oscore.group.GroupCtx;
 import org.glassfish.tyrus.client.ClientManager;
 
+import com.google.gson.Gson;
+
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.DeploymentException;
