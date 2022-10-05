@@ -409,7 +409,7 @@ public class AuthzInfo implements Endpoint, AutoCloseable {
 	            }
     		}
 <span class="fc" id="L411">    	    catch (Exception e) {</span>
-<span class="fc" id="L412">    	        LOGGER.info(&quot;No Recipient ID available to use&quot;);</span>
+<span class="fc" id="L412">    	        LOGGER.info(&quot;Invalid/missing OSCORE_Input_Material&quot;);</span>
 <span class="fc" id="L413">                CBORObject map = CBORObject.NewMap();</span>
 <span class="fc" id="L414">                map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
 <span class="fc" id="L415">                map.Add(Constants.ERROR_DESCRIPTION, </span>

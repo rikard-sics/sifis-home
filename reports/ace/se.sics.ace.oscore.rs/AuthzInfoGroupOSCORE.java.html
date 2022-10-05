@@ -312,8 +312,8 @@ public class AuthzInfoGroupOSCORE extends AuthzInfo {
     	                else
 <span class="fc" id="L313">    	                    signInfoEntry.Add(arrayElem);</span>
     	                
-    	                // 'pub_key_enc' element
-<span class="fc" id="L316">    	                signInfoEntry.Add(myGroup.getPubKeyEnc());</span>
+    	                // 'cred_fmt' element
+<span class="fc" id="L316">    	                signInfoEntry.Add(myGroup.getAuthCredFormat());</span>
 
 <span class="fc" id="L318">    	                signInfo.Add(signInfoEntry);</span>
     	            }
@@ -343,8 +343,8 @@ public class AuthzInfoGroupOSCORE extends AuthzInfo {
 				    	else
 <span class="fc" id="L344">				    		ecdhEntry.Add(arrayElem);</span>
 				    	
-				    	// 'pub_key_enc' element
-<span class="fc" id="L347">				    	ecdhEntry.Add(myGroup.getPubKeyEnc());</span>
+				    	// 'cred_fmt' element
+<span class="fc" id="L347">				    	ecdhEntry.Add(myGroup.getAuthCredFormat());</span>
 	
 <span class="fc" id="L349">					    ecdhInfo.Add(ecdhEntry);</span>
 		        	}

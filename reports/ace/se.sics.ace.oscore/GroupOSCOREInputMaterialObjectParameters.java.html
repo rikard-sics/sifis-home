@@ -50,9 +50,9 @@ package se.sics.ace.oscore;
 		/**
 		 *  'cs_key_enc' - Group OSCORE Public Key Encoding Value
 		 */
-		// Assume that &quot;pub_key_enc&quot; is registered with label 8 in the
+		// Assume that &quot;cred_fmt&quot; is registered with label 8 in the
 		// &quot;OSCORE Security Context Parameters&quot; Registry of draft-ietf-ace-oscore-profile
-		public static final short pub_key_enc = 8; // Major type 0 (unsigned integer) or 1 (negative integer)
+		public static final short cred_fmt = 8; // Major type 0 (unsigned integer) or 1 (negative integer)
 		
 		/**
 		 *  'sign_enc_alg' - Group OSCORE Signature Encryption Algorithm value 
@@ -91,7 +91,7 @@ package se.sics.ace.oscore;
 	     * The string values for the OSCORE Security Context Object parameter abbreviations (use for debugging)
 	     */
 <span class="nc" id="L93">	    public static final String[] CONTEXT_PARAMETER = {&quot;id&quot;, &quot;version&quot;, &quot;ms&quot;, &quot;hkdf&quot;, &quot;alg&quot;, &quot;salt&quot;, &quot;contextId&quot;,</span>
-	    		&quot;group_senderId, pub_key_enc&quot;, &quot;sign_enc_alg&quot;, &quot;sign_alg&quot;, &quot;sign_params&quot;, &quot;ecdh_alg&quot;, &quot;ecdh_params&quot;};
+	    		&quot;group_senderId, cred_fmt&quot;, &quot;sign_enc_alg&quot;, &quot;sign_alg&quot;, &quot;sign_params&quot;, &quot;ecdh_alg&quot;, &quot;ecdh_params&quot;};
 	 
  }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

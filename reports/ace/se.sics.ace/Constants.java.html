@@ -926,9 +926,9 @@ import org.eclipse.californium.cose.AlgorithmID;
 <span class="fc" id="L926">    public static final String[] GROUP_OSCORE_ROLES = {&quot;reserved&quot;, &quot;requester&quot;, &quot;responder&quot;, &quot;monitor&quot;, &quot;verifier&quot;};</span>
     
      /**
-      * Value for the label &quot;get_pub_keys&quot; in the Join Request message
+      * Value for the label &quot;get_creds&quot; in the Join Request message
       */
-     public static final short GET_PUB_KEYS = 101;
+     public static final short GET_CREDS = 101;
      
      /**
       * Value for the label &quot;client_cred&quot; in the Join Request message
@@ -951,9 +951,9 @@ import org.eclipse.californium.cose.AlgorithmID;
      public static final short KEY = 2;
      
      /**
-      * Value for the label &quot;pub_keys&quot; in the Join Response message
+      * Value for the label &quot;creds&quot; in the Join Response message
       */
-     public static final short PUB_KEYS = 3;
+     public static final short CREDS = 3;
      
      /**
       * Value for the label &quot;ace-groupcomm-profile&quot; in the Join Response message
@@ -971,9 +971,9 @@ import org.eclipse.californium.cose.AlgorithmID;
      public static final short ECDH_INFO = 204;
      
      /**
-      * Value for the label &quot;gm_dh_pub_keys&quot; in the Token POST request/response and in the error response to the Join Request
+      * Value for the label &quot;kdc_dh_creds&quot; in the Token POST request/response and in the error response to the Join Request
       */
-     public static final short GM_DH_PUB_KEYS = 205;
+     public static final short KDC_DH_CREDS = 205;
      
      /**
       * Value for the label &quot;kdcchallenge&quot; in the Token POST response
