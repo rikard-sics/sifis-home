@@ -21,6 +21,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 
@@ -54,6 +55,10 @@ import jakarta.websocket.OnClose;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
+import se.sics.prototype.json.incoming.JsonIn;
+import se.sics.prototype.json.outgoing.JsonOut;
+import se.sics.prototype.json.outgoing.OutValue;
+import se.sics.prototype.json.outgoing.RequestPubMessage;
 
 /**
  * Group OSCORE client application.
@@ -242,9 +247,9 @@ public class GroupOscoreClient {
 	 * 
 	 * @param client to use for sending
 	 * @param payload of the Group OSCORE request
-	 * @return string with responses from servers
+	 * @return list with responses from servers
 	 */
-	private static String sendRequest(String payload) {
+	private static ArrayList<CoapResponse> sendRequest(String payload) {
 		Request multicastRequest = Request.newPost();
 		multicastRequest.setPayload(payload);
 		multicastRequest.getOptions().setContentFormat(MediaTypeRegistry.TEXT_PLAIN);
@@ -295,7 +300,7 @@ public class GroupOscoreClient {
 	private static class MultiCoapHandler implements CoapHandler {
 
 		private boolean on;
-		private StringBuilder responseMessages = new StringBuilder();
+		private ArrayList<CoapResponse> responseMessages = new ArrayList<CoapResponse>();
 
 		public synchronized boolean waitOn(long timeout) {
 			on = false;
@@ -312,12 +317,12 @@ public class GroupOscoreClient {
 			notifyAll();
 		}
 
-		private synchronized String getResponses() {
-			return responseMessages.toString();
+		private synchronized ArrayList<CoapResponse> getResponses() {
+			return responseMessages;
 		}
 
 		private synchronized void clearResponses() {
-			responseMessages.setLength(0);
+			responseMessages.clear();
 		}
 
 		/**
@@ -332,7 +337,7 @@ public class GroupOscoreClient {
 
 			System.out.println(Utils.prettyPrint(response));
 
-			responseMessages.append(Utils.prettyPrint(response));
+			responseMessages.add(response);
 		}
 
 		@Override
@@ -360,37 +365,69 @@ public class GroupOscoreClient {
 		// try {
 		System.out.println("--- Received " + message);
 
+		// Parse incoming JSON string from DHT
+		Gson gson = new Gson();
+		JsonIn parsed = gson.fromJson(message, JsonIn.class);
+
+		String topicField = parsed.getVolatile().getValue().getTopic();
+		String messageField = parsed.getVolatile().getValue().getMessage();
+
 		// Device 1 filter
 		if (clientName.equals("Client1")
-				&& message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev1\"}}}")) {
+				&& topicField.equals("command_dev1")) {
 			System.out.println("Filter matched message (device 1)!");
 
-			// Send group requests etc. save answers as string
-			String response = sendRequest("on");
-			System.out.println("Response from servers (pre): " + response);
-			response = response.replace("\n", "").replace("\r\n", "").replace("\"", "").replace("\\", "")
-					.replace(",", "").replace("=", "").replace("-", "").replace(".", "");
-			System.out.println("Response from servers (post): " + response);
+			// Send group request and compile responses
+			ArrayList<CoapResponse> responsesList = sendRequest(messageField);
+			String responsesString = "";
+			for (int i = 0; i < responsesList.size(); i++) {
+				responsesString += responsesList.get(i).getResponseText() + " | ";
+			}
+			responsesString = responsesString.replace(".", "").replace(":", "");
+			System.out.println("Compiled string with responses: " + responsesString);
 
-			// TODO: Make response data proper JSON
-			// return null;
-			return ("{\"RequestPubMessage\":{\"value\":{\"message\":\"" + response + "\",\"topic\":\"output_dev1\"}}}");
+			// Build outgoing JSON to DHT
+			JsonOut outgoing = new JsonOut();
+			RequestPubMessage pubMsg = new RequestPubMessage();
+			OutValue outVal = new OutValue();
+			outVal.setTopic("output_dev1");
+			outVal.setMessage(responsesString); // Responses
+			pubMsg.setValue(outVal);
+			outgoing.setRequestPubMessage(pubMsg);
+			Gson gsonOut = new Gson();
+			String jsonOut = gsonOut.toJson(outgoing);
+
+			System.out.println("Outgoing JSON: " + jsonOut);
+			return (jsonOut);
 		}
 
 		// Device 2 filter
 		else if (clientName.equals("Client2")
-				&& message.equals("{\"Volatile\":{\"value\":{\"message\":\"hi\",\"topic\":\"command_dev2\"}}}")) {
+				&& topicField.equals("command_dev2")) {
 			System.out.println("Filter matched message (device 2)!");
 
-			// Send group requests etc. save answers as string
-			String response = sendRequest("on");
-			System.out.println("Response from servers (pre): " + response);
-			response = response.replace("\n", "").replace("\r\n", "").replace("\"", "").replace("\\", "")
-					.replace(",", "").replace("=", "").replace("-", "").replace(".", "");
-			System.out.println("Response from servers (post): " + response);
+			// Send group request and compile responses
+			ArrayList<CoapResponse> responsesList = sendRequest(messageField);
+			String responsesString = "";
+			for (int i = 0; i < responsesList.size(); i++) {
+				responsesString += responsesList.get(i).getResponseText() + " | ";
+			}
+			responsesString = responsesString.replace(".", "").replace(":", "");
+			System.out.println("Compiled string with responses: " + responsesString);
 
-			// TODO: Make response data proper JSON
-			return ("{\"RequestPubMessage\":{\"value\":{\"message\":\"" + response + "\",\"topic\":\"output_dev2\"}}}");
+			// Build outgoing JSON to DHT
+			JsonOut outgoing = new JsonOut();
+			RequestPubMessage pubMsg = new RequestPubMessage();
+			OutValue outVal = new OutValue();
+			outVal.setTopic("output_dev2");
+			outVal.setMessage(responsesString); // Responses
+			pubMsg.setValue(outVal);
+			outgoing.setRequestPubMessage(pubMsg);
+			Gson gsonOut = new Gson();
+			String jsonOut = gsonOut.toJson(outgoing);
+
+			System.out.println("Outgoing JSON: " + jsonOut);
+			return (jsonOut);
 		}
 
 		// String userInput = bufferRead.readLine();
