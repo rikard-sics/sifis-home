@@ -45,5 +45,18 @@ public class JsonParseTest {
 		String jsonOut = gsonOut.toJson(outgoing);
 
 		System.out.println("Outgoing JSON: " + jsonOut);
+		
+		// Outgoing JSON with more advanced structure
+		// ==[ CoAP Response ]============================================
+		// MID : 25037
+		// Token : C632CAE46D590E61
+		// Type : NON
+		// Status : 2.05 - CONTENT
+		// Options: {"Object-Security":0x290052, "Content-Format":"text/plain"}
+		// RTT : 174 ms
+		// Payload: 13 Bytes
+		// ---------------------------------------------------------------
+		// TEST. ID: 712
+
 	}
 }
