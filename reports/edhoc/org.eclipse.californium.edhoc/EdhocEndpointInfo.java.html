@@ -52,8 +52,8 @@ public class EdhocEndpointInfo {
 	// Connection Identifiers are stored as CBOR integers (if numeric) or as CBOR byte strings (if binary)
 	private Set&lt;CBORObject&gt; usedConnectionIds;
 	
-	// List of supported ciphersuites
-	private List&lt;Integer&gt; supportedCiphersuites;
+	// List of supported cipher suites
+	private List&lt;Integer&gt; supportedCipherSuites;
 	
 	// The database of OSCORE Security Contexts
 	private HashMapCtxDB db;
@@ -74,100 +74,103 @@ public class EdhocEndpointInfo {
 	private EDP edp;
 	
 	
-	public EdhocEndpointInfo(HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds, HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds,
-							 HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs, HashMap&lt;CBORObject, OneKey&gt; peerPublicKeys,
-							 HashMap&lt;CBORObject, CBORObject&gt; peerCredentials, HashMap&lt;CBORObject, EdhocSession&gt; edhocSessions,
-							 Set&lt;CBORObject&gt; usedConnectionIds, List&lt;Integer&gt; supportedCiphersuites, HashMapCtxDB db,
-							 String uri, int OSCORE_REPLAY_WINDOW, int MAX_UNFRAGMENTED_SIZE,
-<span class="nc" id="L82">							 HashMap&lt;String, AppProfile&gt; appProfiles, EDP edp) {</span>
+	public EdhocEndpointInfo(HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds,
+							 HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds,
+							 HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs,
+							 HashMap&lt;CBORObject, OneKey&gt; peerPublicKeys,
+							 HashMap&lt;CBORObject, CBORObject&gt; peerCredentials,
+							 HashMap&lt;CBORObject, EdhocSession&gt; edhocSessions,
+							 Set&lt;CBORObject&gt; usedConnectionIds, List&lt;Integer&gt; supportedCipherSuites,
+							 HashMapCtxDB db, String uri, int OSCORE_REPLAY_WINDOW, int MAX_UNFRAGMENTED_SIZE,
+<span class="nc" id="L85">							 HashMap&lt;String, AppProfile&gt; appProfiles, EDP edp) {</span>
 
 		
-<span class="nc" id="L85">		this.keyPairs = keyPairs;</span>
-<span class="nc" id="L86">		this.idCreds = idCreds;</span>
-<span class="nc" id="L87">		this.creds = creds;</span>
+<span class="nc" id="L88">		this.keyPairs = keyPairs;</span>
+<span class="nc" id="L89">		this.idCreds = idCreds;</span>
+<span class="nc" id="L90">		this.creds = creds;</span>
 						
-<span class="nc" id="L89">		this.peerPublicKeys = peerPublicKeys;</span>
-<span class="nc" id="L90">		this.peerCredentials = peerCredentials;</span>
-<span class="nc" id="L91">		this.edhocSessions = edhocSessions;</span>
-<span class="nc" id="L92">		this .usedConnectionIds = usedConnectionIds;</span>
-<span class="nc" id="L93">		this.supportedCiphersuites = supportedCiphersuites;</span>
-<span class="nc" id="L94">		this.db = db;</span>
-<span class="nc" id="L95">		this.uri = uri;</span>
-<span class="nc" id="L96">		this.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
-<span class="nc" id="L97">		this.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
-<span class="nc" id="L98">		this.appProfiles = appProfiles;</span>
-<span class="nc" id="L99">		this.edp = edp;</span>
+<span class="nc" id="L92">		this.peerPublicKeys = peerPublicKeys;</span>
+<span class="nc" id="L93">		this.peerCredentials = peerCredentials;</span>
+<span class="nc" id="L94">		this.edhocSessions = edhocSessions;</span>
+<span class="nc" id="L95">		this .usedConnectionIds = usedConnectionIds;</span>
+<span class="nc" id="L96">		this.supportedCipherSuites = supportedCipherSuites;</span>
+<span class="nc" id="L97">		this.db = db;</span>
+<span class="nc" id="L98">		this.uri = uri;</span>
+<span class="nc" id="L99">		this.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
+<span class="nc" id="L100">		this.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
+<span class="nc" id="L101">		this.appProfiles = appProfiles;</span>
+<span class="nc" id="L102">		this.edp = edp;</span>
 		
-<span class="nc" id="L101">	}</span>
+<span class="nc" id="L104">	}</span>
 	
 	//Return a reference to the set of EDHOC sessions
 	public HashMap&lt;CBORObject, EdhocSession&gt; getEdhocSessions() {
-<span class="nc" id="L105">		return edhocSessions;</span>
+<span class="nc" id="L108">		return edhocSessions;</span>
 	}
 
 	// Return a reference to the set of Application Profiles
 	public HashMap&lt;String, AppProfile&gt; getAppProfiles() {
-<span class="nc" id="L110">		return appProfiles;</span>
+<span class="nc" id="L113">		return appProfiles;</span>
 	}
 	
 	// Return a reference to the processor of External Authorization Data
 	public EDP getEdp() {
-<span class="nc" id="L115">		return edp;</span>
+<span class="nc" id="L118">		return edp;</span>
 	}
 	
 	// Return the identity key pair
 	public HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; getKeyPairs() {
-<span class="nc" id="L120">		return this.keyPairs;</span>
+<span class="nc" id="L123">		return this.keyPairs;</span>
 	}
 	
 	// Return the ID_CRED used by this peer
 	public HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; getIdCreds() {
-<span class="nc" id="L125">		return this.idCreds;</span>
+<span class="nc" id="L128">		return this.idCreds;</span>
 	}
 	
 	// Return the CRED used by this peer
 	public HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; getCreds() {
-<span class="nc" id="L130">		return this.creds;</span>
+<span class="nc" id="L133">		return this.creds;</span>
 	}
 	
 	// Return the set of peer public keys
 	public HashMap&lt;CBORObject, OneKey&gt; getPeerPublicKeys() {
-<span class="nc" id="L135">		return peerPublicKeys;</span>
+<span class="nc" id="L138">		return peerPublicKeys;</span>
 	}
 	
 	// Return the set of peer credentials
 	public HashMap&lt;CBORObject, CBORObject&gt; getPeerCredentials() {
-<span class="nc" id="L140">		return peerCredentials;</span>
+<span class="nc" id="L143">		return peerCredentials;</span>
 	}
 	
 	// Return the default OSCORE Replay Window size
 	public int getOscoreReplayWindow() {
-<span class="nc" id="L145">		return OSCORE_REPLAY_WINDOW;</span>
+<span class="nc" id="L148">		return OSCORE_REPLAY_WINDOW;</span>
 	}
 	
 	// Return the default MAX_UNFRAGMENTED_SIZE
 		public int getOscoreMaxUnfragmentedSize() {
-<span class="nc" id="L150">			return MAX_UNFRAGMENTED_SIZE;</span>
+<span class="nc" id="L153">			return MAX_UNFRAGMENTED_SIZE;</span>
 		}
 	
 	// Return the database of OSCORE Security Contexts
 	public HashMapCtxDB getOscoreDb() {
-<span class="nc" id="L155">		return db;</span>
+<span class="nc" id="L158">		return db;</span>
 	}
 	
 	// Return the lookup identifier for the Security Context
 	public String getUri() {
-<span class="nc" id="L160">		return uri;</span>
+<span class="nc" id="L163">		return uri;</span>
 	}
 	
-	// Return the set of supported ciphersuites
-	public List&lt;Integer&gt; getSupportedCiphersuites() {
-<span class="nc" id="L165">		return supportedCiphersuites;</span>
+	// Return the set of supported cipher suites
+	public List&lt;Integer&gt; getSupportedCipherSuites() {
+<span class="nc" id="L168">		return supportedCipherSuites;</span>
 	}
 	
 	// Return the set of used Connection Identifiers
 	public Set&lt;CBORObject&gt; getUsedConnectionIds() {
-<span class="nc" id="L170">		return usedConnectionIds;</span>
+<span class="nc" id="L173">		return usedConnectionIds;</span>
 	}
 	
 }

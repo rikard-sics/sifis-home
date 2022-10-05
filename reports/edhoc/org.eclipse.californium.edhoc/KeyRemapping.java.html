@@ -25,10 +25,10 @@ import org.eclipse.californium.cose.AlgorithmID;
 import org.eclipse.californium.cose.CoseException;
 import org.eclipse.californium.cose.KeyKeys;
 import org.eclipse.californium.cose.OneKey;
+import org.eclipse.californium.elements.util.StringUtil;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import net.i2p.crypto.eddsa.EdDSASecurityProvider;
-import net.i2p.crypto.eddsa.Utils;
 import net.i2p.crypto.eddsa.math.Field;
 import net.i2p.crypto.eddsa.math.FieldElement;
 import net.i2p.crypto.eddsa.math.bigint.BigIntegerFieldElement;
@@ -53,7 +53,7 @@ import net.i2p.crypto.eddsa.math.bigint.BigIntegerLittleEndianEncoding;
 
 	// Create the ed25519 field
 <span class="fc" id="L55">	private static Field ed25519Field = new Field(256, // b</span>
-<span class="fc" id="L56">			Utils.hexToBytes(&quot;edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f&quot;), // q(2^255-19)</span>
+<span class="fc" id="L56">			StringUtil.hex2ByteArray(&quot;edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f&quot;), // q(2^255-19)</span>
 			new BigIntegerLittleEndianEncoding());
 
 	// Value of sqrt(-486664) hardcoded (note that there are 2 roots)
@@ -120,8 +120,8 @@ import net.i2p.crypto.eddsa.math.bigint.BigIntegerLittleEndianEncoding;
 <span class="nc" id="L120">		System.out.println(&quot;y from COSE key: &quot; + y_fromKey);</span>
 <span class="nc" id="L121">		System.out.println(&quot;COSE key X param_: &quot; + myKey.get(KeyKeys.OKP_X));</span>
 
-<span class="nc" id="L123">		System.out.println(&quot;y from COSE key (alt) (bytes): &quot; + Utils.bytesToHex(y_fromKeyAlt.toByteArray()));</span>
-<span class="nc" id="L124">		System.out.println(&quot;y from COSE key (bytes): &quot; + Utils.bytesToHex(y_fromKey.toByteArray()));</span>
+<span class="nc" id="L123">		System.out.println(&quot;y from COSE key (alt) (bytes): &quot; + StringUtil.byteArray2HexString(y_fromKeyAlt.toByteArray()));</span>
+<span class="nc" id="L124">		System.out.println(&quot;y from COSE key (bytes): &quot; + StringUtil.byteArray2HexString(y_fromKey.toByteArray()));</span>
 
 		// Check that calculating y in both ways give the same result
 <span class="nc bnc" id="L127" title="All 2 branches missed.">		if (Arrays.equals(y_fromKeyAlt.toByteArray(), y_fromKey.toByteArray())) {</span>

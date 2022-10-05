@@ -53,19 +53,19 @@ import com.upokecenter.cbor.CBORType;
 		
 <span class="nc bnc" id="L54" title="All 2 branches missed.">		for (int i = 0; i &lt; ead.length; i++) {</span>
 			
-			// This element must be an integer indicating the EAD Label
+			// This element must be an integer different than 0, indicating the EAD Label
 <span class="nc bnc" id="L57" title="All 2 branches missed.">			if (i % 2 == 0) {</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">				if (ead[i].getType() != CBORType.Integer) {</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">				if (ead[i].getType() != CBORType.Integer || ead[i].AsInt32() == 0) {</span>
 <span class="nc" id="L59">					System.out.println(&quot;Malformed or invalid data item #&quot; + (i/2));</span>
 <span class="nc" id="L60">					i += 2; // skip the companion data element</span>
 <span class="nc" id="L61">					continue;</span>
 				}
-<span class="nc" id="L63">				System.out.println(&quot;The data item #&quot; + (i/2) + &quot; has EAD Label &quot; + ead[i].AsInt32());</span>
+<span class="nc" id="L63">				System.out.println(&quot;The EAD item #&quot; + (i/2) + &quot; has EAD Label &quot; + ead[i].AsInt32());</span>
 			}
 			
 			// This element includes the actual EAD Value according to the specified EAD Label
 <span class="nc bnc" id="L67" title="All 2 branches missed.">			if (i % 2 == 1) {</span>
-<span class="nc" id="L68">				Util.nicePrint(&quot;The data item #&quot; + (i/2) + &quot; has Value &quot;, ead[i].GetByteString());</span>
+<span class="nc" id="L68">				Util.nicePrint(&quot;The EAD item #&quot; + (i/2) + &quot; has Value &quot;, ead[i].GetByteString());</span>
 			}
 			
 		}

@@ -179,7 +179,7 @@ public static final int EDHOC_CIPHER_SUITE_3 = 3;
 
 
 /**
- * The EDHOC AEAD algorithms associated to each ciphersuite
+ * The EDHOC AEAD algorithms associated to each cipher suite
  */
 <span class="fc" id="L184">public static final String[] EDHOC_AEAD_ALGS = {</span>
 		&quot;AES_CCM_16_64_128&quot;,   // cipher suite 0
@@ -189,7 +189,7 @@ public static final int EDHOC_CIPHER_SUITE_3 = 3;
 };
 
 /**
- * The EDHOC hash algorithms associated to each ciphersuite
+ * The EDHOC hash algorithms associated to each cipher suite
  */
 <span class="fc" id="L194">public static final String[] EDHOC_HASH_ALGS = {</span>
 		&quot;SHA-256&quot;,  // cipher suite 0
@@ -199,7 +199,7 @@ public static final int EDHOC_CIPHER_SUITE_3 = 3;
 };
 
 /**
- * The EDHOC key exchange algorithm (ECDH curve) associated to each ciphersuite
+ * The EDHOC key exchange algorithm (ECDH curve) associated to each cipher suite
  */
 <span class="fc" id="L204">public static final String[] EDHOC_ECDH_CURVES = {</span>
 		&quot;X25519&quot;,  // cipher suite 0
@@ -209,7 +209,7 @@ public static final int EDHOC_CIPHER_SUITE_3 = 3;
 };
 
 /**
- * The EDHOC signature algorithms associated to each ciphersuite
+ * The EDHOC signature algorithms associated to each cipher suite
  */
 <span class="fc" id="L214">public static final String[] EDHOC_SIGN_ALGS = {</span>
 		&quot;EdDSA&quot;,  // cipher suite 0
@@ -219,10 +219,10 @@ public static final int EDHOC_CIPHER_SUITE_3 = 3;
 };
 
 /**
- * The EDHOC signature curve associated to each ciphersuite
+ * The EDHOC signature curve associated to each cipher suite
  * 
  * This is implicitly assumed from the pair EDHOC key exchange algorithm
- * (ECDH curve) and EDHOC signature algorithm for a certain ciphersuite 
+ * (ECDH curve) and EDHOC signature algorithm for a certain cipher suite 
  */
 <span class="fc" id="L227">public static final String[] EDHOC_SIGN_ALG_CURVES = {</span>
 		&quot;Ed25519&quot;,  // cipher suite 0
@@ -232,7 +232,7 @@ public static final int EDHOC_CIPHER_SUITE_3 = 3;
 };
 
 /**
- * The application AEAD algorithms associated to each ciphersuite
+ * The application AEAD algorithms associated to each cipher suite
  */
 <span class="fc" id="L237">public static final String[] APP_AEAD_ALGS = {</span>
 		&quot;AES_CCM_16_64_128&quot;,  // cipher suite 0
@@ -242,7 +242,7 @@ public static final int EDHOC_CIPHER_SUITE_3 = 3;
 };
 
 /**
- * The application hash algorithms associated to each ciphersuite
+ * The application hash algorithms associated to each cipher suite
  */
 <span class="fc" id="L247">public static final String[] APP_HASH_ALGS = {</span>
 		&quot;SHA-256&quot;,  // cipher suite 0
@@ -251,7 +251,6 @@ public static final int EDHOC_CIPHER_SUITE_3 = 3;
 		&quot;SHA-256&quot;,  // cipher suite 3
 };
 
-// v-14
 /**
  * Labels for EDHOC-KDF
  * 
@@ -269,7 +268,6 @@ public static final int KDF_LABEL_IV_4 = 9;
 public static final int KDF_LABEL_PRK_EXPORTER = 10;
 public static final int KDF_LABEL_PRK_OUT_KEY_UPDATE = 11;
 
-//v-14
 /**
  * Labels for EDHOC-Exporter
  * 
