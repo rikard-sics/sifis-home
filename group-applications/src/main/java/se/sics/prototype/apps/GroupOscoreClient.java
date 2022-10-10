@@ -381,9 +381,11 @@ public class GroupOscoreClient {
 			ArrayList<CoapResponse> responsesList = sendRequest(messageField);
 			String responsesString = "";
 			for (int i = 0; i < responsesList.size(); i++) {
-				responsesString += responsesList.get(i).getResponseText() + " | ";
+				responsesString += Utils.prettyPrint(responsesList.get(i)) + "\n|\n";
 			}
-			responsesString = responsesString.replace(".", "").replace(":", "");
+			responsesString = responsesString.replace(".", "").replace(":", " ").replace("=", "-").replace("[", "")
+					.replace("]", "").replace("/", "-").replace("\"", "").replace(".", "").replace("{", "")
+					.replace("}", "");
 			System.out.println("Compiled string with responses: " + responsesString);
 
 			// Build outgoing JSON to DHT
@@ -410,9 +412,11 @@ public class GroupOscoreClient {
 			ArrayList<CoapResponse> responsesList = sendRequest(messageField);
 			String responsesString = "";
 			for (int i = 0; i < responsesList.size(); i++) {
-				responsesString += responsesList.get(i).getResponseText() + " | ";
+				responsesString += Utils.prettyPrint(responsesList.get(i)) + "\n|\n";
 			}
-			responsesString = responsesString.replace(".", "").replace(":", "");
+			responsesString = responsesString.replace(".", "").replace(":", " ").replace("=", "-").replace("[", "")
+					.replace("]", "").replace("/", "-").replace("\"", "").replace(".", "").replace("{", "")
+					.replace("}", "");
 			System.out.println("Compiled string with responses: " + responsesString);
 
 			// Build outgoing JSON to DHT
