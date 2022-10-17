@@ -152,7 +152,7 @@ public class OscoreAsServer {
 		// COSEparams coseP = new COSEparams(MessageTag.MAC0,
 		// AlgorithmID.HMAC_SHA_256, AlgorithmID.Direct);
 		cose.add(coseP);
-		long expiration = 30000L;
+		long expiration = 800000000L;
 		db.addRS("rs2", profiles, scopes, auds, keyTypes, tokenTypes, cose, expiration, authPsk, tokenPsk, null);
 		String peerIdentity = buildOscoreIdentity(new byte[] { 0x01 }, idContext);
 		peerNamesToIdentities.put("rs2", peerIdentity);
