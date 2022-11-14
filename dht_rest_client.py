@@ -2,6 +2,7 @@ import requests
 
 api_url = "http://localhost:3000/"
 
+"""
 #insert Socket
 topic_name = "SIFIS::Sockets"
 topic_uuid = "FirstSocket"
@@ -49,6 +50,23 @@ print(response.json())
 volatile_message = {"message": "on", "topic": "command_ed" }
 response = requests.post(api_url + "pub", json=volatile_message)
 print(response.json())
+"""
 
+valTarget = input("Enter device to send to. 1. Group OSCORE Client #1. 2. Group OSCORE Client #2. 3. EDHOC Client.")
+valPayload = input("Enter payload to send: ")
 
+if valTarget in ['1']:
+    topic = "command_dev1"
+elif valTarget in ['2']:
+    topic = "command_dev2"
+elif valTarget in ['3']:
+    topic = "command_ed"
+else:
+    print("Invalid command")
+    quit();
+
+#publish volatile message
+volatile_message = {"message": valPayload, "topic": topic }
+response = requests.post(api_url + "pub", json=volatile_message)
+print(response.json())
 
