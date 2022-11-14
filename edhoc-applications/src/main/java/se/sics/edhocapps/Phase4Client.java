@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
@@ -49,9 +50,23 @@ import org.eclipse.californium.elements.util.StringUtil;
 import org.eclipse.californium.oscore.HashMapCtxDB;
 import org.eclipse.californium.oscore.OSCoreCtx;
 import org.eclipse.californium.oscore.OSException;
+import org.glassfish.tyrus.client.ClientManager;
 
+import com.google.gson.Gson;
 import com.upokecenter.cbor.CBORObject;
 import com.upokecenter.cbor.CBORType;
+
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import se.sics.edhocapps.json.incoming.JsonIn;
+import se.sics.edhocapps.json.outgoing.JsonOut;
+import se.sics.edhocapps.json.outgoing.OutValue;
+import se.sics.edhocapps.json.outgoing.RequestPubMessage;
 
 import org.eclipse.californium.cose.AlgorithmID;
 import org.eclipse.californium.cose.OneKey;
@@ -65,10 +80,16 @@ import org.eclipse.californium.edhoc.MessageProcessor;
 import org.eclipse.californium.edhoc.SharedSecretCalculation;
 import org.eclipse.californium.edhoc.Util;
 
+@ClientEndpoint
 public class Phase4Client {
 	
 	private static final boolean debugPrint = true;
 	
+	private static CountDownLatch latch;
+	static int HANDLER_TIMEOUT = 1000;
+	static CoapClient client;
+	static boolean useDht = false;
+
 	private static final File CONFIG_FILE = new File("Californium.properties");
 	private static final String CONFIG_HEADER = "Californium CoAP Properties file for Fileclient";
 	private static final int DEFAULT_MAX_RESOURCE_SIZE = 2 * 1024 * 1024; // 2 MB
@@ -181,6 +202,11 @@ public class Phase4Client {
 	 * 
 	 */
 	public static void main(String args[]) {
+
+		if (args.length > 0 && args[0].equals("-dht")) {
+			useDht = true;
+		}
+
 		String defaultUri = "coap://localhost/helloWorld";
 				
 		Configuration config = Configuration.createWithFile(CONFIG_FILE, CONFIG_HEADER, DEFAULTS);
@@ -305,7 +331,7 @@ public class Phase4Client {
 	private static void edhocExchangeAsInitiator(final String args[], final URI targetUri, Set<CBORObject> ownIdCreds,
 												 EdhocEndpointInfo edhocEndpointInfo, CBORObject[] ead1) {
 		
-		CoapClient client = new CoapClient(targetUri);
+		client = new CoapClient(targetUri);
 		
 		/*
 		// Simple sending of a GET request
@@ -956,44 +982,43 @@ public class Phase4Client {
 
         }
         
-		int HANDLER_TIMEOUT = 1000;
 		// Send follow-up requests
+		if (useDht) {
+			System.out.println("Using DHT");
+
+			latch = new CountDownLatch(1000);
+			ClientManager dhtClient = ClientManager.createClient();
+			try {
+				// wss://socketsbay.com/wss/v2/2/demo/
+				URI uri = new URI("ws://localhost:3000/ws");
+				try {
+					dhtClient.connectToServer(Phase4Client.class, uri);
+				} catch (IOException e) {
+					System.err.println("Failed to connect to DHT using WebSockets");
+					e.printStackTrace();
+				}
+				latch.await();
+			} catch (DeploymentException | URISyntaxException | InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			return;
+		}
+
 		Scanner scanner = new Scanner(System.in);
 		String command = "";
-		String payload = null;
+
 		while (!command.equals("q")) {
 
 			System.out.println("Enter command: ");
 			command = scanner.next();
 
-			if (command.equals("1")) {
-				payload = "1";
-			} else if (command.equals("0")) {
-				payload = "0";
-			} else if (command.equals("q")) {
+			if (command.equals("q")) {
 				break;
-			} else {
-				// System.out.println("Unknown command!");
 			}
-
-			Request r = new Request(Code.POST);
-			r.getOptions().setOscore(Bytes.EMPTY);
-			r.setPayload(payload);
-			r.setURI(lightURI);
-
-			// sends a multicast request
-			client.advanced(handler, r);
-			while (handler.waitOn(HANDLER_TIMEOUT)) {
-				// Wait for responses
-			}
-
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			sendRequest(command);
 		}
+
 		scanner.close();
 
 		client.shutdown();
@@ -1739,17 +1764,71 @@ public class Phase4Client {
 		
 	}
 
+	/**
+	 * 
+	 * /** Method for building and sending OSCORE requests.
+	 * 
+	 * @param client to use for sending
+	 * @param payload of the Group OSCORE request
+	 * @return list with responses from servers
+	 */
+	private static ArrayList<CoapResponse> sendRequest(String payload) {
+		Request r = new Request(Code.POST);
+		r.getOptions().setOscore(Bytes.EMPTY);
+		r.setPayload(payload);
+		r.setURI(lightURI);
+
+		System.out.println("In sendrequest");
+
+		handler.clearResponses();
+		try {
+			String host = new URI(client.getURI()).getHost();
+			int port = new URI(client.getURI()).getPort();
+			System.out.println("Sending to: " + host + ":" + port);
+		} catch (URISyntaxException e) {
+			System.err.println("Failed to parse destination URI");
+			e.printStackTrace();
+		}
+		// System.out.println("Sending from: " +
+		// client.getEndpoint().getAddress());
+		System.out.println(Utils.prettyPrint(r));
+
+		// sends a multicast request
+		client.advanced(handler, r);
+		while (handler.waitOn(HANDLER_TIMEOUT)) {
+			// Wait for responses
+		}
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return handler.getResponses();
+
+		// count--;
+		// if(payload.equals("on")) {
+		// payload = "off";
+		// } else {
+		// payload = "on";
+		// }
+	}
+
 	private static final MultiCoapHandler handler = new MultiCoapHandler();
 
 	private static class MultiCoapHandler implements CoapHandler {
 
 		private boolean on;
+		private ArrayList<CoapResponse> responseMessages = new ArrayList<CoapResponse>();
 
 		public synchronized boolean waitOn(long timeout) {
 			on = false;
 			try {
 				wait(timeout);
 			} catch (InterruptedException e) {
+				//
 			}
 			return on;
 		}
@@ -1759,6 +1838,14 @@ public class Phase4Client {
 			notifyAll();
 		}
 
+		private synchronized ArrayList<CoapResponse> getResponses() {
+			return responseMessages;
+		}
+
+		private synchronized void clearResponses() {
+			responseMessages.clear();
+		}
+
 		/**
 		 * Handle and parse incoming responses.
 		 */
@@ -1766,17 +1853,89 @@ public class Phase4Client {
 		public void onLoad(CoapResponse response) {
 			on();
 
-			// // System.out.println("Receiving to: "); //TODO
-			// System.out.println("Receiving from: " +
-			// response.advanced().getSourceContext().getPeerAddress());
+			// System.out.println("Receiving to: ");
+			System.out.println("Receiving from: " + response.advanced().getSourceContext().getPeerAddress());
 
 			System.out.println(Utils.prettyPrint(response));
+
+			responseMessages.add(response);
 		}
 
 		@Override
 		public void onError() {
-			// System.err.println("error");
+			System.err.println("error");
 		}
+	}
+
+	// DHT related methods
+
+	@OnOpen
+	public void onOpen(Session session) {
+		System.out.println("--- Connected " + session.getId());
+		// try {
+		// session.getBasicRemote().sendText("start");
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+	}
+
+	@OnMessage
+	public String onMessage(String message, Session session) {
+		// BufferedReader bufferRead = new BufferedReader(new
+		// InputStreamReader(System.in));
+		// try {
+		System.out.println("--- Received " + message);
+
+		// Parse incoming JSON string from DHT
+		Gson gson = new Gson();
+		JsonIn parsed = gson.fromJson(message, JsonIn.class);
+
+		String topicField = parsed.getVolatile().getValue().getTopic();
+		String messageField = parsed.getVolatile().getValue().getMessage();
+
+		// Device 1 filter
+		if (topicField.equals("command_ed")) {
+			System.out.println("Filter matched message (EDHOC client)!");
+
+			// Send group request and compile responses
+			ArrayList<CoapResponse> responsesList = sendRequest(messageField);
+			String responsesString = "";
+			for (int i = 0; i < responsesList.size(); i++) {
+				responsesString += Utils.prettyPrint(responsesList.get(i)) + "\n|\n";
+			}
+			responsesString = responsesString.replace(".", "").replace(":", " ").replace("=", "-").replace("[", "")
+					.replace("]", "").replace("/", "-").replace("\"", "").replace(".", "").replace("{", "")
+					.replace("}", "");
+			System.out.println("Compiled string with responses: " + responsesString);
+
+			// Build outgoing JSON to DHT
+			JsonOut outgoing = new JsonOut();
+			RequestPubMessage pubMsg = new RequestPubMessage();
+			OutValue outVal = new OutValue();
+			outVal.setTopic("output_ed");
+			outVal.setMessage(responsesString); // Responses
+			pubMsg.setValue(outVal);
+			outgoing.setRequestPubMessage(pubMsg);
+			Gson gsonOut = new Gson();
+			String jsonOut = gsonOut.toJson(outgoing);
+
+			System.out.println("Outgoing JSON: " + jsonOut);
+			return (jsonOut);
+		}
+
+
+		// String userInput = bufferRead.readLine();
+		// return userInput;
+		return null; // Sent as response to DHT
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+	}
+
+	@OnClose
+	public void onClose(Session session, CloseReason closeReason) {
+		System.out.println("Session " + session.getId() + " closed because " + closeReason);
+		latch.countDown();
 	}
 	
 }
