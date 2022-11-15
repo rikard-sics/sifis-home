@@ -203,7 +203,10 @@ public class Phase3Client {
 	 */
 	public static void main(String args[]) {
 
-		if (args.length > 0 && args[0].equals("-dht")) {
+		if (args.length > 0 && (args[0].toLowerCase().equals("-dht") || args[0].toLowerCase().equals("-usedht"))) {
+			useDht = true;
+		}
+		if (args.length > 1 && (args[1].toLowerCase().equals("-dht") || args[1].toLowerCase().equals("-usedht"))) {
 			useDht = true;
 		}
 
@@ -251,6 +254,7 @@ public class Phase3Client {
 		URI uri = null; // URI parameter of the request
 
 		// input URI from command line arguments
+		// TODO: Parse args in different way
 		try {
 			if (args.length == 0) {
 				uri = new URI(defaultUri);

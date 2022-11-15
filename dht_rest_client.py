@@ -52,7 +52,10 @@ response = requests.post(api_url + "pub", json=volatile_message)
 print(response.json())
 """
 
-valTarget = input("Enter device to send to. 1. Group OSCORE Client #1. 2. Group OSCORE Client #2. 3. EDHOC Client.")
+print("1. Group OSCORE Client #1");
+print("2. Group OSCORE Client #2");
+print("3. EDHOC Client");
+valTarget = input("Enter device to send to: ")
 valPayload = input("Enter payload to send: ")
 
 if valTarget in ['1']:

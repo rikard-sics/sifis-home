@@ -19,32 +19,61 @@
 package se.sics.edhocapps;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.californium.core.CoapClient;
+import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapResponse;
+import org.eclipse.californium.core.Utils;
 import org.eclipse.californium.core.coap.CoAP.Code;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.cose.AlgorithmID;
 import org.eclipse.californium.elements.exception.ConnectorException;
+import org.eclipse.californium.elements.util.Bytes;
 import org.eclipse.californium.oscore.HashMapCtxDB;
 import org.eclipse.californium.oscore.OSCoreCoapStackFactory;
 import org.eclipse.californium.oscore.OSCoreCtx;
 import org.eclipse.californium.oscore.OSException;
+import org.glassfish.tyrus.client.ClientManager;
+
+import com.google.gson.Gson;
+
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import se.sics.edhocapps.json.incoming.JsonIn;
+import se.sics.edhocapps.json.outgoing.JsonOut;
+import se.sics.edhocapps.json.outgoing.OutValue;
+import se.sics.edhocapps.json.outgoing.RequestPubMessage;
 
 /**
  * 
  * HelloWorldClient to display the basic OSCORE mechanics
  *
  */
+@ClientEndpoint
 public class Phase0Client {
 
+	private static CountDownLatch latch;
+	static int HANDLER_TIMEOUT = 1000;
+	static boolean useDht = false;
+	static CoapClient c;
+
 	// Set accordingly
-	private static String serverAddress = "192.168.0.99";
+	private static String serverAddress = "localhost";
 
 	private final static HashMapCtxDB db = new HashMapCtxDB();
 	private final static String uriLocal = "coap://" + serverAddress;
 	private final static String hello1 = "/light";
+	private static String lightURI = uriLocal + hello1;
 	private final static AlgorithmID alg = AlgorithmID.AES_CCM_16_64_128;
 	private final static AlgorithmID kdf = AlgorithmID.HKDF_HMAC_SHA_256;
 
@@ -67,51 +96,253 @@ public class Phase0Client {
 	 * @throws InterruptedException on OSCORE processing failure
 	 */
 	public static void main(String[] args) throws OSException, ConnectorException, IOException, InterruptedException {
+		if (args.length > 0 && (args[0].toLowerCase().equals("-dht") || args[0].toLowerCase().equals("-usedht"))) {
+			useDht = true;
+		}
+		if (args.length > 1 && (args[1].toLowerCase().equals("-dht") || args[1].toLowerCase().equals("-usedht"))) {
+			useDht = true;
+		}
+
+		// TODO: Parse args in different way
+		URI cmdUri = null;
+		if (args.length > 0) {
+			try {
+				cmdUri = new URI(args[0]);
+			} catch (URISyntaxException e) {
+				//
+			}
+		}
+		if (args.length > 1) {
+			try {
+				cmdUri = new URI(args[1]);
+			} catch (URISyntaxException e) {
+				//
+			}
+		}
+		if (cmdUri.getScheme() != null && cmdUri.getScheme().equals("coap")) {
+			lightURI = cmdUri.toString();
+		}
+
 		OSCoreCtx ctx = new OSCoreCtx(master_secret, true, alg, sid, rid, kdf, 32, master_salt, null,
 				MAX_UNFRAGMENTED_SIZE);
 		db.addContext(uriLocal, ctx);
 
 		OSCoreCoapStackFactory.useAsDefault(db);
-		CoapClient c = new CoapClient(uriLocal + hello1);
+		c = new CoapClient(lightURI);
 
-		// System.out.println("Phase 0 Client ready to send CoAP request" +
-		// "\n");
-		Support.printPause("Press enter to send CoAP message");
+		// Send requests
+		if (useDht) {
+			System.out.println("Using DHT");
 
-		Request r = new Request(Code.POST);
-		r.setPayload("1");
-		CoapResponse resp = c.advanced(r);
-		System.out.println(org.eclipse.californium.core.Utils.prettyPrint(resp));
+			latch = new CountDownLatch(1000);
+			ClientManager dhtClient = ClientManager.createClient();
+			try {
+				// wss://socketsbay.com/wss/v2/2/demo/
+				URI uri = new URI("ws://localhost:3000/ws");
+				try {
+					dhtClient.connectToServer(Phase0Client.class, uri);
+				} catch (IOException e) {
+					System.err.println("Failed to connect to DHT using WebSockets");
+					e.printStackTrace();
+				}
+				latch.await();
+			} catch (DeploymentException | URISyntaxException | InterruptedException e) {
+				e.printStackTrace();
+			}
+
+			return;
+		}
 
 		Scanner scanner = new Scanner(System.in);
 		String command = "";
-		String payload = null;
+
 		while (!command.equals("q")) {
 
 			System.out.println("Enter command: ");
 			command = scanner.next();
 
-			if (command.equals("1")) {
-				payload = "1";
-			} else if (command.equals("0")) {
-				payload = "0";
-			} else if (command.equals("q")) {
-				System.exit(0);
-			} else {
-				// System.out.println("Unknown command!");
+			if (command.equals("q")) {
+				break;
 			}
-
-			r = new Request(Code.POST);
-			r.setPayload(payload);
-			resp = c.advanced(r);
-			System.out.println(org.eclipse.californium.core.Utils.prettyPrint(resp));
-			// // System.out.println("RTT: " +
-			// resp.advanced().getTransmissionRttNanos() + " nanoseconds");
-
-			Thread.sleep(1000);
+			sendRequest(command);
 		}
+
 		scanner.close();
 
 		c.shutdown();
 	}
+
+	/**
+	 * 
+	 * /** Method for building and sending OSCORE requests.
+	 * 
+	 * @param client to use for sending
+	 * @param payload of the Group OSCORE request
+	 * @return list with responses from servers
+	 */
+	private static ArrayList<CoapResponse> sendRequest(String payload) {
+		Request r = new Request(Code.POST);
+		r.getOptions().setOscore(Bytes.EMPTY);
+		r.setPayload(payload);
+		r.setURI(lightURI);
+
+		System.out.println("In sendrequest");
+
+		handler.clearResponses();
+		try {
+			String host = new URI(c.getURI()).getHost();
+			int port = new URI(c.getURI()).getPort();
+			System.out.println("Sending to: " + host + ":" + port);
+		} catch (URISyntaxException e) {
+			System.err.println("Failed to parse destination URI");
+			e.printStackTrace();
+		}
+		// System.out.println("Sending from: " +
+		// client.getEndpoint().getAddress());
+		System.out.println(Utils.prettyPrint(r));
+
+		// sends a multicast request
+		c.advanced(handler, r);
+		while (handler.waitOn(HANDLER_TIMEOUT)) {
+			// Wait for responses
+		}
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return handler.getResponses();
+
+		// count--;
+		// if(payload.equals("on")) {
+		// payload = "off";
+		// } else {
+		// payload = "on";
+		// }
+	}
+
+	private static final MultiCoapHandler handler = new MultiCoapHandler();
+
+	private static class MultiCoapHandler implements CoapHandler {
+
+		private boolean on;
+		private ArrayList<CoapResponse> responseMessages = new ArrayList<CoapResponse>();
+
+		public synchronized boolean waitOn(long timeout) {
+			on = false;
+			try {
+				wait(timeout);
+			} catch (InterruptedException e) {
+				//
+			}
+			return on;
+		}
+
+		private synchronized void on() {
+			on = true;
+			notifyAll();
+		}
+
+		private synchronized ArrayList<CoapResponse> getResponses() {
+			return responseMessages;
+		}
+
+		private synchronized void clearResponses() {
+			responseMessages.clear();
+		}
+
+		/**
+		 * Handle and parse incoming responses.
+		 */
+		@Override
+		public void onLoad(CoapResponse response) {
+			on();
+
+			// System.out.println("Receiving to: ");
+			System.out.println("Receiving from: " + response.advanced().getSourceContext().getPeerAddress());
+
+			System.out.println(Utils.prettyPrint(response));
+
+			responseMessages.add(response);
+		}
+
+		@Override
+		public void onError() {
+			System.err.println("error");
+		}
+	}
+
+	// DHT related methods
+
+	@OnOpen
+	public void onOpen(Session session) {
+		System.out.println("--- Connected " + session.getId());
+		// try {
+		// session.getBasicRemote().sendText("start");
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+	}
+
+	@OnMessage
+	public String onMessage(String message, Session session) {
+		// BufferedReader bufferRead = new BufferedReader(new
+		// InputStreamReader(System.in));
+		// try {
+		System.out.println("--- Received " + message);
+
+		// Parse incoming JSON string from DHT
+		Gson gson = new Gson();
+		JsonIn parsed = gson.fromJson(message, JsonIn.class);
+
+		String topicField = parsed.getVolatile().getValue().getTopic();
+		String messageField = parsed.getVolatile().getValue().getMessage();
+
+		// Device 1 filter
+		if (topicField.equals("command_ed")) {
+			System.out.println("Filter matched message (EDHOC client)!");
+
+			// Send group request and compile responses
+			ArrayList<CoapResponse> responsesList = sendRequest(messageField);
+			String responsesString = "";
+			for (int i = 0; i < responsesList.size(); i++) {
+				responsesString += Utils.prettyPrint(responsesList.get(i)) + "\n|\n";
+			}
+			responsesString = responsesString.replace(".", "").replace(":", " ").replace("=", "-").replace("[", "")
+					.replace("]", "").replace("/", "-").replace("\"", "").replace(".", "").replace("{", "")
+					.replace("}", "");
+			System.out.println("Compiled string with responses: " + responsesString);
+
+			// Build outgoing JSON to DHT
+			JsonOut outgoing = new JsonOut();
+			RequestPubMessage pubMsg = new RequestPubMessage();
+			OutValue outVal = new OutValue();
+			outVal.setTopic("output_ed");
+			outVal.setMessage(responsesString); // Responses
+			pubMsg.setValue(outVal);
+			outgoing.setRequestPubMessage(pubMsg);
+			Gson gsonOut = new Gson();
+			String jsonOut = gsonOut.toJson(outgoing);
+
+			System.out.println("Outgoing JSON: " + jsonOut);
+			return (jsonOut);
+		}
+
+		// String userInput = bufferRead.readLine();
+		// return userInput;
+		return null; // Sent as response to DHT
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+	}
+
+	@OnClose
+	public void onClose(Session session, CloseReason closeReason) {
+		System.out.println("Session " + session.getId() + " closed because " + closeReason);
+		latch.countDown();
+	}
+
 }

@@ -159,7 +159,7 @@ public class OscoreAsRsClient {
 			} else if (args[i].equals("-as")) {
 				AS_HOST = new URI(args[i + 1]).getHost();
 				AS_PORT = new URI(args[i + 1]).getPort();
-			} else if (args[i].equals("-dht")) {
+			} else if (args[i].toLowerCase().equals("-dht") || args[i].toLowerCase().equals("-usedht")) {
 				useDht = true;
 			}
 		}
