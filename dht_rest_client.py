@@ -52,6 +52,11 @@ response = requests.post(api_url + "pub", json=volatile_message)
 print(response.json())
 """
 
+# To install script requirements run:
+# pip install -r python_requirements.txt
+# Codebase for DHT and original example script:
+# https://github.com/domo-iot/sifis-dht-test
+
 print("1. Group OSCORE Client #1");
 print("2. Group OSCORE Client #2");
 print("3. EDHOC Client");
