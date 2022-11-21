@@ -30,7 +30,7 @@ ACE library,se.sics.ace.examples,KissTime,0,8,0,0,0,2,0,2,0,2
 ACE library,se.sics.ace.examples,XacmlPDP.new FilenameFilter() {...},11,0,0,0,2,0,2,0,2,0
 ACE library,se.sics.ace.examples,KissValidator,72,158,15,19,19,31,13,11,2,5
 ACE library,se.sics.ace.client,GetToken,197,22,37,3,49,7,24,1,4,1
-ACE library,se.sics.ace.rs,TokenRepository,642,1826,105,199,150,426,92,89,3,26
+ACE library,se.sics.ace.rs,TokenRepository,661,1826,107,199,154,426,93,89,3,26
 ACE library,se.sics.ace.rs,AuthzInfo,385,957,33,79,89,230,31,36,0,10
 ACE library,se.sics.ace.rs,CnonceHandler,98,263,12,18,25,66,9,13,1,6
 ACE library,se.sics.ace.rs,IntrospectionException,10,0,0,0,4,0,2,0,2,0
