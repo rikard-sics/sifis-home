@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.californium.cose.AlgorithmID;
 import org.eclipse.californium.cose.KeyKeys;
@@ -40,20 +41,20 @@ public class EdhocSession {
     // The outer map has label SIGNATURE_KEY or ECDH_KEY for distinguishing the two key usages. 
     
     // The asymmetric key pairs of this peer (one per supported curve)
-<span class="fc" id="L43">	private HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs = new HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt;();</span>
+<span class="fc" id="L44">	private HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs = new HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt;();</span>
     
     // The identifiers of the authentication credentials of this peer
-<span class="fc" id="L46">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
+<span class="fc" id="L47">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
     
     // The authentication credentials of this peer (one per supported curve)
-<span class="fc" id="L49">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
-	
-	// The processor to use for External Authorization Data.
+<span class="fc" id="L50">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
+
+	// The side processor to use with this session
 	//
 	// It is required to be also in the EDHOC session, to be accessible
 	// also by the EDHOC layer, when receiving an EDHOC+OSCORE request
 	// targeting a different resource than an EDHOC resource. 
-	private EDP edp;
+	private SideProcessor sideProcessor;
 	
 	// The database of OSCORE Security Contexts.
 	// It can be null, if the EDHOC session has occurred
@@ -73,120 +74,122 @@ public class EdhocSession {
 	private OneKey ephemeralKey;
 	
 	private List&lt;Integer&gt; supportedCipherSuites;
+	private Set&lt;Integer&gt; supportedEADs;
 	private AppProfile appProfile;
+	private int trustModel;
 	
 	private byte[] peerConnectionId;
-<span class="fc" id="L79">	private CBORObject peerIdCred = null;</span>
+<span class="fc" id="L82">	private CBORObject peerIdCred = null;</span>
+<span class="fc" id="L83">	private byte[] peerCred = null; // This is the serialization of a CBOR object</span>
 	
-	// v-16
-<span class="fc" id="L82">	private byte[] peerCred = null; // This is the serialization of a CBOR object</span>
-	
-<span class="fc" id="L84">	private OneKey peerLongTermPublicKey = null;</span>
-<span class="fc" id="L85">	private OneKey peerEphemeralPublicKey = null;</span>
-<span class="fc" id="L86">	private List&lt;Integer&gt; peerSupportedCipherSuites = null;</span>
+<span class="fc" id="L85">	private OneKey peerLongTermPublicKey = null;</span>
+<span class="fc" id="L86">	private OneKey peerEphemeralPublicKey = null;</span>
+<span class="fc" id="L87">	private List&lt;Integer&gt; peerSupportedCipherSuites = null;</span>
 	
 	// Stored hash of EDHOC Message 1
-<span class="fc" id="L89">	private byte[] hashMessage1 = null;</span>
+<span class="fc" id="L90">	private byte[] hashMessage1 = null;</span>
 	
 	// Stored PLAINTEXT_2, as serialized CBOR sequence
-<span class="fc" id="L92">	private byte[] plaintext2 = null;</span>
+<span class="fc" id="L93">	private byte[] plaintext2 = null;</span>
 	
 	// Inner Key-Derivation Keys
-<span class="fc" id="L95">	private byte[] prk_2e = null;</span>
-<span class="fc" id="L96">	private byte[] prk_3e2m = null;</span>
-<span class="fc" id="L97">	private byte[] prk_4e3m = null;</span>
+<span class="fc" id="L96">	private byte[] prk_2e = null;</span>
+<span class="fc" id="L97">	private byte[] prk_3e2m = null;</span>
+<span class="fc" id="L98">	private byte[] prk_4e3m = null;</span>
 	
 	// Transcript Hashes
-<span class="fc" id="L100">	private byte[] TH2 = null;</span>
-<span class="fc" id="L101">	private byte[] TH3 = null;</span>
-<span class="fc" id="L102">	private byte[] TH4 = null;</span>
+<span class="fc" id="L101">	private byte[] TH2 = null;</span>
+<span class="fc" id="L102">	private byte[] TH3 = null;</span>
+<span class="fc" id="L103">	private byte[] TH4 = null;</span>
 	
 	// Key to store after a successful EDHOC execution
-<span class="fc" id="L105">	private byte[] prk_out = null;</span>
-<span class="fc" id="L106">	private byte[] prk_exporter = null;</span>
+<span class="fc" id="L106">	private byte[] prk_out = null;</span>
+<span class="fc" id="L107">	private byte[] prk_exporter = null;</span>
 	
 	// EDHOC message_3 , to be used for building an EDHOC+OSCORE request
-<span class="fc" id="L109">	private byte[] message3 = null;</span>
+<span class="fc" id="L110">	private byte[] message3 = null;</span>
 	
 	public EdhocSession(boolean initiator, boolean clientInitiated, int method, byte[] connectionId,
 						HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs,
 						HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds,
 						HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds,
-						List&lt;Integer&gt; cipherSuites, AppProfile appProfile,
-<span class="fc" id="L116">						EDP edp, HashMapCtxDB db) {</span>
+						List&lt;Integer&gt; cipherSuites, List&lt;Integer&gt; peerCipherSuites,
+<span class="fc" id="L117">						Set&lt;Integer&gt; eads, AppProfile appProfile, int trustModel, HashMapCtxDB db) {</span>
 		
-<span class="fc" id="L118">		this.initiator = initiator;</span>
-<span class="fc" id="L119">		this.clientInitiated = clientInitiated;</span>
-<span class="fc" id="L120">		this.method = method;</span>
-<span class="fc" id="L121">		this.connectionId = connectionId;</span>
+<span class="fc" id="L119">		this.initiator = initiator;</span>
+<span class="fc" id="L120">		this.clientInitiated = clientInitiated;</span>
+<span class="fc" id="L121">		this.method = method;</span>
+<span class="fc" id="L122">		this.connectionId = connectionId;</span>
 		
-<span class="fc" id="L123">		this.keyPairs = keyPairs;</span>
-<span class="fc" id="L124">		this.idCreds = idCreds;</span>
-<span class="fc" id="L125">		this.creds = creds;</span>
+<span class="fc" id="L124">		this.keyPairs = keyPairs;</span>
+<span class="fc" id="L125">		this.idCreds = idCreds;</span>
+<span class="fc" id="L126">		this.creds = creds;</span>
 		
-<span class="fc" id="L127">		this.keyPair = null;</span>
-<span class="fc" id="L128">		this.idCred = null;</span>
-<span class="fc" id="L129">		this.cred = null;</span>
-<span class="fc" id="L130">		this.ephemeralKey = null;</span>
+<span class="fc" id="L128">		this.keyPair = null;</span>
+<span class="fc" id="L129">		this.idCred = null;</span>
+<span class="fc" id="L130">		this.cred = null;</span>
+<span class="fc" id="L131">		this.ephemeralKey = null;</span>
 		
-<span class="fc" id="L132">		this.supportedCipherSuites = cipherSuites;</span>
-<span class="fc" id="L133">		this.appProfile = appProfile;</span>
-<span class="fc" id="L134">		this.edp = edp;</span>
-<span class="fc" id="L135">		this.db = db;</span>
+<span class="fc" id="L133">		this.supportedCipherSuites = cipherSuites;</span>
+<span class="fc" id="L134">		this.supportedEADs = eads;</span>
+<span class="fc" id="L135">		this.appProfile = appProfile;</span>
+<span class="fc" id="L136">		this.trustModel = trustModel;</span>
+<span class="fc" id="L137">		this.db = db;</span>
 		
-<span class="fc" id="L137">		this.selectedCipherSuite = -1;</span>
+<span class="fc" id="L139">		this.selectedCipherSuite = -1;</span>
 		
-<span class="fc" id="L139">		this.peerConnectionId = null;</span>
+<span class="fc" id="L141">		this.peerConnectionId = null;</span>
+<span class="fc" id="L142">		this.peerSupportedCipherSuites = peerCipherSuites;</span>
 		
-<span class="fc bfc" id="L141" title="All 2 branches covered.">		currentStep = initiator ? Constants.EDHOC_BEFORE_M1 : Constants.EDHOC_BEFORE_M2;</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">		currentStep = initiator ? Constants.EDHOC_BEFORE_M1 : Constants.EDHOC_BEFORE_M2;</span>
 		
-<span class="fc" id="L143">	}</span>
+<span class="fc" id="L146">	}</span>
 	
 	/**
 	 * Delete all ephemeral keys and other temporary material used during the session
 	 */
 	public void deleteTemporaryMaterial() {
 		
-<span class="fc" id="L150">		this.ephemeralKey = null;</span>
-<span class="fc" id="L151">		this.peerEphemeralPublicKey = null;</span>
-<span class="fc" id="L152">		this.prk_2e = null;</span>
-<span class="fc" id="L153">		this.prk_3e2m = null;</span>
-<span class="fc" id="L154">		this.TH2 = null;</span>
-<span class="fc" id="L155">		this.TH3 = null;</span>
+<span class="fc" id="L153">		this.ephemeralKey = null;</span>
+<span class="fc" id="L154">		this.peerEphemeralPublicKey = null;</span>
+<span class="fc" id="L155">		this.prk_2e = null;</span>
+<span class="fc" id="L156">		this.prk_3e2m = null;</span>
+<span class="fc" id="L157">		this.TH2 = null;</span>
+<span class="fc" id="L158">		this.TH3 = null;</span>
 		
-<span class="pc bpc" id="L157" title="1 of 2 branches missed.">		if (this.appProfile.getUseMessage4() == false) {</span>
-<span class="fc" id="L158">			this.prk_4e3m = null;</span>
-<span class="fc" id="L159">			this.TH4 = null;</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">		if (this.appProfile.getUseMessage4() == false) {</span>
+<span class="fc" id="L161">			this.prk_4e3m = null;</span>
+<span class="fc" id="L162">			this.TH4 = null;</span>
 		}
 		
-<span class="fc" id="L162">	}</span>
+<span class="fc" id="L165">	}</span>
 	
 	/**
 	 * @return  True if this peer is the initiator, or False otherwise 
 	 */
 	public boolean isInitiator() {
-<span class="fc" id="L168">		return this.initiator;</span>
+<span class="fc" id="L171">		return this.initiator;</span>
 	}
 	
 	/**
 	 * @return  the authentication method of this peer 
 	 */
 	public int getMethod() {
-<span class="fc" id="L175">		return this.method;</span>
+<span class="fc" id="L178">		return this.method;</span>
 	}
 	
 	/**
 	 * @return  True if the CoAP client is the initiator, or False otherwise 
 	 */
 	public boolean isClientInitiated() {
-<span class="fc" id="L182">		return this.clientInitiated;</span>
+<span class="fc" id="L185">		return this.clientInitiated;</span>
 	}
 		
 	/**
 	 * @return  the Connection Identifier of this peer
 	 */
 	public byte[] getConnectionId() {
-<span class="fc" id="L189">		return this.connectionId;</span>
+<span class="fc" id="L192">		return this.connectionId;</span>
 	}	
 	
 	/**
@@ -194,7 +197,7 @@ public class EdhocSession {
 	 */
 	public OneKey getKeyPair() {
 		
-<span class="fc" id="L197">		return this.keyPair;</span>
+<span class="fc" id="L200">		return this.keyPair;</span>
 		
 	}
 	
@@ -203,7 +206,7 @@ public class EdhocSession {
 	 */
 	public CBORObject getIdCred() {
 		
-<span class="fc" id="L206">		return this.idCred;</span>
+<span class="fc" id="L209">		return this.idCred;</span>
 		
 	}
 	
@@ -212,7 +215,7 @@ public class EdhocSession {
 	 */
 	public byte[] getCred() {
 		
-<span class="fc" id="L215">		return this.cred;</span>
+<span class="fc" id="L218">		return this.cred;</span>
 		
 	}
 	
@@ -220,74 +223,74 @@ public class EdhocSession {
 	 */
 	public void setAuthenticationCredential() {
 		
-<span class="fc" id="L223">		int keyUsage = -1;</span>
-<span class="fc" id="L224">		int curve = -1;</span>
+<span class="fc" id="L226">		int keyUsage = -1;</span>
+<span class="fc" id="L227">		int curve = -1;</span>
 		
-<span class="fc bfc" id="L226" title="All 2 branches covered.">		if (this.method == Constants.EDHOC_AUTH_METHOD_0) {</span>
-<span class="fc" id="L227">			keyUsage = Constants.SIGNATURE_KEY;</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">		if (this.method == Constants.EDHOC_AUTH_METHOD_0) {</span>
+<span class="fc" id="L230">			keyUsage = Constants.SIGNATURE_KEY;</span>
 		}
-<span class="pc bpc" id="L229" title="1 of 2 branches missed.">		if (this.method == Constants.EDHOC_AUTH_METHOD_1) {</span>
-<span class="nc bnc" id="L230" title="All 2 branches missed.">			keyUsage = initiator ? Constants.SIGNATURE_KEY : Constants.ECDH_KEY;</span>
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">		if (this.method == Constants.EDHOC_AUTH_METHOD_1) {</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			keyUsage = initiator ? Constants.SIGNATURE_KEY : Constants.ECDH_KEY;</span>
 		}
-<span class="pc bpc" id="L232" title="1 of 2 branches missed.">		if (this.method == Constants.EDHOC_AUTH_METHOD_2) {</span>
-<span class="nc bnc" id="L233" title="All 2 branches missed.">			keyUsage = initiator ? Constants.ECDH_KEY : Constants.SIGNATURE_KEY;</span>
+<span class="pc bpc" id="L235" title="1 of 2 branches missed.">		if (this.method == Constants.EDHOC_AUTH_METHOD_2) {</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">			keyUsage = initiator ? Constants.ECDH_KEY : Constants.SIGNATURE_KEY;</span>
 		}
-<span class="fc bfc" id="L235" title="All 2 branches covered.">		if (this.method == Constants.EDHOC_AUTH_METHOD_3) {</span>
-<span class="fc" id="L236">			keyUsage = Constants.ECDH_KEY;</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">		if (this.method == Constants.EDHOC_AUTH_METHOD_3) {</span>
+<span class="fc" id="L239">			keyUsage = Constants.ECDH_KEY;</span>
 		}
 		
-<span class="pc bpc" id="L239" title="1 of 4 branches missed.">		if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
+<span class="pc bpc" id="L242" title="1 of 4 branches missed.">		if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
 			
-<span class="pc bpc" id="L241" title="1 of 2 branches missed.">			if (this.method == Constants.EDHOC_AUTH_METHOD_0) {</span>
-<span class="fc" id="L242">				curve = Constants.CURVE_Ed25519;</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">			if (this.method == Constants.EDHOC_AUTH_METHOD_0) {</span>
+<span class="fc" id="L245">				curve = Constants.CURVE_Ed25519;</span>
 			}
-<span class="pc bpc" id="L244" title="1 of 2 branches missed.">			if (this.method == Constants.EDHOC_AUTH_METHOD_1) {</span>
-<span class="nc bnc" id="L245" title="All 2 branches missed.">				curve = initiator ? Constants.CURVE_Ed25519 : Constants.CURVE_X25519;</span>
+<span class="pc bpc" id="L247" title="1 of 2 branches missed.">			if (this.method == Constants.EDHOC_AUTH_METHOD_1) {</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">				curve = initiator ? Constants.CURVE_Ed25519 : Constants.CURVE_X25519;</span>
 			}
-<span class="pc bpc" id="L247" title="1 of 2 branches missed.">			if (this.method == Constants.EDHOC_AUTH_METHOD_2) {</span>
-<span class="nc bnc" id="L248" title="All 2 branches missed.">				curve = initiator ? Constants.CURVE_X25519 : Constants.CURVE_Ed25519;</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">			if (this.method == Constants.EDHOC_AUTH_METHOD_2) {</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">				curve = initiator ? Constants.CURVE_X25519 : Constants.CURVE_Ed25519;</span>
 			}
-<span class="pc bpc" id="L250" title="1 of 2 branches missed.">			if (this.method == Constants.EDHOC_AUTH_METHOD_3) {</span>
-<span class="nc" id="L251">				curve = Constants.CURVE_X25519;</span>
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">			if (this.method == Constants.EDHOC_AUTH_METHOD_3) {</span>
+<span class="nc" id="L254">				curve = Constants.CURVE_X25519;</span>
 			}
 			
 		}
-<span class="pc bpc" id="L255" title="1 of 4 branches missed.">		if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3) {</span>
-<span class="fc" id="L256">				curve = Constants.CURVE_P256;</span>
+<span class="pc bpc" id="L258" title="1 of 4 branches missed.">		if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3) {</span>
+<span class="fc" id="L259">				curve = Constants.CURVE_P256;</span>
 		}
 		
-<span class="fc" id="L259">		this.keyPair = this.keyPairs.get(Integer.valueOf(keyUsage)).</span>
-<span class="fc" id="L260">									 get(Integer.valueOf(curve));</span>
-<span class="fc" id="L261">		this.cred = this.creds.get(Integer.valueOf(keyUsage)).</span>
-<span class="fc" id="L262">							   get(Integer.valueOf(curve)).GetByteString();</span>
-<span class="fc" id="L263">		this.idCred = this.idCreds.get(Integer.valueOf(keyUsage)).</span>
-<span class="fc" id="L264">								   get(Integer.valueOf(curve));</span>
+<span class="fc" id="L262">		this.keyPair = this.keyPairs.get(Integer.valueOf(keyUsage)).</span>
+<span class="fc" id="L263">									 get(Integer.valueOf(curve));</span>
+<span class="fc" id="L264">		this.cred = this.creds.get(Integer.valueOf(keyUsage)).</span>
+<span class="fc" id="L265">							   get(Integer.valueOf(curve)).GetByteString();</span>
+<span class="fc" id="L266">		this.idCred = this.idCreds.get(Integer.valueOf(keyUsage)).</span>
+<span class="fc" id="L267">								   get(Integer.valueOf(curve));</span>
 				
-<span class="fc" id="L266">	}</span>
+<span class="fc" id="L269">	}</span>
 	
 	/**
 	 * @param ek  the ephemeral key pair of this peer 
 	 */
 	public void setEphemeralKey(OneKey ek) {
 		
-<span class="fc" id="L273">		this.ephemeralKey = ek;</span>
+<span class="fc" id="L276">		this.ephemeralKey = ek;</span>
 		
-<span class="fc" id="L275">	}</span>
+<span class="fc" id="L278">	}</span>
 	
 	/**
 	 * @param ek  the ephemeral key pair of this peer 
 	 */
 	public void setEphemeralKey() {
 		
-<span class="nc" id="L282">		OneKey ek = null;</span>
-<span class="nc bnc" id="L283" title="All 4 branches missed.">		if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1)</span>
-<span class="nc" id="L284">			ek = Util.generateKeyPair(KeyKeys.OKP_X25519.AsInt32());</span>
-<span class="nc bnc" id="L285" title="All 4 branches missed.">		else if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3)</span>
-<span class="nc" id="L286">			ek = Util.generateKeyPair(KeyKeys.EC2_P256.AsInt32());</span>
+<span class="nc" id="L285">		OneKey ek = null;</span>
+<span class="nc bnc" id="L286" title="All 4 branches missed.">		if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1)</span>
+<span class="nc" id="L287">			ek = Util.generateKeyPair(KeyKeys.OKP_X25519.AsInt32());</span>
+<span class="nc bnc" id="L288" title="All 4 branches missed.">		else if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3)</span>
+<span class="nc" id="L289">			ek = Util.generateKeyPair(KeyKeys.EC2_P256.AsInt32());</span>
 		
-<span class="nc" id="L288">		setEphemeralKey(ek);</span>
+<span class="nc" id="L291">		setEphemeralKey(ek);</span>
 		
-<span class="nc" id="L290">	}</span>
+<span class="nc" id="L293">	}</span>
 
 	
 	/**
@@ -295,7 +298,7 @@ public class EdhocSession {
 	 */
 	public OneKey getEphemeralKey() {
 		
-<span class="fc" id="L298">		return this.ephemeralKey;</span>
+<span class="fc" id="L301">		return this.ephemeralKey;</span>
 		
 	}
 	
@@ -304,16 +307,25 @@ public class EdhocSession {
 	 */
 	public void setSupportedCipherSuites(List&lt;Integer&gt; cipherSuites) {
 
-<span class="nc" id="L307">		this.supportedCipherSuites = cipherSuites;</span>
+<span class="nc" id="L310">		this.supportedCipherSuites = cipherSuites;</span>
 		
-<span class="nc" id="L309">	}</span>
+<span class="nc" id="L312">	}</span>
 	
 	/**
 	 * @return  the supported cipher suites to indicate in EDHOC messages
 	 */
 	public List&lt;Integer&gt; getSupportedCipherSuites() {
 
-<span class="fc" id="L316">		return this.supportedCipherSuites;</span>
+<span class="fc" id="L319">		return this.supportedCipherSuites;</span>
+		
+	}
+	
+	/**
+	 * @return  the supported EAD items
+	 */
+	public Set&lt;Integer&gt; getSupportedEADs() {
+
+<span class="nc" id="L328">		return this.supportedEADs;</span>
 		
 	}
 	
@@ -322,31 +334,50 @@ public class EdhocSession {
 	 */
 	public AppProfile getApplicationProfile() {
 
-<span class="nc" id="L325">		return this.appProfile;</span>
+<span class="nc" id="L337">		return this.appProfile;</span>
 		
 	}
 	
 	/**
-	 * @return  the processor of External Authorization Data used for this session
+	 * @return  the used trust model for validating authentication credentials of the other peer
 	 */
-	public EDP getEdp() {
+	public int getTrustModel() {
+
+<span class="nc" id="L346">		return this.trustModel;</span>
 		
-<span class="nc" id="L334">		return this.edp;</span>
+	}	
+	
+	/**
+	 * @return  the side processor object for this session
+	 */
+	public SideProcessor getSideProcessor() {
+		
+<span class="fc" id="L355">		return this.sideProcessor;</span>
 		
 	}
+	
+	/**
+	 * Set the side processor object for this session
+	 * @param  the side processor object for this session
+	 */
+	public void setSideProcessor(SideProcessor sideProcessor) {
+		
+<span class="fc" id="L365">		this.sideProcessor = sideProcessor;</span>
+		
+<span class="fc" id="L367">	}</span>
 	
 	/**
 	 * @return  the database of OSCORE Security Contexts
 	 */
 	public HashMapCtxDB getOscoreDb() {
-<span class="nc" id="L342">		return this.db;</span>
+<span class="nc" id="L373">		return this.db;</span>
 	}
 
 	/**
 	 * @return  the current step in the execution of the EDHOC protocol 
 	 */
 	public int getCurrentStep() {
-<span class="fc" id="L349">		return this.currentStep;</span>
+<span class="fc" id="L380">		return this.currentStep;</span>
 	}
 	
 	/**
@@ -354,14 +385,14 @@ public class EdhocSession {
 	 * @param newStep   the new step to set 
 	 */
 	public void setCurrentStep(int newStep) {
-<span class="fc" id="L357">		this.currentStep = newStep;</span>
-<span class="fc" id="L358">	}</span>
+<span class="fc" id="L388">		this.currentStep = newStep;</span>
+<span class="fc" id="L389">	}</span>
 	
 	/**
 	 * @return  the selected cipher suite for this EDHOC session 
 	 */
 	public int getSelectedCipherSuite() {
-<span class="fc" id="L364">		return this.selectedCipherSuite;</span>
+<span class="fc" id="L395">		return this.selectedCipherSuite;</span>
 	}
 	
 	/**
@@ -369,14 +400,14 @@ public class EdhocSession {
 	 * @param cipherSuite   the selected cipher suite 
 	 */
 	public void setSelectedCipherSuite(int cipherSuite) {
-<span class="fc" id="L372">		this.selectedCipherSuite = cipherSuite;</span>
-<span class="fc" id="L373">	}</span>
+<span class="fc" id="L403">		this.selectedCipherSuite = cipherSuite;</span>
+<span class="fc" id="L404">	}</span>
 	
 	/**
 	 * @return  the Connection Identifier of the other peer
 	 */
 	public byte[] getPeerConnectionId() {
-<span class="fc" id="L379">		return this.peerConnectionId;</span>
+<span class="fc" id="L410">		return this.peerConnectionId;</span>
 	}
 	
 	/**
@@ -384,49 +415,36 @@ public class EdhocSession {
 	 * @param peerId   the Connection Id of the other peer
 	 */
 	public void setPeerConnectionId(byte[] peerId) {
-<span class="fc" id="L387">		this.peerConnectionId = peerId;</span>
-<span class="fc" id="L388">	}</span>
+<span class="fc" id="L418">		this.peerConnectionId = peerId;</span>
+<span class="fc" id="L419">	}</span>
 	
 	/**
 	 * @return  the list of the cipher suites supported by the peer
 	 */
 	public List&lt;Integer&gt; getPeerSupportedCipherSuites() {
-<span class="fc" id="L394">		return this.peerSupportedCipherSuites;</span>
+<span class="fc" id="L425">		return this.peerSupportedCipherSuites;</span>
 	}
 	
-	/**
-	 * Set the list of the cipher suites supported by the peer
-	 * @param peerSupportedCipherSuites   the list of the cipher suites supported by the peer
-	 */
-	public void setPeerSupportedCipherSuites(List&lt;Integer&gt; peerSupportedCipherSuites) {
-<span class="fc" id="L402">		this.peerSupportedCipherSuites = peerSupportedCipherSuites;</span>
-<span class="fc" id="L403">	}</span>
-	
-	
-	// v-16
 	/**
 	 * @return  the CRED of the other peer
 	 */
 	public byte[] getPeerCred() {
-<span class="fc" id="L411">		return this.peerCred;</span>
+<span class="fc" id="L432">		return this.peerCred;</span>
 	}
 	
-	// v-16
 	/**
 	 * Set the CRED of the other peer
 	 * @param peerCred   the CRED of the other peer 
 	 */
 	public void setPeerCred(byte[] peerCred) {
-<span class="fc" id="L420">		this.peerCred = peerCred;</span>
-<span class="fc" id="L421">	}</span>
-	
-	
-	
+<span class="fc" id="L440">		this.peerCred = peerCred;</span>
+<span class="fc" id="L441">	}</span>
+
 	/**
 	 * @return  the long-term public key of the other peer
 	 */
 	public OneKey getPeerLongTermPublicKey() {
-<span class="nc" id="L429">		return this.peerLongTermPublicKey;</span>
+<span class="nc" id="L447">		return this.peerLongTermPublicKey;</span>
 	}
 	
 	/**
@@ -434,28 +452,28 @@ public class EdhocSession {
 	 * @param peerKey   the long-term public key of the other peer 
 	 */
 	public void setPeerLongTermPublicKey(OneKey peerKey) {
-<span class="nc" id="L437">		this.peerLongTermPublicKey = peerKey;</span>
-<span class="nc" id="L438">	}</span>
+<span class="nc" id="L455">		this.peerLongTermPublicKey = peerKey;</span>
+<span class="nc" id="L456">	}</span>
 
 	/**
 	 * @return  the ID_CRED of the long-term public key of the other peer
 	 */
 	public CBORObject getPeerIdCred() {
-<span class="nc" id="L444">		return this.peerIdCred;</span>
+<span class="nc" id="L462">		return this.peerIdCred;</span>
 	}
 	
 	/**
 	 * Set the ID_CRED of the long-term public key of the other peer
 	 */
 	public void setPeerIdCred(CBORObject idCred) {
-<span class="nc" id="L451">		this.peerIdCred = idCred;</span>
-<span class="nc" id="L452">	}</span>
+<span class="nc" id="L469">		this.peerIdCred = idCred;</span>
+<span class="nc" id="L470">	}</span>
 
 	/**
 	 * @return  the ephemeral public key of the other peer
 	 */
 	public OneKey getPeerEphemeralPublicKey() {
-<span class="fc" id="L458">		return this.peerEphemeralPublicKey;</span>
+<span class="fc" id="L476">		return this.peerEphemeralPublicKey;</span>
 	}
 	
 	/**
@@ -463,63 +481,63 @@ public class EdhocSession {
 	 * @param peerKey   the ephemeral public key of the other peer 
 	 */
 	public void setPeerEphemeralPublicKey(OneKey peerKey) {
-<span class="fc" id="L466">		this.peerEphemeralPublicKey = peerKey;</span>
-<span class="fc" id="L467">	}</span>
+<span class="fc" id="L484">		this.peerEphemeralPublicKey = peerKey;</span>
+<span class="fc" id="L485">	}</span>
 
 	/**
 	 * @return  the inner key PRK_2e
 	 */
 	public byte[] getPRK2e() {
-<span class="fc" id="L473">		return this.prk_2e;</span>
+<span class="fc" id="L491">		return this.prk_2e;</span>
 	}
 	
 	/**
 	 * @param prk2e   the inner key PRK_2e
 	 */
 	public void setPRK2e(byte[] prk2e) {
-<span class="fc" id="L480">		this.prk_2e = new byte[prk2e.length];</span>
-<span class="fc" id="L481">		System.arraycopy(prk2e,  0, this.prk_2e, 0, prk2e.length);</span>
-<span class="fc" id="L482">	}</span>
+<span class="fc" id="L498">		this.prk_2e = new byte[prk2e.length];</span>
+<span class="fc" id="L499">		System.arraycopy(prk2e,  0, this.prk_2e, 0, prk2e.length);</span>
+<span class="fc" id="L500">	}</span>
 
 	/**
 	 * @return  the inner key PRK_3e2m
 	 */
 	public byte[] getPRK3e2m() {
-<span class="fc" id="L488">		return this.prk_3e2m;</span>
+<span class="fc" id="L506">		return this.prk_3e2m;</span>
 	}
 	
 	/**
 	 * @param prk3e2m   the inner key PRK_3e2m
 	 */
 	public void setPRK3e2m(byte[] prk3e2m) {
-<span class="fc" id="L495">		this.prk_3e2m = new byte[prk3e2m.length];</span>
-<span class="fc" id="L496">		System.arraycopy(prk3e2m,  0, this.prk_3e2m, 0, prk3e2m.length);</span>
-<span class="fc" id="L497">	}</span>
+<span class="fc" id="L513">		this.prk_3e2m = new byte[prk3e2m.length];</span>
+<span class="fc" id="L514">		System.arraycopy(prk3e2m,  0, this.prk_3e2m, 0, prk3e2m.length);</span>
+<span class="fc" id="L515">	}</span>
 
 	/**
 	 * @return  the inner key PRK_4e3m
 	 */
 	public byte[] getPRK4e3m() {
-<span class="fc" id="L503">		return this.prk_4e3m;</span>
+<span class="fc" id="L521">		return this.prk_4e3m;</span>
 	}
 	
 	/**
 	 * @param prk4e3m   the inner key PRK_4e3m
 	 */
 	public void setPRK4e3m(byte[] prk4e3m) {
-<span class="fc bfc" id="L510" title="All 2 branches covered.">		if (prk4e3m == null)</span>
-<span class="fc" id="L511">			this.prk_4e3m = null;</span>
+<span class="fc bfc" id="L528" title="All 2 branches covered.">		if (prk4e3m == null)</span>
+<span class="fc" id="L529">			this.prk_4e3m = null;</span>
 		else {
-<span class="fc" id="L513">			this.prk_4e3m = new byte[prk4e3m.length];</span>
-<span class="fc" id="L514">			System.arraycopy(prk4e3m,  0, this.prk_4e3m, 0, prk4e3m.length);</span>
+<span class="fc" id="L531">			this.prk_4e3m = new byte[prk4e3m.length];</span>
+<span class="fc" id="L532">			System.arraycopy(prk4e3m,  0, this.prk_4e3m, 0, prk4e3m.length);</span>
 		}
-<span class="fc" id="L516">	}</span>
+<span class="fc" id="L534">	}</span>
 	
 	/**
 	 * @return  the Transcript Hash TH2
 	 */
 	public byte[] getTH2() {
-<span class="fc" id="L522">		return this.TH2;</span>
+<span class="fc" id="L540">		return this.TH2;</span>
 	}
 	
 	/**
@@ -527,14 +545,14 @@ public class EdhocSession {
 	 * @param inputTH   the Transcript Hash TH2
 	 */
 	public void setTH2(byte[] inputTH) {
-<span class="fc" id="L530">		this.TH2 = inputTH;</span>
-<span class="fc" id="L531">	}</span>
+<span class="fc" id="L548">		this.TH2 = inputTH;</span>
+<span class="fc" id="L549">	}</span>
 		
 	/**
 	 * @return  the Transcript Hash TH3
 	 */
 	public byte[] getTH3() {
-<span class="fc" id="L537">		return this.TH3;</span>
+<span class="fc" id="L555">		return this.TH3;</span>
 	}
 	
 	/**
@@ -542,14 +560,14 @@ public class EdhocSession {
 	 * @param inputTH   the Transcript Hash TH3
 	 */
 	public void setTH3(byte[] inputTH) {
-<span class="fc" id="L545">		this.TH3 = inputTH;</span>
-<span class="fc" id="L546">	}</span>
+<span class="fc" id="L563">		this.TH3 = inputTH;</span>
+<span class="fc" id="L564">	}</span>
 	
 	/**
 	 * @return  the Transcript Hash TH4
 	 */
 	public byte[] getTH4() {
-<span class="fc" id="L552">		return this.TH4;</span>
+<span class="fc" id="L570">		return this.TH4;</span>
 	}
 	
 	/**
@@ -557,44 +575,44 @@ public class EdhocSession {
 	 * @param inputTH   the Transcript Hash TH4
 	 */
 	public void setTH4(byte[] inputTH) {
-<span class="fc" id="L560">		this.TH4 = inputTH;</span>
-<span class="fc" id="L561">	}</span>
+<span class="fc" id="L578">		this.TH4 = inputTH;</span>
+<span class="fc" id="L579">	}</span>
 
 	/**
 	 * @return  the key PRK_out
 	 */
 	public byte[] getPRKout() {
-<span class="nc" id="L567">		return this.prk_out;</span>
+<span class="nc" id="L585">		return this.prk_out;</span>
 	}
 	
 	/**
 	 * @param prkOut   the key PRK_out
 	 */
 	public void setPRKout(byte[] prkOut) {
-<span class="fc" id="L574">		this.prk_out = new byte[prkOut.length];</span>
-<span class="fc" id="L575">		System.arraycopy(prkOut,  0, this.prk_out, 0, prkOut.length);</span>
-<span class="fc" id="L576">	}</span>
+<span class="fc" id="L592">		this.prk_out = new byte[prkOut.length];</span>
+<span class="fc" id="L593">		System.arraycopy(prkOut,  0, this.prk_out, 0, prkOut.length);</span>
+<span class="fc" id="L594">	}</span>
 	
 	/**
 	 * @return  the key PRK_exporter
 	 */
 	public byte[] getPRKexporter() {
-<span class="nc" id="L582">		return this.prk_exporter;</span>
+<span class="nc" id="L600">		return this.prk_exporter;</span>
 	}
 	
 	/**
 	 * @param prkOut   the key PRK_exporter
 	 */
 	public void setPRKexporter(byte[] prkExporter) {
-<span class="fc" id="L589">		this.prk_exporter = new byte[prkExporter.length];</span>
-<span class="fc" id="L590">		System.arraycopy(prkExporter,  0, this.prk_exporter, 0, prkExporter.length);</span>
-<span class="fc" id="L591">	}</span>
+<span class="fc" id="L607">		this.prk_exporter = new byte[prkExporter.length];</span>
+<span class="fc" id="L608">		System.arraycopy(prkExporter,  0, this.prk_exporter, 0, prkExporter.length);</span>
+<span class="fc" id="L609">	}</span>
 	
 	/**
 	 * @return  the hash of EDHOC Message 1
 	 */
 	public byte[] getHashMessage1() {
-<span class="fc" id="L597">		return this.hashMessage1;</span>
+<span class="fc" id="L615">		return this.hashMessage1;</span>
 	}
 	
 	/**
@@ -603,72 +621,72 @@ public class EdhocSession {
 	 */
 	public boolean setHashMessage1(byte[] msg) {
 		
-<span class="fc" id="L606">		byte[] hash = null;</span>
-<span class="fc" id="L607">		String hashAlgorithm = null;</span>
+<span class="fc" id="L624">		byte[] hash = null;</span>
+<span class="fc" id="L625">		String hashAlgorithm = null;</span>
 		
-<span class="fc" id="L609">		int selectedCipherSuite = getSelectedCipherSuite();</span>
-<span class="fc" id="L610">		hashAlgorithm = getEdhocHashAlg(selectedCipherSuite);</span>
+<span class="fc" id="L627">		int selectedCipherSuite = getSelectedCipherSuite();</span>
+<span class="fc" id="L628">		hashAlgorithm = getEdhocHashAlg(selectedCipherSuite);</span>
 
 		try {
-<span class="fc" id="L613">			hash = Util.computeHash(msg, hashAlgorithm);</span>
-<span class="nc" id="L614">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L615">		    System.err.println(&quot;Invalid hash algorithm when computing the hash of EDHOC Message 1\n&quot; + e.getMessage());</span>
-<span class="nc" id="L616">		    return false;</span>
-<span class="fc" id="L617">		}</span>
+<span class="fc" id="L631">			hash = Util.computeHash(msg, hashAlgorithm);</span>
+<span class="nc" id="L632">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L633">		    System.err.println(&quot;Invalid hash algorithm when computing the hash of EDHOC Message 1\n&quot; + e.getMessage());</span>
+<span class="nc" id="L634">		    return false;</span>
+<span class="fc" id="L635">		}</span>
 		
-<span class="pc bpc" id="L619" title="1 of 2 branches missed.">		if (hash == null) {</span>
-<span class="nc" id="L620">		    System.err.println(&quot;Error when computing the hash of EDHOC Message 1\n&quot;);</span>
-<span class="nc" id="L621">			return false;</span>
+<span class="pc bpc" id="L637" title="1 of 2 branches missed.">		if (hash == null) {</span>
+<span class="nc" id="L638">		    System.err.println(&quot;Error when computing the hash of EDHOC Message 1\n&quot;);</span>
+<span class="nc" id="L639">			return false;</span>
 		}
 		
-<span class="fc" id="L624">		this.hashMessage1 = new byte[hash.length];</span>
-<span class="fc" id="L625">		System.arraycopy(hash, 0, this.hashMessage1, 0, hash.length);</span>
-<span class="fc" id="L626">		return true;</span>
+<span class="fc" id="L642">		this.hashMessage1 = new byte[hash.length];</span>
+<span class="fc" id="L643">		System.arraycopy(hash, 0, this.hashMessage1, 0, hash.length);</span>
+<span class="fc" id="L644">		return true;</span>
 	}
 	
     /**
      *  Clean up the stored hash of EDHOC Message 1
      */
 	public void cleanMessage1() {
-<span class="fc" id="L633">		this.hashMessage1 = null;</span>
-<span class="fc" id="L634">	}</span>
+<span class="fc" id="L651">		this.hashMessage1 = null;</span>
+<span class="fc" id="L652">	}</span>
 	
     /**
      * @return  the EDHOC Message 3
      */
 	public byte[] getMessage3() {
-<span class="nc" id="L640">		return this.message3;</span>
+<span class="nc" id="L658">		return this.message3;</span>
 	}
 	
     /**
      * @param msg   The EDHOC message_3 to store, before an EDHOC+OSCORE request
      */
 	public void setMessage3(byte[] msg) {
-<span class="nc" id="L647">		this.message3 = new byte[msg.length];</span>
-<span class="nc" id="L648">		System.arraycopy(msg, 0, this.message3, 0, msg.length);</span>
-<span class="nc" id="L649">	}</span>
+<span class="nc" id="L665">		this.message3 = new byte[msg.length];</span>
+<span class="nc" id="L666">		System.arraycopy(msg, 0, this.message3, 0, msg.length);</span>
+<span class="nc" id="L667">	}</span>
 	
     /**
      *  Clean up the stored EDHOC Message 3
      */
 	public void cleanMessage3() {
-<span class="nc" id="L655">		this.message3 = null;</span>
-<span class="nc" id="L656">	}</span>
+<span class="nc" id="L673">		this.message3 = null;</span>
+<span class="nc" id="L674">	}</span>
 	
 	/**
 	 * @return  the PLAINTEXT_2
 	 */
 	public byte[] getPlaintext2() {
-<span class="fc" id="L662">		return this.plaintext2;</span>
+<span class="fc" id="L680">		return this.plaintext2;</span>
 	}
 
 	/**
 	 * @param pt  store a PLAINTEXT_2 for the later computation of TH3
 	 */
 	public void setPlaintext2(byte[] pt) {
-<span class="fc" id="L669">		this.plaintext2 = new byte[pt.length];</span>
-<span class="fc" id="L670">		System.arraycopy(pt, 0, this.plaintext2, 0, pt.length);</span>
-<span class="fc" id="L671">	}</span>
+<span class="fc" id="L687">		this.plaintext2 = new byte[pt.length];</span>
+<span class="fc" id="L688">		System.arraycopy(pt, 0, this.plaintext2, 0, pt.length);</span>
+<span class="fc" id="L689">	}</span>
 	
 	/**
 	 * EDHOC-Exporter function, to derive application keys
@@ -679,13 +697,13 @@ public class EdhocSession {
 	 */
 	public byte[] edhocExporter(int label, CBORObject context, int len) throws InvalidKeyException, NoSuchAlgorithmException {
 		
-<span class="pc bpc" id="L682" title="3 of 6 branches missed.">		if (label &lt; 0 || context.getType() != CBORType.ByteString || len &lt; 0)</span>
-<span class="nc" id="L683">			return null;</span>
+<span class="pc bpc" id="L700" title="3 of 6 branches missed.">		if (label &lt; 0 || context.getType() != CBORType.ByteString || len &lt; 0)</span>
+<span class="nc" id="L701">			return null;</span>
 		
-<span class="pc bpc" id="L685" title="3 of 4 branches missed.">		if (this.currentStep != Constants.EDHOC_AFTER_M3 &amp;&amp; this.currentStep != Constants.EDHOC_SENT_M3)</span>
-<span class="nc" id="L686">			return null;</span>
+<span class="pc bpc" id="L703" title="3 of 4 branches missed.">		if (this.currentStep != Constants.EDHOC_AFTER_M3 &amp;&amp; this.currentStep != Constants.EDHOC_SENT_M3)</span>
+<span class="nc" id="L704">			return null;</span>
 	
-<span class="fc" id="L688">		return edhocKDF(this.prk_exporter, label, context, len);</span>
+<span class="fc" id="L706">		return edhocKDF(this.prk_exporter, label, context, len);</span>
 		
 	}
 	
@@ -697,35 +715,35 @@ public class EdhocSession {
 	public boolean edhocKeyUpdate(CBORObject context) throws InvalidKeyException, NoSuchAlgorithmException {
 		
 		// The EDHOC execution is not completed yet
-<span class="pc bpc" id="L700" title="1 of 2 branches missed.">		if (this.currentStep != Constants.EDHOC_AFTER_M3)</span>
-<span class="nc" id="L701">			return false;</span>
+<span class="pc bpc" id="L718" title="1 of 2 branches missed.">		if (this.currentStep != Constants.EDHOC_AFTER_M3)</span>
+<span class="nc" id="L719">			return false;</span>
 		
 		// The provided context is not valid
-<span class="pc bpc" id="L704" title="2 of 4 branches missed.">		if (context == null || context.getType() != CBORType.ByteString)</span>
-<span class="nc" id="L705">			return false;</span>
+<span class="pc bpc" id="L722" title="2 of 4 branches missed.">		if (context == null || context.getType() != CBORType.ByteString)</span>
+<span class="nc" id="L723">			return false;</span>
 	
 		// Update PRK_out
-<span class="fc" id="L708">		int length = EdhocSession.getEdhocHashAlgOutputSize(this.selectedCipherSuite);</span>
+<span class="fc" id="L726">		int length = EdhocSession.getEdhocHashAlgOutputSize(this.selectedCipherSuite);</span>
 		try {
-<span class="fc" id="L710">			this.prk_out = edhocKDF(this.prk_out, Constants.KDF_LABEL_PRK_OUT_KEY_UPDATE, context, length);</span>
-<span class="nc" id="L711">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L712">			System.err.println(&quot;Error when updating PRK_out\n&quot; + e.getMessage());</span>
-<span class="nc" id="L713">			return false;</span>
-<span class="nc" id="L714">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L715">			System.err.println(&quot;Error when updating PRK_out\n&quot; + e.getMessage());</span>
-<span class="nc" id="L716">			return false;</span>
-<span class="fc" id="L717">		}</span>
-<span class="fc" id="L718">	    Util.nicePrint(&quot;PRK_out (updated)&quot;, this.prk_out);</span>
+<span class="fc" id="L728">			this.prk_out = edhocKDF(this.prk_out, Constants.KDF_LABEL_PRK_OUT_KEY_UPDATE, context, length);</span>
+<span class="nc" id="L729">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L730">			System.err.println(&quot;Error when updating PRK_out\n&quot; + e.getMessage());</span>
+<span class="nc" id="L731">			return false;</span>
+<span class="nc" id="L732">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L733">			System.err.println(&quot;Error when updating PRK_out\n&quot; + e.getMessage());</span>
+<span class="nc" id="L734">			return false;</span>
+<span class="fc" id="L735">		}</span>
+<span class="fc" id="L736">	    Util.nicePrint(&quot;PRK_out (updated)&quot;, this.prk_out);</span>
 		
 		// Update PRK_exporter
-<span class="fc" id="L721">	    this.prk_exporter = MessageProcessor.computePRKexporter(this, this.prk_out);</span>
-<span class="pc bpc" id="L722" title="1 of 2 branches missed.">	    if (prk_exporter == null) {</span>
-<span class="nc" id="L723">			System.err.println(&quot;Error when updating PRK_exporter\n&quot;);</span>
-<span class="nc" id="L724">			return false;</span>
+<span class="fc" id="L739">	    this.prk_exporter = MessageProcessor.computePRKexporter(this, this.prk_out);</span>
+<span class="pc bpc" id="L740" title="1 of 2 branches missed.">	    if (prk_exporter == null) {</span>
+<span class="nc" id="L741">			System.err.println(&quot;Error when updating PRK_exporter\n&quot;);</span>
+<span class="nc" id="L742">			return false;</span>
 		}
-<span class="fc" id="L726">	    Util.nicePrint(&quot;PRK_exporter (updated)&quot;, this.prk_exporter);</span>
+<span class="fc" id="L744">	    Util.nicePrint(&quot;PRK_exporter (updated)&quot;, this.prk_exporter);</span>
 
-<span class="fc" id="L728">		return true;</span>
+<span class="fc" id="L746">		return true;</span>
 
 	}
 	
@@ -740,27 +758,27 @@ public class EdhocSession {
 	public byte[] edhocKDF(byte[] prk, int label, CBORObject context, int length)
 			throws InvalidKeyException, NoSuchAlgorithmException {
 		
-<span class="pc bpc" id="L743" title="2 of 4 branches missed.">		if (prk == null || context == null)</span>
-<span class="nc" id="L744">			return null;</span>
+<span class="pc bpc" id="L761" title="2 of 4 branches missed.">		if (prk == null || context == null)</span>
+<span class="nc" id="L762">			return null;</span>
 		
-<span class="pc bpc" id="L746" title="1 of 2 branches missed.">		if (context.getType() != CBORType.ByteString)</span>
-<span class="nc" id="L747">			return null;</span>
+<span class="pc bpc" id="L764" title="1 of 2 branches missed.">		if (context.getType() != CBORType.ByteString)</span>
+<span class="nc" id="L765">			return null;</span>
 		
         // Prepare the 'info' CBOR sequence
-<span class="fc" id="L750">        List&lt;CBORObject&gt; objectList = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L751">        objectList.add(CBORObject.FromObject(label));</span>
-<span class="fc" id="L752">        objectList.add(context);</span>
-<span class="fc" id="L753">        objectList.add(CBORObject.FromObject(length));</span>
-<span class="fc" id="L754">		byte[] info = Util.buildCBORSequence(objectList);</span>
+<span class="fc" id="L768">        List&lt;CBORObject&gt; objectList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L769">        objectList.add(CBORObject.FromObject(label));</span>
+<span class="fc" id="L770">        objectList.add(context);</span>
+<span class="fc" id="L771">        objectList.add(CBORObject.FromObject(length));</span>
+<span class="fc" id="L772">		byte[] info = Util.buildCBORSequence(objectList);</span>
 		
-<span class="fc" id="L756">		byte[] okm = null;</span>
-<span class="fc" id="L757">		String hashAlgorithm = EdhocSession.getEdhocHashAlg(selectedCipherSuite);</span>
+<span class="fc" id="L774">		byte[] okm = null;</span>
+<span class="fc" id="L775">		String hashAlgorithm = EdhocSession.getEdhocHashAlg(selectedCipherSuite);</span>
 		
-<span class="pc bpc" id="L759" title="5 of 6 branches missed.">		if (hashAlgorithm.equals(&quot;SHA-256&quot;) || hashAlgorithm.equals(&quot;SHA-384&quot;) || hashAlgorithm.equals(&quot;SHA-512&quot;)) {</span>
-<span class="fc" id="L760">			okm = Hkdf.expand(prk, info, length);</span>
+<span class="pc bpc" id="L777" title="5 of 6 branches missed.">		if (hashAlgorithm.equals(&quot;SHA-256&quot;) || hashAlgorithm.equals(&quot;SHA-384&quot;) || hashAlgorithm.equals(&quot;SHA-512&quot;)) {</span>
+<span class="fc" id="L778">			okm = Hkdf.expand(prk, info, length);</span>
 		}
 		
-<span class="fc" id="L763">		return okm;</span>
+<span class="fc" id="L781">		return okm;</span>
 		
 	}
 
@@ -771,21 +789,21 @@ public class EdhocSession {
      */
 	public static byte[] getMasterSecretOSCORE(EdhocSession session) {
 
-<span class="fc" id="L774">	    byte[] masterSecret = null;</span>
-<span class="fc" id="L775">	    int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L792">	    byte[] masterSecret = null;</span>
+<span class="fc" id="L793">	    int selectedCipherSuite = session.getSelectedCipherSuite();</span>
 	    
-<span class="fc" id="L777">	    CBORObject context = CBORObject.FromObject(new byte[0]);</span>
-<span class="fc" id="L778">	    int keyLength = getKeyLengthAppAEAD(selectedCipherSuite);</span>
+<span class="fc" id="L795">	    CBORObject context = CBORObject.FromObject(new byte[0]);</span>
+<span class="fc" id="L796">	    int keyLength = getKeyLengthAppAEAD(selectedCipherSuite);</span>
 	    
 	    try {
-<span class="fc" id="L781">			masterSecret = session.edhocExporter(Constants.EXPORTER_LABEL_OSCORE_MASTER_SECRET, context, keyLength);</span>
-<span class="nc" id="L782">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L783">			System.err.println(&quot;Error when the OSCORE Master Secret&quot; + e.getMessage());</span>
-<span class="nc" id="L784">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L785">			System.err.println(&quot;Error when the OSCORE Master Secret&quot; + e.getMessage());</span>
-<span class="pc" id="L786">		}</span>
+<span class="fc" id="L799">			masterSecret = session.edhocExporter(Constants.EXPORTER_LABEL_OSCORE_MASTER_SECRET, context, keyLength);</span>
+<span class="nc" id="L800">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L801">			System.err.println(&quot;Error when the OSCORE Master Secret&quot; + e.getMessage());</span>
+<span class="nc" id="L802">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L803">			System.err.println(&quot;Error when the OSCORE Master Secret&quot; + e.getMessage());</span>
+<span class="pc" id="L804">		}</span>
 	    
-<span class="fc" id="L788">	    return masterSecret;</span>
+<span class="fc" id="L806">	    return masterSecret;</span>
 		
 	}
 	
@@ -796,18 +814,18 @@ public class EdhocSession {
      */
 	public static byte[] getMasterSaltOSCORE(EdhocSession session) {
 
-<span class="fc" id="L799">	    byte[] masterSalt = null;</span>
-<span class="fc" id="L800">	    CBORObject context = CBORObject.FromObject(new byte[0]);</span>
+<span class="fc" id="L817">	    byte[] masterSalt = null;</span>
+<span class="fc" id="L818">	    CBORObject context = CBORObject.FromObject(new byte[0]);</span>
 	    
 	    try {
-<span class="fc" id="L803">			masterSalt = session.edhocExporter(Constants.EXPORTER_LABEL_OSCORE_MASTER_SALT, context, 8);</span>
-<span class="nc" id="L804">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L805">			System.err.println(&quot;Error when the OSCORE Master Salt&quot; + e.getMessage());</span>
-<span class="nc" id="L806">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L807">			System.err.println(&quot;Error when the OSCORE Master Salt&quot; + e.getMessage());</span>
-<span class="pc" id="L808">		}</span>
+<span class="fc" id="L821">			masterSalt = session.edhocExporter(Constants.EXPORTER_LABEL_OSCORE_MASTER_SALT, context, 8);</span>
+<span class="nc" id="L822">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L823">			System.err.println(&quot;Error when the OSCORE Master Salt&quot; + e.getMessage());</span>
+<span class="nc" id="L824">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L825">			System.err.println(&quot;Error when the OSCORE Master Salt&quot; + e.getMessage());</span>
+<span class="pc" id="L826">		}</span>
 	    
-<span class="fc" id="L810">	    return masterSalt;</span>
+<span class="fc" id="L828">	    return masterSalt;</span>
 		
 	}
 	
@@ -818,20 +836,20 @@ public class EdhocSession {
      */
 	public static AlgorithmID getEdhocAEADAlg(int cipherSuite) {
 
-<span class="fc" id="L821">		AlgorithmID alg = null;</span>
+<span class="fc" id="L839">		AlgorithmID alg = null;</span>
 	    
-<span class="pc bpc" id="L823" title="2 of 3 branches missed.">    	switch (cipherSuite) {</span>
+<span class="pc bpc" id="L841" title="2 of 3 branches missed.">    	switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_2:
-<span class="fc" id="L826">				alg = AlgorithmID.AES_CCM_16_64_128;</span>
-<span class="fc" id="L827">				break;</span>
+<span class="fc" id="L844">				alg = AlgorithmID.AES_CCM_16_64_128;</span>
+<span class="fc" id="L845">				break;</span>
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="nc" id="L830">				alg = AlgorithmID.AES_CCM_16_128_128;</span>
+<span class="nc" id="L848">				alg = AlgorithmID.AES_CCM_16_128_128;</span>
 				break;
 		}
 	    
-<span class="fc" id="L834">	    return alg;</span>
+<span class="fc" id="L852">	    return alg;</span>
 		
 	}
 	
@@ -842,17 +860,17 @@ public class EdhocSession {
      */
 	public static int getKeyLengthEdhocAEAD(int cipherSuite) {
 
-<span class="fc" id="L845">		int keyLength = 0;</span>
+<span class="fc" id="L863">		int keyLength = 0;</span>
 	    
-<span class="pc bpc" id="L847" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L865" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
 	    	case Constants.EDHOC_CIPHER_SUITE_0:
 	    	case Constants.EDHOC_CIPHER_SUITE_1:
 	    	case Constants.EDHOC_CIPHER_SUITE_2:
 	    	case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="fc" id="L852">	    		keyLength = 16;</span>
+<span class="fc" id="L870">	    		keyLength = 16;</span>
 		}
 	    
-<span class="fc" id="L855">	    return keyLength;</span>
+<span class="fc" id="L873">	    return keyLength;</span>
 		
 	}
 	
@@ -863,17 +881,17 @@ public class EdhocSession {
      */
 	public static int getIvLengthEdhocAEAD(int cipherSuite) {
 
-<span class="fc" id="L866">		int ivLength = 0;</span>
+<span class="fc" id="L884">		int ivLength = 0;</span>
 	    
-<span class="pc bpc" id="L868" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L886" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
 	    	case Constants.EDHOC_CIPHER_SUITE_0:
 	    	case Constants.EDHOC_CIPHER_SUITE_1:
 	    	case Constants.EDHOC_CIPHER_SUITE_2:
 	    	case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="fc" id="L873">	    		ivLength = 13;</span>
+<span class="fc" id="L891">	    		ivLength = 13;</span>
 		}
 	    
-<span class="fc" id="L876">	    return ivLength;</span>
+<span class="fc" id="L894">	    return ivLength;</span>
 		
 	}
 	
@@ -884,19 +902,19 @@ public class EdhocSession {
      */
 	public static int getTagLengthEdhocAEAD(int cipherSuite) {
 
-<span class="fc" id="L887">		int tagLength = 0;</span>
+<span class="fc" id="L905">		int tagLength = 0;</span>
 	    
-<span class="pc bpc" id="L889" title="2 of 3 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L907" title="2 of 3 branches missed.">		switch (cipherSuite) {</span>
 	    	case Constants.EDHOC_CIPHER_SUITE_0:
 	    	case Constants.EDHOC_CIPHER_SUITE_2:
-<span class="fc" id="L892">	    		tagLength = 8;</span>
-<span class="fc" id="L893">	    		break;</span>
+<span class="fc" id="L910">	    		tagLength = 8;</span>
+<span class="fc" id="L911">	    		break;</span>
 	    	case Constants.EDHOC_CIPHER_SUITE_1:
 	    	case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="nc" id="L896">	    		tagLength = 16;</span>
+<span class="nc" id="L914">	    		tagLength = 16;</span>
 		}
 	    
-<span class="fc" id="L899">	    return tagLength;</span>
+<span class="fc" id="L917">	    return tagLength;</span>
 		
 	}
 	
@@ -907,17 +925,17 @@ public class EdhocSession {
      */
 	public static String getEdhocHashAlg(int cipherSuite) {
 
-<span class="fc" id="L910">		String hashAlg = null;</span>
+<span class="fc" id="L928">		String hashAlg = null;</span>
 	    
-<span class="pc bpc" id="L912" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L930" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_2:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="fc" id="L917">				hashAlg = &quot;SHA-256&quot;;</span>
+<span class="fc" id="L935">				hashAlg = &quot;SHA-256&quot;;</span>
 		}
 	    
-<span class="fc" id="L920">	    return hashAlg;</span>
+<span class="fc" id="L938">	    return hashAlg;</span>
 		
 	}
 	
@@ -928,17 +946,17 @@ public class EdhocSession {
      */
 	public static int getEdhocHashAlgOutputSize(int cipherSuite) {
 
-<span class="fc" id="L931">		int outputSize = 0;</span>
+<span class="fc" id="L949">		int outputSize = 0;</span>
 	    
-<span class="pc bpc" id="L933" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L951" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_2:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="fc" id="L938">				outputSize = 32;</span>
+<span class="fc" id="L956">				outputSize = 32;</span>
 		}
 	    
-<span class="fc" id="L941">	    return outputSize;</span>
+<span class="fc" id="L959">	    return outputSize;</span>
 		
 	}
 	
@@ -951,17 +969,17 @@ public class EdhocSession {
      */
 	public static int getEphermeralKeyLength(int cipherSuite) {
 
-<span class="nc" id="L954">		int keyLength = 0;</span>
+<span class="nc" id="L972">		int keyLength = 0;</span>
 	    
-<span class="nc bnc" id="L956" title="All 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="nc bnc" id="L974" title="All 2 branches missed.">		switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_2:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="nc" id="L961">				keyLength = 32;</span>
+<span class="nc" id="L979">				keyLength = 32;</span>
 		}
 	    
-<span class="nc" id="L964">	    return keyLength;</span>
+<span class="nc" id="L982">	    return keyLength;</span>
 		
 	}
 	
@@ -972,17 +990,17 @@ public class EdhocSession {
      */
 	public static AlgorithmID getAppAEAD(int cipherSuite) {
 
-<span class="nc" id="L975">		AlgorithmID alg = null;</span>
+<span class="nc" id="L993">		AlgorithmID alg = null;</span>
 	    
-<span class="nc bnc" id="L977" title="All 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="nc bnc" id="L995" title="All 2 branches missed.">		switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_2:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="nc" id="L982">				alg = AlgorithmID.AES_CCM_16_64_128;</span>
+<span class="nc" id="L1000">				alg = AlgorithmID.AES_CCM_16_64_128;</span>
 		}
 	    
-<span class="nc" id="L985">	    return alg;</span>
+<span class="nc" id="L1003">	    return alg;</span>
 		
 	}
 	
@@ -993,17 +1011,17 @@ public class EdhocSession {
      */
 	public static int getKeyLengthAppAEAD(int cipherSuite) {
 
-<span class="fc" id="L996">		int keyLength = 0;</span>
+<span class="fc" id="L1014">		int keyLength = 0;</span>
 	    
-<span class="pc bpc" id="L998" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L1016" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
 	    	case Constants.EDHOC_CIPHER_SUITE_0:
 	    	case Constants.EDHOC_CIPHER_SUITE_1:
 	    	case Constants.EDHOC_CIPHER_SUITE_2:
 	    	case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="fc" id="L1003">	    		keyLength = 16;</span>
+<span class="fc" id="L1021">	    		keyLength = 16;</span>
 		}
 	    
-<span class="fc" id="L1006">	    return keyLength;</span>
+<span class="fc" id="L1024">	    return keyLength;</span>
 		
 	}
 	
@@ -1014,17 +1032,17 @@ public class EdhocSession {
      */
 	public static AlgorithmID getAppHkdf(int cipherSuite) {
 
-<span class="nc" id="L1017">		AlgorithmID alg = null;</span>
+<span class="nc" id="L1035">		AlgorithmID alg = null;</span>
 	    
-<span class="nc bnc" id="L1019" title="All 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="nc bnc" id="L1037" title="All 2 branches missed.">		switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_2:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="nc" id="L1024">				alg = AlgorithmID.HKDF_HMAC_SHA_256;</span>
+<span class="nc" id="L1042">				alg = AlgorithmID.HKDF_HMAC_SHA_256;</span>
 		}
 	    
-<span class="nc" id="L1027">	    return alg;</span>
+<span class="nc" id="L1045">	    return alg;</span>
 		
 	}
 	

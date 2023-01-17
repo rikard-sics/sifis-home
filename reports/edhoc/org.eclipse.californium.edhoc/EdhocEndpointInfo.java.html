@@ -2,7 +2,6 @@
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Set;
 
 import org.eclipse.californium.cose.OneKey;
@@ -25,13 +24,13 @@ public class EdhocEndpointInfo {
     // The outer map has label SIGNATURE_KEY or ECDH_KEY for distinguishing the two key usages. 
     
     // The asymmetric key pairs of this peer (one per supported curve)
-<span class="nc" id="L28">	private HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs = new HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt;();</span>
+<span class="nc" id="L27">	private HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs = new HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt;();</span>
     
     // The identifiers of the authentication credentials of this peer
-<span class="nc" id="L31">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
+<span class="nc" id="L30">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
     
     // The authentication credentials of this peer (one per supported curve)
-<span class="nc" id="L34">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
+<span class="nc" id="L33">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
 	
 	// Public keys of other peers
 	// 
@@ -55,10 +54,31 @@ public class EdhocEndpointInfo {
 	// List of supported cipher suites
 	private List&lt;Integer&gt; supportedCipherSuites;
 	
+	// Set of supported EAD items
+	private Set&lt;Integer&gt; supportedEADs;
+	
+	// This data structure collects instructions provided by the application for producing EAD items
+	// to include in outgoing EDHOC messages. The production of these EAD items is not related to or
+	// triggered by the consumption of other EAD items included in incoming EDHOC messages.
+	// 
+	// This data structure can be null if the application does not specify the production of any of such EAD items. 
+	//
+	// The outer map key indicates the outgoing EDHOC message in question.
+	//
+	// Each inner list specifies a sequence of element pairs (CBOR integer, CBOR map).
+	// The CBOR integer specifies the ead_label in case of non-critical EAD item,
+	// or the corresponding negative value in case of critical EAD item.
+	// The CBOR map provides input on how to produce the EAD item,
+	// with the map keys from a namespace specific of the ead_label.
+	private HashMap&lt;Integer, List&lt;CBORObject&gt;&gt; eadProductionInput;
+	
+	// The trust model for validating authentication credentials of other peers
+	private int trustModel;
+	
 	// The database of OSCORE Security Contexts
 	private HashMapCtxDB db;
 	
-	// Lookup identifier to be associated with the OSCORE Security Context
+	// URI of the EDHOC resource, also used as lookup identifier associated with the created OSCORE Security Context
 	private String uri;
 	
 	// The size of the Replay Window to use in an OSCORE Recipient Context
@@ -69,11 +89,7 @@ public class EdhocEndpointInfo {
 	
 	// The collection of application profiles - The lookup key is the full URI of the EDHOC resource
 	private HashMap&lt;String, AppProfile&gt; appProfiles;
-	
-	// The processor of External Authorization Data
-	private EDP edp;
-	
-	
+		
 	public EdhocEndpointInfo(HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds,
 							 HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds,
 							 HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs,
@@ -81,96 +97,109 @@ public class EdhocEndpointInfo {
 							 HashMap&lt;CBORObject, CBORObject&gt; peerCredentials,
 							 HashMap&lt;CBORObject, EdhocSession&gt; edhocSessions,
 							 Set&lt;CBORObject&gt; usedConnectionIds, List&lt;Integer&gt; supportedCipherSuites,
-							 HashMapCtxDB db, String uri, int OSCORE_REPLAY_WINDOW, int MAX_UNFRAGMENTED_SIZE,
-<span class="nc" id="L85">							 HashMap&lt;String, AppProfile&gt; appProfiles, EDP edp) {</span>
+							 Set&lt;Integer&gt; supportedEADs, HashMap&lt;Integer, List&lt;CBORObject&gt;&gt; eadProductionInput,
+							 int trustModel, HashMapCtxDB db, String uri, int OSCORE_REPLAY_WINDOW,
+<span class="nc" id="L102">							 int MAX_UNFRAGMENTED_SIZE, HashMap&lt;String, AppProfile&gt; appProfiles) {</span>
 
 		
-<span class="nc" id="L88">		this.keyPairs = keyPairs;</span>
-<span class="nc" id="L89">		this.idCreds = idCreds;</span>
-<span class="nc" id="L90">		this.creds = creds;</span>
+<span class="nc" id="L105">		this.keyPairs = keyPairs;</span>
+<span class="nc" id="L106">		this.idCreds = idCreds;</span>
+<span class="nc" id="L107">		this.creds = creds;</span>
 						
-<span class="nc" id="L92">		this.peerPublicKeys = peerPublicKeys;</span>
-<span class="nc" id="L93">		this.peerCredentials = peerCredentials;</span>
-<span class="nc" id="L94">		this.edhocSessions = edhocSessions;</span>
-<span class="nc" id="L95">		this .usedConnectionIds = usedConnectionIds;</span>
-<span class="nc" id="L96">		this.supportedCipherSuites = supportedCipherSuites;</span>
-<span class="nc" id="L97">		this.db = db;</span>
-<span class="nc" id="L98">		this.uri = uri;</span>
-<span class="nc" id="L99">		this.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
-<span class="nc" id="L100">		this.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
-<span class="nc" id="L101">		this.appProfiles = appProfiles;</span>
-<span class="nc" id="L102">		this.edp = edp;</span>
+<span class="nc" id="L109">		this.peerPublicKeys = peerPublicKeys;</span>
+<span class="nc" id="L110">		this.peerCredentials = peerCredentials;</span>
+<span class="nc" id="L111">		this.edhocSessions = edhocSessions;</span>
+<span class="nc" id="L112">		this.usedConnectionIds = usedConnectionIds;</span>
+<span class="nc" id="L113">		this.supportedCipherSuites = supportedCipherSuites;</span>
+<span class="nc" id="L114">		this.supportedEADs = supportedEADs;</span>
+<span class="nc" id="L115">		this.eadProductionInput = eadProductionInput;</span>
+<span class="nc" id="L116">		this.trustModel = trustModel;</span>
+<span class="nc" id="L117">		this.db = db;</span>
+<span class="nc" id="L118">		this.uri = uri;</span>
+<span class="nc" id="L119">		this.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
+<span class="nc" id="L120">		this.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
+<span class="nc" id="L121">		this.appProfiles = appProfiles;</span>
 		
-<span class="nc" id="L104">	}</span>
+<span class="nc" id="L123">	}</span>
 	
 	//Return a reference to the set of EDHOC sessions
 	public HashMap&lt;CBORObject, EdhocSession&gt; getEdhocSessions() {
-<span class="nc" id="L108">		return edhocSessions;</span>
+<span class="nc" id="L127">		return edhocSessions;</span>
 	}
 
 	// Return a reference to the set of Application Profiles
 	public HashMap&lt;String, AppProfile&gt; getAppProfiles() {
-<span class="nc" id="L113">		return appProfiles;</span>
-	}
-	
-	// Return a reference to the processor of External Authorization Data
-	public EDP getEdp() {
-<span class="nc" id="L118">		return edp;</span>
+<span class="nc" id="L132">		return appProfiles;</span>
 	}
 	
 	// Return the identity key pair
 	public HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; getKeyPairs() {
-<span class="nc" id="L123">		return this.keyPairs;</span>
+<span class="nc" id="L137">		return this.keyPairs;</span>
 	}
 	
 	// Return the ID_CRED used by this peer
 	public HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; getIdCreds() {
-<span class="nc" id="L128">		return this.idCreds;</span>
+<span class="nc" id="L142">		return this.idCreds;</span>
 	}
 	
 	// Return the CRED used by this peer
 	public HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; getCreds() {
-<span class="nc" id="L133">		return this.creds;</span>
+<span class="nc" id="L147">		return this.creds;</span>
 	}
 	
 	// Return the set of peer public keys
 	public HashMap&lt;CBORObject, OneKey&gt; getPeerPublicKeys() {
-<span class="nc" id="L138">		return peerPublicKeys;</span>
+<span class="nc" id="L152">		return peerPublicKeys;</span>
 	}
 	
 	// Return the set of peer credentials
 	public HashMap&lt;CBORObject, CBORObject&gt; getPeerCredentials() {
-<span class="nc" id="L143">		return peerCredentials;</span>
+<span class="nc" id="L157">		return peerCredentials;</span>
 	}
 	
 	// Return the default OSCORE Replay Window size
 	public int getOscoreReplayWindow() {
-<span class="nc" id="L148">		return OSCORE_REPLAY_WINDOW;</span>
+<span class="nc" id="L162">		return OSCORE_REPLAY_WINDOW;</span>
 	}
 	
 	// Return the default MAX_UNFRAGMENTED_SIZE
 		public int getOscoreMaxUnfragmentedSize() {
-<span class="nc" id="L153">			return MAX_UNFRAGMENTED_SIZE;</span>
+<span class="nc" id="L167">			return MAX_UNFRAGMENTED_SIZE;</span>
 		}
 	
 	// Return the database of OSCORE Security Contexts
 	public HashMapCtxDB getOscoreDb() {
-<span class="nc" id="L158">		return db;</span>
+<span class="nc" id="L172">		return db;</span>
 	}
 	
 	// Return the lookup identifier for the Security Context
 	public String getUri() {
-<span class="nc" id="L163">		return uri;</span>
+<span class="nc" id="L177">		return uri;</span>
 	}
 	
 	// Return the set of supported cipher suites
 	public List&lt;Integer&gt; getSupportedCipherSuites() {
-<span class="nc" id="L168">		return supportedCipherSuites;</span>
+<span class="nc" id="L182">		return supportedCipherSuites;</span>
 	}
-	
+		
 	// Return the set of used Connection Identifiers
 	public Set&lt;CBORObject&gt; getUsedConnectionIds() {
-<span class="nc" id="L173">		return usedConnectionIds;</span>
+<span class="nc" id="L187">		return usedConnectionIds;</span>
+	}
+	
+	// Return the set of supported EAD items
+	public Set&lt;Integer&gt; getSupportedEADs() {
+<span class="nc" id="L192">		return supportedEADs;</span>
+	}
+	
+	// Return the information to produce EAD items for outgoing messages
+	public HashMap&lt;Integer, List&lt;CBORObject&gt;&gt; getEadProductionInput() {
+<span class="nc" id="L197">		return eadProductionInput;</span>
+	}
+	
+	// Return the trust model used for validating authentication credentials of other peers
+	public int getTrustModel() {
+<span class="nc" id="L202">		return trustModel;</span>
 	}
 	
 }

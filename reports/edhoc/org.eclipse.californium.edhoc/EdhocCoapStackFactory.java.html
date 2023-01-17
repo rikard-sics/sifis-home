@@ -12,7 +12,7 @@
  * 
  * Contributors:
  *    Marco Tiloca (RISE)
- *    Rikard Höglund (RISE)
+ *    Rikard HÃ¶glund (RISE)
  *    
  ******************************************************************************/
 package org.eclipse.californium.edhoc;
