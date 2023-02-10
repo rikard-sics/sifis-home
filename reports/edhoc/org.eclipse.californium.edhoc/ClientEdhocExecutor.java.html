@@ -658,17 +658,13 @@ import com.upokecenter.cbor.CBORType;
 <span class="nc" id="L658">							edhocMessageResp = client.advanced(edhocMessageReq3);</span>
 <span class="nc" id="L659">						} catch (ConnectorException e) {</span>
 <span class="nc" id="L660">							System.err.println(&quot;ConnectorException when sending EDHOC Error Message&quot;);</span>
-<span class="nc" id="L661">							Util.purgeSession(session, connectionIdentifier, edhocSessions, usedConnectionIds);</span>
-<span class="nc" id="L662">							edhocEndpointInfo.getOscoreDb().removeContext(ctx); // Delete the previously derived OSCORE Security Context</span>
-<span class="nc" id="L663">							client.shutdown();</span>
-<span class="nc" id="L664">							return false;</span>
-<span class="nc" id="L665">						} catch (IOException e) {</span>
-<span class="nc" id="L666">							System.err.println(&quot;IOException when sending EDHOC Error Message&quot;);</span>
-<span class="nc" id="L667">							Util.purgeSession(session, connectionIdentifier, edhocSessions, usedConnectionIds);</span>
-<span class="nc" id="L668">							edhocEndpointInfo.getOscoreDb().removeContext(ctx); // Delete the previously derived OSCORE Security Context</span>
-<span class="nc" id="L669">							client.shutdown();</span>
-<span class="nc" id="L670">							return false;</span>
-<span class="nc" id="L671">						}</span>
+<span class="nc" id="L661">						} catch (IOException e) {</span>
+<span class="nc" id="L662">							System.err.println(&quot;IOException when sending EDHOC Error Message&quot;);</span>
+<span class="nc" id="L663">						}</span>
+<span class="nc" id="L664">						Util.purgeSession(session, connectionIdentifier, edhocSessions, usedConnectionIds);</span>
+<span class="nc" id="L665">						edhocEndpointInfo.getOscoreDb().removeContext(ctx); // Delete the previously derived OSCORE Security Context</span>
+<span class="nc" id="L666">						client.shutdown();</span>
+<span class="nc" id="L667">						return false;</span>
 					}
 				
 				}
@@ -677,8 +673,8 @@ import com.upokecenter.cbor.CBORType;
 							
 		} // End handling of reception of EDHOC message_2
 
-<span class="nc" id="L680">		client.shutdown();</span>
-<span class="nc" id="L681">		return true;</span>
+<span class="nc" id="L676">		client.shutdown();</span>
+<span class="nc" id="L677">		return true;</span>
 		
 	} // End of startEdhocExchangeAsInitiator()
 	
@@ -688,8 +684,8 @@ import com.upokecenter.cbor.CBORType;
 	 */
 	private void processResponseAfterEdhoc(CoapResponse msg) {
 		// Do nothing
-<span class="nc" id="L691">		System.out.println(&quot;ResponseAfterEdhoc()&quot;);</span>
-<span class="nc" id="L692">	}</span>
+<span class="nc" id="L687">		System.out.println(&quot;ResponseAfterEdhoc()&quot;);</span>
+<span class="nc" id="L688">	}</span>
 	
 	
 	/*
@@ -697,43 +693,43 @@ import com.upokecenter.cbor.CBORType;
 	 */
 	private void processErrorMessageAsResponse(CBORObject[] objectList, int messageNumber) {
 
-<span class="nc bnc" id="L700" title="All 2 branches missed.">    	if (objectList != null) {</span>
+<span class="nc bnc" id="L696" title="All 2 branches missed.">    	if (objectList != null) {</span>
     		
-<span class="nc" id="L702">    		int index = 0;</span>
+<span class="nc" id="L698">    		int index = 0;</span>
     		
         	// Retrieve ERR_CODE
-<span class="nc" id="L705">        	int errorCode = objectList[index].AsInt32();</span>
-<span class="nc" id="L706">        	System.out.println(&quot;ERR_CODE: &quot; + errorCode + &quot;\n&quot;);</span>
-<span class="nc" id="L707">        	index++;</span>
+<span class="nc" id="L701">        	int errorCode = objectList[index].AsInt32();</span>
+<span class="nc" id="L702">        	System.out.println(&quot;ERR_CODE: &quot; + errorCode + &quot;\n&quot;);</span>
+<span class="nc" id="L703">        	index++;</span>
         	
         	// Retrieve ERR_INFO
-<span class="nc bnc" id="L710" title="All 2 branches missed.">    		if (errorCode == Constants.ERR_CODE_UNSPECIFIED_ERROR) {</span>
-<span class="nc" id="L711">	        	String errMsg = objectList[index].toString();</span>
-<span class="nc" id="L712">	        	System.out.println(&quot;DIAG_MSG: &quot; + errMsg + &quot;\n&quot;);</span>
-<span class="nc" id="L713">    		}</span>
-<span class="nc bnc" id="L714" title="All 2 branches missed.">    		else if (errorCode == Constants.ERR_CODE_WRONG_SELECTED_CIPHER_SUITE) {</span>
-<span class="nc" id="L715">    			learnedPeerSupportedCipherSuites = new ArrayList&lt;Integer&gt;();</span>
-<span class="nc" id="L716">    			CBORObject suitesR = objectList[index];</span>
+<span class="nc bnc" id="L706" title="All 2 branches missed.">    		if (errorCode == Constants.ERR_CODE_UNSPECIFIED_ERROR) {</span>
+<span class="nc" id="L707">	        	String errMsg = objectList[index].toString();</span>
+<span class="nc" id="L708">	        	System.out.println(&quot;DIAG_MSG: &quot; + errMsg + &quot;\n&quot;);</span>
+<span class="nc" id="L709">    		}</span>
+<span class="nc bnc" id="L710" title="All 2 branches missed.">    		else if (errorCode == Constants.ERR_CODE_WRONG_SELECTED_CIPHER_SUITE) {</span>
+<span class="nc" id="L711">    			learnedPeerSupportedCipherSuites = new ArrayList&lt;Integer&gt;();</span>
+<span class="nc" id="L712">    			CBORObject suitesR = objectList[index];</span>
     			
-<span class="nc bnc" id="L718" title="All 2 branches missed.">				if (suitesR.getType() == CBORType.Integer) {</span>
-<span class="nc" id="L719">					int suite = suitesR.AsInt32();</span>
-<span class="nc" id="L720">					learnedPeerSupportedCipherSuites.add(Integer.valueOf(suite));</span>
-<span class="nc" id="L721">		        	System.out.println(&quot;SUITES_R: &quot; + suite + &quot;\n&quot;);</span>
-<span class="nc" id="L722">				}</span>
-<span class="nc bnc" id="L723" title="All 2 branches missed.">				else if (suitesR.getType() == CBORType.Array) {</span>
-<span class="nc" id="L724">					System.out.print(&quot;SUITES_R: [ &quot; );</span>
-<span class="nc bnc" id="L725" title="All 2 branches missed.">					for (int i = 0; i &lt; suitesR.size(); i++) {</span>
-<span class="nc" id="L726">						int suite = suitesR.get(i).AsInt32();</span>
-<span class="nc" id="L727">						learnedPeerSupportedCipherSuites.add(Integer.valueOf(suite));</span>
-<span class="nc" id="L728">						System.out.print(suite + &quot; &quot; );</span>
+<span class="nc bnc" id="L714" title="All 2 branches missed.">				if (suitesR.getType() == CBORType.Integer) {</span>
+<span class="nc" id="L715">					int suite = suitesR.AsInt32();</span>
+<span class="nc" id="L716">					learnedPeerSupportedCipherSuites.add(Integer.valueOf(suite));</span>
+<span class="nc" id="L717">		        	System.out.println(&quot;SUITES_R: &quot; + suite + &quot;\n&quot;);</span>
+<span class="nc" id="L718">				}</span>
+<span class="nc bnc" id="L719" title="All 2 branches missed.">				else if (suitesR.getType() == CBORType.Array) {</span>
+<span class="nc" id="L720">					System.out.print(&quot;SUITES_R: [ &quot; );</span>
+<span class="nc bnc" id="L721" title="All 2 branches missed.">					for (int i = 0; i &lt; suitesR.size(); i++) {</span>
+<span class="nc" id="L722">						int suite = suitesR.get(i).AsInt32();</span>
+<span class="nc" id="L723">						learnedPeerSupportedCipherSuites.add(Integer.valueOf(suite));</span>
+<span class="nc" id="L724">						System.out.print(suite + &quot; &quot; );</span>
 					}
-<span class="nc" id="L730">					System.out.println(&quot;]\n&quot;);</span>
+<span class="nc" id="L726">					System.out.println(&quot;]\n&quot;);</span>
 				}
     		}
 
     	}
 		
-<span class="nc" id="L736">	}</span>
+<span class="nc" id="L732">	}</span>
 	
     /**
      *  Retrieve the EDHOC session associated with this EDHOC exchange
@@ -741,7 +737,7 @@ import com.upokecenter.cbor.CBORType;
      * @return  The EDHOC session associated with this EDHOC exchange
      */
 	public EdhocSession getEdhocSession() {
-<span class="nc" id="L744">		return this.edhocSession;</span>
+<span class="nc" id="L740">		return this.edhocSession;</span>
 	}
 	
     /**
@@ -751,7 +747,7 @@ import com.upokecenter.cbor.CBORType;
      * @return  The learned list of EDHOC cipher suites supported by the other peer
      */
 	public List&lt;Integer&gt; getLearnedPeerSupportedCipherSuites() {		
-<span class="nc" id="L754">		return this.learnedPeerSupportedCipherSuites;</span>
+<span class="nc" id="L750">		return this.learnedPeerSupportedCipherSuites;</span>
 	}
 	
     /**
@@ -760,7 +756,7 @@ import com.upokecenter.cbor.CBORType;
      * @return  The result application response to the EDHOC+OSCORE combined request
      */
 	public CoapResponse getAppResponseToCombinedRequest() {		
-<span class="nc" id="L763">		return this.appResponseToCombinedRequest;</span>
+<span class="nc" id="L759">		return this.appResponseToCombinedRequest;</span>
 	}
 		
 }
