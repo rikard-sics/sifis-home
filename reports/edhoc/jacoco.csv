@@ -1,6 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-Cf-EDHOC,org.eclipse.californium.edhoc,Util,1176,764,199,87,287,165,147,33,18,17
 Cf-EDHOC,org.eclipse.californium.edhoc,KissEDP,116,0,10,0,25,0,11,0,6,0
+Cf-EDHOC,org.eclipse.californium.edhoc,Util,1176,764,199,87,287,165,147,33,18,17
 Cf-EDHOC,org.eclipse.californium.edhoc,SideProcessor,533,112,57,10,121,30,47,9,15,6
 Cf-EDHOC,org.eclipse.californium.edhoc,EdhocStack,66,0,0,0,5,0,1,0,1,0
 Cf-EDHOC,org.eclipse.californium.edhoc,EdhocCoapStackFactory,70,0,6,0,18,0,7,0,4,0
@@ -15,4 +15,4 @@ Cf-EDHOC,org.eclipse.californium.edhoc,Hkdf,5,215,2,10,1,50,3,7,1,3
 Cf-EDHOC,org.eclipse.californium.edhoc,KeyRemapping,263,408,6,2,49,82,7,16,4,15
 Cf-EDHOC,org.eclipse.californium.edhoc,SharedSecretCalculation.Tuple,0,31,0,0,0,6,0,1,0,1
 Cf-EDHOC,org.eclipse.californium.edhoc,EdhocResource,1125,0,117,0,297,0,64,0,5,0
-Cf-EDHOC,org.eclipse.californium.edhoc,SharedSecretCalculation,3539,1277,35,65,379,270,44,40,16,18
+Cf-EDHOC,org.eclipse.californium.edhoc,SharedSecretCalculation,3544,1272,37,63,380,269,46,38,16,18
