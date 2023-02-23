@@ -45,6 +45,14 @@ If you are developing in Eclipse (and possibly other IDEs) choose the "eclipse" 
 
 Deactive the "default" profile, and activate the "eclipse" profile.
 
+*Right click on "group-applications->Maven->Select Maven Profile...* (CTRL+Alt+P)
+
+Deactive the "default" profile, and activate the "eclipse" profile.
+
+*Right click on "edhoc-applications"->Maven->Select Maven Profile...* (CTRL+Alt+P)
+
+Deactive the "default" profile, and activate the "eclipse" profile.
+
 
 ### MySQL installation
 

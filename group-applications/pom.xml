@@ -21,6 +21,63 @@
 			<url>https://repo1.maven.org/maven2/</url>
 		</repository>
 	</repositories>
+	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<dependencies>
+				<!-- Rikard: Jar file dependencies from Californium -->
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>cf-oscore</artifactId>
+					<version>3.1.0</version>
+					<scope>system</scope>
+					<systemPath>${pom.basedir}/lib/cf-oscore-3.1.0-SNAPSHOT.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>californium-core</artifactId>
+					<version>3.1.0</version>
+					<scope>system</scope>
+					<systemPath>${pom.basedir}/lib/californium-core-3.1.0-SNAPSHOT.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>element-connector</artifactId>
+					<version>3.1.0</version>
+					<scope>system</scope>
+					<systemPath>${pom.basedir}/lib/element-connector-3.1.0-SNAPSHOT.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>scandium</artifactId>
+					<version>3.1.0</version>
+					<scope>system</scope>
+					<systemPath>${pom.basedir}/lib/scandium-3.1.0-SNAPSHOT.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>cf-edhoc</artifactId>
+					<version>3.1.0</version>
+					<scope>system</scope>
+					<systemPath>${pom.basedir}/lib/cf-edhoc-3.1.0-SNAPSHOT.jar</systemPath>
+				</dependency>
+				<dependency>
+					<groupId>se.sics</groupId>
+					<artifactId>ace</artifactId>
+					<version>0.0.1</version>
+					<scope>system</scope>
+					<systemPath>${pom.basedir}/lib/ace-0.0.1-SNAPSHOT.jar</systemPath>
+				</dependency>
+				<!-- Rikard: End Jar file dependencies from Californium -->
+			</dependencies>
+		</profile>
+		<profile>
+			<id>eclipse</id>
+		</profile>
+	</profiles>
 	<dependencies>
 		<dependency> <!-- Rikard: Added for WebSocket -->
 			<groupId>javax.websocket</groupId>
@@ -36,7 +93,7 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
-			<scope>test</scope>
+			<!-- <scope>test</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>com.upokecenter</groupId>
