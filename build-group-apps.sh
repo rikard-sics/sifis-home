@@ -17,6 +17,14 @@ if [ -f "$FILE" ]; then
     echo "$FILE exists."
 else 
     echo "$FILE does not exist."
+    
+    # Copy library Jar files from Californium to ACE lib folder
+    mkdir ace/lib
+    cp californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar ace/lib
+    cp californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar ace/lib
+    cp californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar ace/lib
+    cp californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar ace/lib
+    
     cd ace
     mvn -DskipTests clean install
     cd ..
@@ -31,6 +39,8 @@ cp californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.
 cp californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar group-applications/lib
 
 cp californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar group-applications/lib
+
+cp californium-extended/cf-edhoc/target/cf-edhoc-3.1.0-SNAPSHOT.jar group-applications/lib
 
 cp ace/target/ace-0.0.1-SNAPSHOT.jar group-applications/lib
 
@@ -60,5 +70,11 @@ cp -n ~/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar group-appli
 cp -n ~/.m2/repository/org/slf4j/slf4j-log4j12/1.7.5/slf4j-log4j12-1.7.5.jar group-applications/lib
 cp -n ~/.m2/repository/org/slf4j/slf4j-simple/1.7.5/slf4j-simple-1.7.5.jar group-applications/lib
 
-# Add printing of where Jar ended up and how to run it
+# Printing of where Jar ended up and how to run it
+echo "Jar file containing Group Applications built under group-applications/target/group-applications-0.0.2-SNAPSHOT.jar" 
+echo "Run using (from folder target): "
+echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsServer --help"
+echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreRsServer --help"
+echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsRsClient --help"
+echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.Adversary --help"
 
