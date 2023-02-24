@@ -55,6 +55,9 @@ import se.sics.ace.examples.KissTime;
 import se.sics.ace.oscore.as.GroupOSCOREJoinPDP;
 import se.sics.prototype.support.DBHelper;
 import se.sics.prototype.support.KeyStorage;
+import java.io.File;
+import java.util.Arrays;
+
 
 /**
  * ACE Authorization Server using OSCORE for communication.
@@ -104,6 +107,12 @@ public class OscoreAsServer {
 	 * @throws Exception on failure
 	 */
 	public static void main(String[] args) throws Exception {
+
+
+	String classpath = System.getProperty("java.class.path");
+   String[] classPathValues = classpath.split(File.pathSeparator);
+   System.out.println(Arrays.toString(classPathValues));
+		
 
 		byte[] idContext = null;
 		String myIdentity = buildOscoreIdentity(KeyStorage.aceSenderIds.get("AS"), idContext);

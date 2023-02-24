@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Build Californium (if needed)
 FILE=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
@@ -80,13 +80,64 @@ cp -n ~/.m2/repository/org/slf4j/jul-to-slf4j/1.7.36/jul-to-slf4j-1.7.36.jar gro
 cp -n ~/.m2/repository/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar group-applications/lib
 
 # Printing of where Jar ended up and how to run it
-echo "Jar file containing Group Applications built under group-applications/target/group-applications-0.0.2-SNAPSHOT.jar" 
-echo "Run using (from folder target): "
-echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsServer --help"
-echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreRsServer --help"
-echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsRsClient --help"
-echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.Adversary --help"
+#echo "Jar file containing Group Applications built under group-applications/target/group-applications-0.0.2-SNAPSHOT.jar" 
+#echo "Run using (from folder target): "
+#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsServer --help"
+#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreRsServer --help"
+#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsRsClient --help"
+#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.Adversary --help"
 
 # TODO: Take care of db.pwd
 echo "Warning: A MySQL server must be installed with the root password in group-applications/db.pwd"
+
+# Build individual Jar files
+cd group-applications/target
+echo "Main-Class: se.sics.prototype.apps.OscoreAsServer" > Manifest.template
+echo "Class-Path: lib/cf-oscore-3.1.0-SNAPSHOT.jar" >> Manifest.template
+echo "  lib/scandium-3.1.0-SNAPSHOT.jar" >> Manifest.template
+echo "  lib/slf4j-simple-1.7.5.jar" >> Manifest.template
+echo "  lib/slf4j-api-1.7.36.jar" >> Manifest.template
+echo "  lib/cf-edhoc-3.1.0-SNAPSHOT.jar" >> Manifest.template
+echo "  lib/eddsa-0.3.0.jar" >> Manifest.template
+echo "  lib/jakarta.activation-2.0.0.jar" >> Manifest.template
+echo "  lib/californium-core-3.1.0-SNAPSHOT.jar" >> Manifest.template
+echo "  lib/bcpkix-jdk15on-1.67.jar" >> Manifest.template
+echo "  lib/mysql-connector-java-5.1.47.jar" >> Manifest.template
+echo "  lib/slf4j-api-1.7.5.jar" >> Manifest.template
+echo "  lib/bcprov-jdk15on-1.67.jar" >> Manifest.template
+echo "  lib/jul-to-slf4j-1.7.36.jar" >> Manifest.template
+echo "  lib/ace-0.0.1-SNAPSHOT.jar" >> Manifest.template
+echo "  lib/cbor-4.3.0.jar" >> Manifest.template
+echo "  lib/slf4j-log4j12-1.7.5.jar" >> Manifest.template
+echo "  lib/jakarta.xml.bind-api-3.0.0.jar" >> Manifest.template
+echo "  lib/jakarta.websocket-api-2.0.0.jar" >> Manifest.template
+echo "  lib/slf4j-simple-1.7.36.jar" >> Manifest.template
+echo "  lib/numbers-1.4.3.jar" >> Manifest.template
+echo "  lib/element-connector-3.1.0-SNAPSHOT.jar" >> Manifest.template
+echo -e "\n" >> Manifest.template >> Manifest.template
+
+unzip -o group-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
+head -c -1 -q META-INF/MANIFEST.MF Manifest.template > META-INF/MANIFEST.MF
+
+zip group-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
+cp group-applications-0.0.2-SNAPSHOT.jar ../OscoreAsServer.jar
+
+sed -i "s/OscoreAsServer/OscoreRsServer/" META-INF/MANIFEST.MF
+zip group-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
+cp group-applications-0.0.2-SNAPSHOT.jar ../OscoreRsServer.jar
+
+sed -i "s/OscoreRsServer/OscoreAsRsClient/" META-INF/MANIFEST.MF
+zip group-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
+cp group-applications-0.0.2-SNAPSHOT.jar ../OscoreAsRsClient.jar
+
+sed -i "s/OscoreAsRsClient/Adversary/" META-INF/MANIFEST.MF
+zip group-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
+cp group-applications-0.0.2-SNAPSHOT.jar ../Adversary.jar
+
+rm -rf META-INF
+rm Manifest.template
+cd ..
+cd ..
+
+echo "Jar files containing Group Applications built under group-applications/. Execute them with lib in the same folder." 
 
