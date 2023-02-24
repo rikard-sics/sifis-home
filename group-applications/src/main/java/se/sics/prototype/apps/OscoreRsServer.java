@@ -3002,9 +3002,6 @@ public class OscoreRsServer {
 
 		rand = new Random();
 
-		// Set logging for slf4/blah
-		BasicConfigurator.configure();
-
 		// Set java.util.logging
 		Logger rootLogger = LogManager.getLogManager().getLogger("");
 		rootLogger.setLevel(Level.FINEST);

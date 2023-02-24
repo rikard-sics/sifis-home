@@ -73,6 +73,9 @@ cp -n ~/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar group-appli
 cp -n ~/.m2/repository/org/slf4j/slf4j-log4j12/1.7.5/slf4j-log4j12-1.7.5.jar group-applications/lib
 cp -n ~/.m2/repository/org/slf4j/slf4j-simple/1.7.5/slf4j-simple-1.7.5.jar group-applications/lib
 cp -n ~/.m2/repository/mysql/mysql-connector-java/5.1.47/mysql-connector-java-5.1.47.jar group-applications/lib
+cp -n ~/.m2/repository/org/json/json/20180813/json-20180813.jar group-applications/lib
+cp -n ~/.m2/repository/junit/junit/4.12/junit-4.12.jar group-applications/lib
+cp -n ~/.m2/repository/org/postgresql/postgresql/9.3-1104-jdbc4/postgresql-9.3-1104-jdbc4.jar group-applications/lib
 
 # For Californium's logging
 cp -n ~/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar group-applications/lib
@@ -108,14 +111,18 @@ echo "  lib/bcprov-jdk15on-1.67.jar" >> Manifest.template
 echo "  lib/jul-to-slf4j-1.7.36.jar" >> Manifest.template
 echo "  lib/ace-0.0.1-SNAPSHOT.jar" >> Manifest.template
 echo "  lib/cbor-4.3.0.jar" >> Manifest.template
+echo "  lib/junit-4.12.jar" >> Manifest.template
 echo "  lib/slf4j-log4j12-1.7.5.jar" >> Manifest.template
+echo "  lib/postgresql-9.3-1104-jdbc4.jar" >> Manifest.template
 echo "  lib/jakarta.xml.bind-api-3.0.0.jar" >> Manifest.template
 echo "  lib/jakarta.websocket-api-2.0.0.jar" >> Manifest.template
+echo "  lib/json-20180813.jar" >> Manifest.template
 echo "  lib/slf4j-simple-1.7.36.jar" >> Manifest.template
 echo "  lib/numbers-1.4.3.jar" >> Manifest.template
 echo "  lib/element-connector-3.1.0-SNAPSHOT.jar" >> Manifest.template
 echo -e "\n" >> Manifest.template >> Manifest.template
 
+cp group-applications-0.0.2-SNAPSHOT.jar group-applications-0.0.2-SNAPSHOT.jar.bk
 unzip -o group-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
 head -c -1 -q META-INF/MANIFEST.MF Manifest.template > META-INF/MANIFEST.MF
 
@@ -133,6 +140,8 @@ cp group-applications-0.0.2-SNAPSHOT.jar ../OscoreAsRsClient.jar
 sed -i "s/OscoreAsRsClient/Adversary/" META-INF/MANIFEST.MF
 zip group-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
 cp group-applications-0.0.2-SNAPSHOT.jar ../Adversary.jar
+
+cp group-applications-0.0.2-SNAPSHOT.jar.bk group-applications-0.0.2-SNAPSHOT.jar
 
 rm -rf META-INF
 rm Manifest.template

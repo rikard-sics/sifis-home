@@ -86,6 +86,7 @@ echo "  lib/numbers-1.4.3.jar" >> Manifest.template
 echo "  lib/element-connector-3.1.0-SNAPSHOT.jar" >> Manifest.template
 echo -e "\n" >> Manifest.template
 
+cp edhoc-applications-0.0.2-SNAPSHOT.jar edhoc-applications-0.0.2-SNAPSHOT.jar.bk
 unzip -o edhoc-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
 head -c -1 -q META-INF/MANIFEST.MF Manifest.template > META-INF/MANIFEST.MF
 
@@ -127,6 +128,8 @@ cp edhoc-applications-0.0.2-SNAPSHOT.jar ../Phase4Server.jar
 sed -i "s/Phase4Server/Phase4Client/" META-INF/MANIFEST.MF
 zip edhoc-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
 cp edhoc-applications-0.0.2-SNAPSHOT.jar ../Phase4Client.jar
+
+cp edhoc-applications-0.0.2-SNAPSHOT.jar.bk edhoc-applications-0.0.2-SNAPSHOT.jar
 
 rm -rf META-INF
 rm Manifest.template
