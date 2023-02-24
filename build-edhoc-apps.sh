@@ -13,22 +13,14 @@ fi
 
 # Copy library Jar files from Californium to EDHOC Apps lib folder
 mkdir edhoc-applications/lib
-cp californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT-sources.jar edhoc-applications/lib
 cp californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar edhoc-applications/lib
 
 cp californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar edhoc-applications/lib
-cp californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT-sources.jar edhoc-applications/lib
-cp californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT-tests.jar edhoc-applications/lib
 
-cp californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT-sources.jar edhoc-applications/lib
 cp californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar edhoc-applications/lib
-cp californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT-tests.jar edhoc-applications/lib
 
-cp californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT-sources.jar edhoc-applications/lib
-cp californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT-tests.jar edhoc-applications/lib
 cp californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar edhoc-applications/lib
 
-cp californium-extended/cf-edhoc/target/cf-edhoc-3.1.0-SNAPSHOT-sources.jar edhoc-applications/lib
 cp californium-extended/cf-edhoc/target/cf-edhoc-3.1.0-SNAPSHOT.jar edhoc-applications/lib
 
 # Run EDHOC Apps JUnit tests
@@ -39,27 +31,23 @@ echo "*** Building EDHOC Applications ***"
 # mvn clean install | tee mvn_res
 mvn clean org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent install org.jacoco:jacoco-maven-plugin:0.8.6:report | tee mvn_res
 if grep 'BUILD FAILURE' mvn_res;then exit 1; fi;
-if grep 'BUILD SUCCESS' mvn_res;then exit 0; else exit 1; fi; #FIXME
+if grep 'BUILD SUCCESS' mvn_res;then echo "BUILD SUCCESS"; else exit 1; fi;
 rm mvn_res
 cd ..
 
-# TODO: Add copying of needed Jars
-#bcpkix-jdk15on-1.67.jar
-#bcprov-jdk15on-1.67.jar
-#californium-core-3.1.0-SNAPSHOT.jar
-#cbor-4.3.0.jar
-#cf-edhoc-3.1.0-SNAPSHOT.jar
-#cf-oscore-3.1.0-SNAPSHOT.jar
-#eddsa-0.3.0.jar
-#element-connector-3.1.0-SNAPSHOT.jar
-#jakarta.activation-2.0.0.jar
-#jakarta.websocket-api-2.0.0.jar
-#jakarta.xml.bind-api-3.0.0.jar
-#jcl-over-slf4j-1.7.5.jar
-#numbers-1.4.3.jar
-#scandium-3.1.0-SNAPSHOT.jar
-#slf4j-api-1.7.5.jar
-#slf4j-log4j12-1.7.5.jar
-#slf4j-simple-1.7.5.jar
+# Copy necessary dependencies
+cp -n ~/.m2/repository/org/bouncycastle/bcpkix-jdk15on/1.67/bcpkix-jdk15on-1.67.jar edhoc-applications/lib
+cp -n ~/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.67/bcprov-jdk15on-1.67.jar edhoc-applications/lib
+cp -n ~/.m2/repository/com/upokecenter/cbor/4.3.0/cbor-4.3.0.jar edhoc-applications/lib
+cp -n ~/.m2/repository/net/i2p/crypto/eddsa/0.3.0/eddsa-0.3.0.jar edhoc-applications/lib
+cp -n ~/.m2/repository/com/sun/activation/jakarta.activation/2.0.0/jakarta.activation-2.0.0.jar edhoc-applications/lib
+cp -n ~/.m2/repository/jakarta/websocket/jakarta.websocket-api/2.0.0/jakarta.websocket-api-2.0.0.jar edhoc-applications/lib
+cp -n ~/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/3.0.0/jakarta.xml.bind-api-3.0.0.jar edhoc-applications/lib
+cp -n ~/.m2/repository/org/slf4j/jcl-over-slf4j/1.7.5/jcl-over-slf4j-1.7.5.jar edhoc-applications/lib
+cp -n ~/.m2/repository/com/github/peteroupc/numbers/1.4.3/numbers-1.4.3.jar edhoc-applications/lib
+cp -n ~/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar edhoc-applications/lib
+cp -n ~/.m2/repository/org/slf4j/slf4j-log4j12/1.7.5/slf4j-log4j12-1.7.5.jar edhoc-applications/lib
+cp -n ~/.m2/repository/org/slf4j/slf4j-simple/1.7.5/slf4j-simple-1.7.5.jar edhoc-applications/lib
 
 # Add printing of where Jar ended up and how to run it
+
