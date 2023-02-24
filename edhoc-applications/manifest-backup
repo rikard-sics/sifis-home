@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Built-By: segridn
+Created-By: Apache Maven 3.6.3
+Build-Jdk: 1.8.0_321
+Main-Class: se.sics.edhocapps.Phase2Server
+Class-Path: edhoc-applications-0.0.2-SNAPSHOT.jar
+  jakarta.websocket-api-2.0.0.jar
+  jakarta.xml.bind-api-3.0.0.jar
+  californium-core-3.1.0-SNAPSHOT.jar
+  bcprov-jdk15on-1.67.jar
+  numbers-1.4.3.jar
+  slf4j-simple-1.7.5.jar
+  cbor-4.3.0.jar
+  scandium-3.1.0-SNAPSHOT.jar
+  jcl-over-slf4j-1.7.5.jar
+  element-connector-3.1.0-SNAPSHOT.jar
+  cf-oscore-3.1.0-SNAPSHOT.jar
+  jakarta.activation-2.0.0.jar
+  bcpkix-jdk15on-1.67.jar
+  eddsa-0.3.0.jar
+  slf4j-log4j12-1.7.5.jar
+  cf-edhoc-3.1.0-SNAPSHOT.jar
+  slf4j-api-1.7.5.jar
+

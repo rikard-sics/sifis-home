@@ -31,6 +31,7 @@ else
 fi
 
 # Copy library Jar files from Californium to Group Apps lib folder
+# Dependencies for building with Maven
 mkdir group-applications/lib
 cp californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar group-applications/lib
 
@@ -40,6 +41,7 @@ cp californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar group-a
 
 cp californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar group-applications/lib
 
+#Remove?
 cp californium-extended/cf-edhoc/target/cf-edhoc-3.1.0-SNAPSHOT.jar group-applications/lib
 
 cp ace/target/ace-0.0.1-SNAPSHOT.jar group-applications/lib
@@ -57,6 +59,7 @@ rm mvn_res
 cd ..
 
 # Copy necessary dependencies
+# Dependencies for running
 cp -n ~/.m2/repository/org/bouncycastle/bcpkix-jdk15on/1.67/bcpkix-jdk15on-1.67.jar group-applications/lib
 cp -n ~/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.67/bcprov-jdk15on-1.67.jar group-applications/lib
 cp -n ~/.m2/repository/com/upokecenter/cbor/4.3.0/cbor-4.3.0.jar group-applications/lib
@@ -77,4 +80,6 @@ echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.
 echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreRsServer --help"
 echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsRsClient --help"
 echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.Adversary --help"
+
+# TODO: Take care of db.pwd
 

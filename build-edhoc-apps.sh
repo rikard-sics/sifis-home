@@ -12,6 +12,7 @@ else
 fi
 
 # Copy library Jar files from Californium to EDHOC Apps lib folder
+# Dependencies for building with Maven
 mkdir edhoc-applications/lib
 cp californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar edhoc-applications/lib
 
@@ -36,6 +37,7 @@ rm mvn_res
 cd ..
 
 # Copy necessary dependencies
+# Dependencies for running
 cp -n ~/.m2/repository/org/bouncycastle/bcpkix-jdk15on/1.67/bcpkix-jdk15on-1.67.jar edhoc-applications/lib
 cp -n ~/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.67/bcprov-jdk15on-1.67.jar edhoc-applications/lib
 cp -n ~/.m2/repository/com/upokecenter/cbor/4.3.0/cbor-4.3.0.jar edhoc-applications/lib

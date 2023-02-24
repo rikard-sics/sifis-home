@@ -45,18 +45,19 @@ import org.eclipse.californium.edhoc.EdhocResource;
 import org.eclipse.californium.edhoc.EdhocSession;
 import org.eclipse.californium.edhoc.SharedSecretCalculation;
 import org.eclipse.californium.edhoc.Util;
-import org.eclipse.californium.elements.config.Configuration;
 import org.eclipse.californium.elements.util.NetworkInterfacesUtil;
 import org.eclipse.californium.elements.util.StringUtil;
 import org.eclipse.californium.oscore.HashMapCtxDB;
 import org.eclipse.californium.oscore.OSCoreResource;
+import java.io.File;
+import java.util.Arrays;
 
 import com.upokecenter.cbor.CBORObject;
 
-public class Phase1Server extends CoapServer {
+public class Phase1Server {
 
-	private static final int COAP_PORT = Configuration.getStandard().get(CoapConfig.COAP_PORT);
-
+	private static final int COAP_PORT = 80;
+	
 	// private static final int COAP_PORT = 5690;
 
 	// Set to True if this CoAP server is the EDHOC responder (only flow available at the moment)
@@ -120,7 +121,7 @@ public class Phase1Server extends CoapServer {
 	private static HashMap<String, AppProfile> appProfiles = new HashMap<String, AppProfile>();
 	
 	// The database of OSCORE Security Contexts
-	private final static HashMapCtxDB db = new HashMapCtxDB();
+	private final static HashMapCtxDB db = null;
 	
 	// Lookup identifier to be associated with the OSCORE Security Context
 	private final static String uriLocal = "coap://localhost";
@@ -135,13 +136,13 @@ public class Phase1Server extends CoapServer {
 	 * Application entry point.
 	 */
 	public static void main(String[] args) {
+	
+	String classpath = System.getProperty("java.class.path");
+   String[] classPathValues = classpath.split(File.pathSeparator);
+   System.out.println(Arrays.toString(classPathValues));
 		
 		// Insert EdDSA security provider
 		Util.installCryptoProvider();
-
-		// Enable EDHOC stack with EDHOC and OSCORE layers
-		EdhocCoapStackFactory.useAsDefault(db, edhocSessions, peerPublicKeys, peerCredentials,
-				                           usedConnectionIds, OSCORE_REPLAY_WINDOW, MAX_UNFRAGMENTED_SIZE);
 
 		// Add the supported ciphersuites
 		setupSupportedCipherSuites();
@@ -174,8 +175,6 @@ public class Phase1Server extends CoapServer {
 
 		Phase1Server server = new Phase1Server();
 		// add endpoints on all IP addresses
-		server.addEndpoints(udp);
-		server.start();
 		
 		System.out.println("Server started");
 
@@ -186,38 +185,17 @@ public class Phase1Server extends CoapServer {
 		// runTests();		
 	}
 
-	/**
-	 * Add individual endpoints listening on default CoAP port on all IPv4
-	 * addresses of all network interfaces.
-	 */
-	private void addEndpoints(boolean udp) {
-		Configuration config = Configuration.getStandard();
-		for (InetAddress addr : NetworkInterfacesUtil.getNetworkInterfaces()) {
-			InetSocketAddress bindToAddress = new InetSocketAddress(addr, COAP_PORT);
-			if (udp) {
-				CoapEndpoint.Builder builder = new CoapEndpoint.Builder();
-				builder.setInetSocketAddress(bindToAddress);
-				builder.setConfiguration(config);
-				addEndpoint(builder.build());
-			}
-
-		}
-	}
-
 	/*
 	 * Constructor for a new server. Here, the resources of the server are initialized.
 	 */
 	public Phase1Server() {
 
 		// provide an instance of a Hello-World resource
-		add(new HelloWorldResource());
 		
-		// add light resource
-		add(new LightResource("light"));
 
 		// provide an instance of a .well-known resource
 		CoapResource wellKnownResource = new WellKnown();
-		add(wellKnownResource);
+		
 		
 		// If EAD items have to be produced for outgoing EDHOC messages
 		// (irrespective of the consumption of EAD items
