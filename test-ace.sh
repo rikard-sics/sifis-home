@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Execute Junit tests for ACE and save as Jacoco test reports
+
 # Build Californium (if needed)
 FILE=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
 if [ -f "$FILE" ]; then

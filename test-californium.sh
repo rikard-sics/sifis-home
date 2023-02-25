@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Execute Junit tests for Californium and save as Jacoco test reports
+
 # https://stackoverflow.com/questions/65092032/maven-build-failed-but-exit-code-is-still-0
 
 cd californium-extended

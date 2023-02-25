@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Configure and prepare projects for import in Eclipse
+
 cd ace
 mvn -P eclipse eclipse:eclipse
 cd ..

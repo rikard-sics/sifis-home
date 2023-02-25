@@ -58,13 +58,6 @@
 					<systemPath>${pom.basedir}/lib/scandium-3.1.0-SNAPSHOT.jar</systemPath>
 				</dependency>
 				<dependency>
-					<groupId>org.eclipse.californium</groupId>
-					<artifactId>cf-edhoc</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/cf-edhoc-3.1.0-SNAPSHOT.jar</systemPath>
-				</dependency>
-				<dependency>
 					<groupId>se.sics</groupId>
 					<artifactId>ace</artifactId>
 					<version>0.0.1</version>

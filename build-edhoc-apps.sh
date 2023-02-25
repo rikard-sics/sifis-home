@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Builds DHT-enabled standalone Jar files for the EDHOC Applications
+# Phase0Server: CoAP-only server
+# Phase0Client: CoAP-only client
+# Phase1Server: EDHOC server using method 0 and no optimized request
+# Phase1Client: EDHOC client using method 0 and no optimized request
+# Phase2Server: EDHOC server using method 3 and no optimized request
+# Phase2Client: EDHOC client using method 3 and no optimized request
+# Phase3Server: EDHOC server using method 0 and the optimized request
+# Phase3Client: EDHOC client using method 0 and the optimized request
+# Phase4Server: EDHOC server using method 3 and the optimized request
+# Phase4Client: EDHOC client using method 3 and the optimized request
+
 # Build Californium (if needed)
 FILE=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
 if [ -f "$FILE" ]; then
@@ -46,6 +58,11 @@ cp -n ~/.m2/repository/com/sun/activation/jakarta.activation/2.0.0/jakarta.activ
 cp -n ~/.m2/repository/jakarta/websocket/jakarta.websocket-api/2.0.0/jakarta.websocket-api-2.0.0.jar edhoc-applications/lib
 cp -n ~/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/3.0.0/jakarta.xml.bind-api-3.0.0.jar edhoc-applications/lib
 cp -n ~/.m2/repository/com/github/peteroupc/numbers/1.4.3/numbers-1.4.3.jar edhoc-applications/lib
+cp -n ~/.m2/repository/org/glassfish/tyrus/tyrus-client/2.0.0/tyrus-client-2.0.0.jar edhoc-applications/lib
+cp -n ~/.m2/repository/org/glassfish/tyrus/tyrus-container-grizzly-client/2.0.0/tyrus-container-grizzly-client-2.0.0.jar edhoc-applications/lib
+cp -n ~/.m2/repository/javax/websocket/javax.websocket-api/1.1/javax.websocket-api-1.1.jar edhoc-applications/lib
+cp -n ~/.m2/repository/org/glassfish/tyrus/tyrus-core/2.0.0/tyrus-core-2.0.0.jar edhoc-applications/lib #TODO: Add in pom?
+cp -n ~/.m2/repository/org/glassfish/tyrus/tyrus-spi/2.0.0/tyrus-spi-2.0.0.jar edhoc-applications/lib #TODO: Add in pom?
 
 cp -n ~/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar edhoc-applications/lib
 cp -n ~/.m2/repository/org/slf4j/jul-to-slf4j/1.7.36/jul-to-slf4j-1.7.36.jar edhoc-applications/lib
@@ -67,28 +84,33 @@ cp -n ~/.m2/repository/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar edh
 
 # Build individual Jar files
 cd edhoc-applications/target
-echo "Main-Class: se.sics.edhocapps.Phase0Server" > Manifest.template
-echo "Class-Path: lib/cf-oscore-3.1.0-SNAPSHOT.jar" >> Manifest.template
-echo "  lib/scandium-3.1.0-SNAPSHOT.jar" >> Manifest.template
-echo "  lib/slf4j-api-1.7.36.jar" >> Manifest.template
-echo "  lib/cf-edhoc-3.1.0-SNAPSHOT.jar" >> Manifest.template
-echo "  lib/eddsa-0.3.0.jar" >> Manifest.template
-echo "  lib/jakarta.activation-2.0.0.jar" >> Manifest.template
-echo "  lib/californium-core-3.1.0-SNAPSHOT.jar" >> Manifest.template
-echo "  lib/bcpkix-jdk15on-1.67.jar" >> Manifest.template
-echo "  lib/bcprov-jdk15on-1.67.jar" >> Manifest.template
-echo "  lib/jul-to-slf4j-1.7.36.jar" >> Manifest.template
-echo "  lib/cbor-4.3.0.jar" >> Manifest.template
-echo "  lib/jakarta.xml.bind-api-3.0.0.jar" >> Manifest.template
-echo "  lib/jakarta.websocket-api-2.0.0.jar" >> Manifest.template
-echo "  lib/slf4j-simple-1.7.36.jar" >> Manifest.template
-echo "  lib/numbers-1.4.3.jar" >> Manifest.template
-echo "  lib/element-connector-3.1.0-SNAPSHOT.jar" >> Manifest.template
-echo -e "\n" >> Manifest.template
+echo "Main-Class: se.sics.edhocapps.Phase0Server" > Manifest.addition
+echo "Class-Path: lib/cf-oscore-3.1.0-SNAPSHOT.jar" >> Manifest.addition
+echo "  lib/scandium-3.1.0-SNAPSHOT.jar" >> Manifest.addition
+echo "  lib/slf4j-api-1.7.36.jar" >> Manifest.addition
+echo "  lib/cf-edhoc-3.1.0-SNAPSHOT.jar" >> Manifest.addition
+echo "  lib/eddsa-0.3.0.jar" >> Manifest.addition
+echo "  lib/jakarta.activation-2.0.0.jar" >> Manifest.addition
+echo "  lib/californium-core-3.1.0-SNAPSHOT.jar" >> Manifest.addition
+echo "  lib/bcpkix-jdk15on-1.67.jar" >> Manifest.addition
+echo "  lib/bcprov-jdk15on-1.67.jar" >> Manifest.addition
+echo "  lib/jul-to-slf4j-1.7.36.jar" >> Manifest.addition
+echo "  lib/cbor-4.3.0.jar" >> Manifest.addition
+echo "  lib/jakarta.xml.bind-api-3.0.0.jar" >> Manifest.addition
+echo "  lib/jakarta.websocket-api-2.0.0.jar" >> Manifest.addition
+echo "  lib/slf4j-simple-1.7.36.jar" >> Manifest.addition
+echo "  lib/numbers-1.4.3.jar" >> Manifest.addition
+echo "  lib/element-connector-3.1.0-SNAPSHOT.jar" >> Manifest.addition
+echo "  lib/tyrus-client-2.0.0.jar" >> Manifest.addition
+echo "  lib/tyrus-container-grizzly-client-2.0.0.jar" >> Manifest.addition
+echo "  lib/javax.websocket-api-1.1.jar" >> Manifest.addition
+echo "  lib/tyrus-core-2.0.0.jar" >> Manifest.addition
+echo "  lib/tyrus-spi-2.0.0.jar" >> Manifest.addition
+echo -e "\n" >> Manifest.addition
 
 cp edhoc-applications-0.0.2-SNAPSHOT.jar edhoc-applications-0.0.2-SNAPSHOT.jar.bk
 unzip -o edhoc-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
-head -c -1 -q META-INF/MANIFEST.MF Manifest.template > META-INF/MANIFEST.MF
+head -c -1 -q META-INF/MANIFEST.MF Manifest.addition > META-INF/MANIFEST.MF
 
 zip edhoc-applications-0.0.2-SNAPSHOT.jar META-INF/MANIFEST.MF
 cp edhoc-applications-0.0.2-SNAPSHOT.jar ../Phase0Server.jar
@@ -132,9 +154,9 @@ cp edhoc-applications-0.0.2-SNAPSHOT.jar ../Phase4Client.jar
 cp edhoc-applications-0.0.2-SNAPSHOT.jar.bk edhoc-applications-0.0.2-SNAPSHOT.jar
 
 rm -rf META-INF
-rm Manifest.template
+rm Manifest.addition
 cd ..
 cd ..
 
-echo "Jar files containing EDHOC Applications built under edhoc-applications/. Execute them with lib in the same folder." 
+echo "Jar files containing EDHOC Applications built under edhoc-applications/. Execute them with lib in the same folder. Use --help to see possible arguments." 
 
