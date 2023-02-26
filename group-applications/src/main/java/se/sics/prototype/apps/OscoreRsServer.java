@@ -91,9 +91,6 @@ import se.sics.ace.oscore.rs.OscoreAuthzInfoGroupOSCORE;
 import se.sics.ace.rs.AsRequestCreationHints;
 import se.sics.ace.rs.TokenRepository;
 import se.sics.prototype.support.KeyStorage;
-import java.io.File;
-import java.util.Arrays;
-
 
 /**
  * ACE Resource Server application.
@@ -2992,13 +2989,6 @@ public class OscoreRsServer {
 	 * @throws Exception on failure
 	 */
 	public static void main(String[] args) throws Exception {
-
-
-
-	String classpath = System.getProperty("java.class.path");
-   String[] classPathValues = classpath.split(File.pathSeparator);
-   System.out.println(Arrays.toString(classPathValues));
-		
 
 		rand = new Random();
 
