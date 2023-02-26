@@ -136,6 +136,8 @@ public class Phase1Server extends CoapServer {
 	 */
 	public static void main(String[] args) {
 		
+		System.out.println("Starting Phase1Server...");
+
 		// Insert EdDSA security provider
 		Util.installCryptoProvider();
 

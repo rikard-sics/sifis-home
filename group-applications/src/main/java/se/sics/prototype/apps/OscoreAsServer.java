@@ -105,6 +105,8 @@ public class OscoreAsServer {
 	 */
 	public static void main(String[] args) throws Exception {
 
+		System.out.println("Starting Authorization Server: OscoreAsServer...");
+
 		byte[] idContext = null;
 		String myIdentity = buildOscoreIdentity(KeyStorage.aceSenderIds.get("AS"), idContext);
 		String asName = "AS";

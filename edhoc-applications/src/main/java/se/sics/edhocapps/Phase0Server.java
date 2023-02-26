@@ -61,7 +61,7 @@ public class Phase0Server {
 	 */
 	public static void main(String[] args) throws OSException {
 
-		// System.out.println("Started Phase 0 server");
+		System.out.println("Starting Phase0Server...");
 
 		OSCoreCtx ctx = new OSCoreCtx(master_secret, false, alg, sid, rid, kdf, 32, master_salt, null,
 				MAX_UNFRAGMENTED_SIZE);

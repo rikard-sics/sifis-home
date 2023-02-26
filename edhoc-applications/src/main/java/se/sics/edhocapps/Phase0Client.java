@@ -91,6 +91,8 @@ public class Phase0Client {
 	 */
 	public static void main(String[] args) throws OSException {
 
+		System.out.println("Starting Phase0Client...");
+
 		// Parse command line arguments
 		for (int i = 0; i < args.length; i += 2) {
 			if (args[i].equals("-server")) {

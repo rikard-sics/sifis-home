@@ -137,6 +137,8 @@ public class OscoreAsRsClient {
 	 */
 	public static void main(String[] args) throws URISyntaxException {
 
+		System.out.println("Starting Group peer (OSCORE Server/Client) that joins groups.: OscoreAsRsClient...");
+
 		// install needed cryptography providers
 		try {
 			org.eclipse.californium.oscore.InstallCryptoProviders.installProvider();

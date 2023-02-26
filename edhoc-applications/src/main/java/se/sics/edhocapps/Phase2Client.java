@@ -226,6 +226,8 @@ public class Phase2Client {
 	 */
 	public static void main(String args[]) {
 
+		System.out.println("Starting Phase2Client...");
+
 		// Parse command line arguments
 		boolean useDht = false;
 		for (int i = 0; i < args.length; i += 2) {

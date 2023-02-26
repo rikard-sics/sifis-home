@@ -2990,6 +2990,8 @@ public class OscoreRsServer {
 	 */
 	public static void main(String[] args) throws Exception {
 
+		System.out.println("Starting Resource Server (Group Manager): OscoreRsServer...");
+
 		rand = new Random();
 
 		// Set java.util.logging
