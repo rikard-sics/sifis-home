@@ -71,16 +71,16 @@ cp -n ~/.m2/repository/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar edh
 # Printing of where Jar ended up and how to run it
 #echo "Jar file containing EDHOC Applications built under edhoc-applications/target/edhoc-applications-0.0.2-SNAPSHOT.jar" 
 #echo "Run using (from folder target): "
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase0Server --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase0Client --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase1Server --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase1Client --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase2Server --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase2Client --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase3Server --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase3Client --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase4Server --help"
-#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase4Client --help"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase0Server"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase0Client -help"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase1Server"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase1Client -help"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase2Server"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase2Client -help"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase3Server"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase3Client -help"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase4Server"
+#echo "java -cp edhoc-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.edhocapps.Phase4Client -help"
 
 # Build individual Jar files
 cd edhoc-applications/target
@@ -158,5 +158,5 @@ rm Manifest.addition
 cd ..
 cd ..
 
-echo "Jar files containing EDHOC Applications built under edhoc-applications/. Execute them with lib in the same folder. Use --help to see possible arguments." 
+echo "Jar files containing EDHOC Applications built under edhoc-applications/. Execute them with lib in the same folder. Use -help to see possible arguments when applicable."
 

@@ -226,13 +226,30 @@ public class Phase3Client {
 	 */
 	public static void main(String args[]) {
 
-		// Toggle usage of DHT or command line input
+		// Parse command line arguments
 		boolean useDht = false;
-		if (args.length > 0 && (args[0].toLowerCase().equals("-dht") || args[0].toLowerCase().equals("-usedht"))) {
-			useDht = true;
-		}
-		if (args.length > 1 && (args[1].toLowerCase().equals("-dht") || args[1].toLowerCase().equals("-usedht"))) {
-			useDht = true;
+		for (int i = 0; i < args.length; i += 2) {
+			if (args[i].equals("-server")) {
+				String serverUri = args[i + 1];
+
+				// URI of the EDHOC resource
+				edhocURI = serverUri + "/.well-known/edhoc";
+
+				// URI of the application resource to target, following an EDHOC
+				// execution
+				appRequestURI = serverUri + "/light";
+
+				// URI of the application resource to target with the EDHOC +
+				// OSCORE combined request, conveying both EDHOC message_3 and
+				// the first OSCORE-protected application request
+				edhocCombinedRequestURI = serverUri + "/light";
+
+			} else if (args[i].toLowerCase().equals("-dht") || args[i].toLowerCase().equals("-usedht")) {
+				useDht = true;
+			} else if (args[i].toLowerCase().equals("-help")) {
+				Support.printHelp();
+				System.exit(0);
+			}
 		}
 
 		Configuration config = Configuration.createWithFile(CONFIG_FILE, CONFIG_HEADER, DEFAULTS);

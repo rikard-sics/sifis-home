@@ -47,4 +47,23 @@ public class Support {
 			System.out.println(str);
 		}
 	}
+
+	/**
+	 * Print help for EDHOC clients
+	 */
+	public static void printHelp() {
+		System.out.println("Usage: [ -server URI ] [ -dht ]");
+
+		System.out.println("Options:");
+
+		System.out.print("-server");
+		System.out.println("\t EDHOC Server base URI");
+
+		System.out.print("-dht");
+		System.out.println("\t Use DHT");
+
+		System.out.print("-help");
+		System.out.println("\t Print help");
+	}
+
 }

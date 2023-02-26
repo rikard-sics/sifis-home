@@ -67,12 +67,10 @@ public class Phase0Client {
 	static CoapClient c;
 
 	// Set accordingly
-	private static String serverAddress = "localhost";
-
 	private final static HashMapCtxDB db = new HashMapCtxDB();
-	private final static String uriLocal = "coap://" + serverAddress;
+	private static String serverUri = "coap://localhost";
 	private final static String hello1 = "/light";
-	private static String lightURI = uriLocal + hello1;
+	private static String lightURI = serverUri + hello1;
 	private final static AlgorithmID alg = AlgorithmID.AES_CCM_16_64_128;
 	private final static AlgorithmID kdf = AlgorithmID.HKDF_HMAC_SHA_256;
 
@@ -92,31 +90,21 @@ public class Phase0Client {
 	 * @throws OSException on OSCORE processing failure
 	 */
 	public static void main(String[] args) throws OSException {
-		if (args.length > 0 && (args[0].toLowerCase().equals("-dht") || args[0].toLowerCase().equals("-usedht"))) {
-			useDht = true;
-		}
-		if (args.length > 1 && (args[1].toLowerCase().equals("-dht") || args[1].toLowerCase().equals("-usedht"))) {
-			useDht = true;
-		}
 
-		// TODO: Parse args in different way
-		URI cmdUri = null;
-		if (args.length > 0) {
-			try {
-				cmdUri = new URI(args[0]);
-			} catch (URISyntaxException e) {
-				//
+		// Parse command line arguments
+		for (int i = 0; i < args.length; i += 2) {
+			if (args[i].equals("-server")) {
+				serverUri = args[i + 1];
+
+				// Set URI for light resource
+				lightURI = serverUri + hello1;
+
+			} else if (args[i].toLowerCase().equals("-dht") || args[i].toLowerCase().equals("-usedht")) {
+				useDht = true;
+			} else if (args[i].toLowerCase().equals("-help")) {
+				Support.printHelp();
+				System.exit(0);
 			}
-		}
-		if (args.length > 1) {
-			try {
-				cmdUri = new URI(args[1]);
-			} catch (URISyntaxException e) {
-				//
-			}
-		}
-		if (cmdUri.getScheme() != null && cmdUri.getScheme().equals("coap")) {
-			lightURI = cmdUri.toString();
 		}
 
 		// Wait for EDHOC Server to become available
@@ -137,7 +125,7 @@ public class Phase0Client {
 
 		OSCoreCtx ctx = new OSCoreCtx(master_secret, true, alg, sid, rid, kdf, 32, master_salt, null,
 				MAX_UNFRAGMENTED_SIZE);
-		db.addContext(uriLocal, ctx);
+		db.addContext(serverUri, ctx);
 
 		OSCoreCoapStackFactory.useAsDefault(db);
 		c = new CoapClient(lightURI);

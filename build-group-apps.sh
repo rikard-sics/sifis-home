@@ -96,10 +96,10 @@ cp -n ~/.m2/repository/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar gro
 # Printing of where Jar ended up and how to run it
 #echo "Jar file containing Group Applications built under group-applications/target/group-applications-0.0.2-SNAPSHOT.jar" 
 #echo "Run using (from folder target): "
-#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsServer --help"
-#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreRsServer --help"
-#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsRsClient --help"
-#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.Adversary --help"
+#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsServer"
+#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreRsServer"
+#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.OscoreAsRsClient -help"
+#echo "java -cp group-applications-0.0.2-SNAPSHOT.jar:../lib/* se.sics.prototype.apps.Adversary"
 
 # TODO: Take care of db.pwd
 echo "Warning: A MySQL server must be installed with the root password in db.pwd in the folder the Jars are launched from"
@@ -164,5 +164,5 @@ rm Manifest.addition
 cd ..
 cd ..
 
-echo "Jar files containing Group Applications built under group-applications/. Execute them with lib in the same folder. Use --help to see possible arguments." 
+echo "Jar files containing Group Applications built under group-applications/. Execute them with lib in the same folder. Use -help to see possible arguments when applicable."
 

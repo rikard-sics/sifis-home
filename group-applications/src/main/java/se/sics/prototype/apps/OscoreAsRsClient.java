@@ -150,6 +150,7 @@ public class OscoreAsRsClient {
 
 		// Set member name, AS and GM to use from command line arguments
 		String memberName = "Client1";
+		int delay = 0;
 		for (int i = 0; i < args.length; i += 2) {
 			if (args[i].equals("-name")) {
 				memberName = args[i + 1];
@@ -161,7 +162,20 @@ public class OscoreAsRsClient {
 				AS_PORT = new URI(args[i + 1]).getPort();
 			} else if (args[i].toLowerCase().equals("-dht") || args[i].toLowerCase().equals("-usedht")) {
 				useDht = true;
+			} else if (args[i].toLowerCase().equals("-delay")) {
+				delay = Integer.parseInt(args[i + 1]);
+			} else if (args[i].toLowerCase().equals("-help")) {
+				printHelp();
+				System.exit(0);
 			}
+		}
+
+		// Delay before starting
+		try {
+			Thread.sleep(delay * 1000);
+		} catch (InterruptedException e) {
+			System.err.println("Failed to sleep before starting");
+			e.printStackTrace();
 		}
 
 		// Explicitly enable the OSCORE Stack
@@ -785,6 +799,30 @@ public class OscoreAsRsClient {
 			System.out.println("*** The response from the RS is null!");
 			System.out.print("No response received");
 		}
+	}
+
+	private static void printHelp() {
+		System.out.println("Usage: [ -name Name ] [ -gm URI ] [ -as URI ] [ -dht ] [-delay Seconds ]");
+
+		System.out.println("Options:");
+
+		System.out.print("-name");
+		System.out.println("\t Name/Role of this peer");
+
+		System.out.print("-gm");
+		System.out.println("\t Group Manager base URI");
+
+		System.out.print("-as");
+		System.out.println("\t Authorization Server base URI");
+
+		System.out.print("-dht");
+		System.out.println("\t Use DHT");
+
+		System.out.print("-delay");
+		System.out.println("\t Delay in seconds before starting");
+
+		System.out.print("-help");
+		System.out.println("\t Print help");
 	}
 
 }
