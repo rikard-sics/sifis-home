@@ -735,8 +735,8 @@ public class OscoreAsRsClient {
 		// Print the join response
 		Tools.printJoinResponse(joinResponse);
 
-		// Pause if this is for server1
-		if (!memberName.toLowerCase().contains("server1")) {
+		// Pause if this is for server7
+		if (!memberName.toLowerCase().contains("server7")) {
 			System.out.println("Has now joined the OSCORE group.");
 		} else {
 			printPause(memberName, "Has now joined the OSCORE group.");
@@ -753,8 +753,8 @@ public class OscoreAsRsClient {
 	 */
 	static void printPause(String memberName, String message) {
 
-		// Only print for Server1
-		if (!memberName.toLowerCase().equals("server1")) {
+		// Only print for Server7
+		if (!memberName.toLowerCase().equals("server7")) {
 			return;
 		}
 
