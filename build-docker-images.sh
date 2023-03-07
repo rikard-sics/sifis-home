@@ -83,7 +83,7 @@ cp ../Dockerfile.base $dockerfile
 echo 'ADD OscoreAsRsClient.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
 echo '' >> $dockerfile
-echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreAsRsClient.jar", "-delay", "60", "-name", "Client1", "-as", "XXX", "-gm", "XXX", "-dht"]' >> $dockerfile
+echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreAsRsClient.jar", "-name", "Client1", "-delay", "60", "-as", "XXX", "-gm", "XXX", "-dht"]' >> $dockerfile
 # docker build -f $dockerfile -t OscoreAsRsClient-Client1 .
 
 # OscoreAsRsClient: Group OSCORE Server/Client which will join the group(s)
