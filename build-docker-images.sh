@@ -36,8 +36,8 @@ echo 'RUN apt-get -y update && \' >> Dockerfile.base
 echo '    apt-get install -yq tzdata && \' >> Dockerfile.base
 echo '    ln -fs /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && \' >> Dockerfile.base
 echo '    dpkg-reconfigure -f noninteractive tzdata && \' >> Dockerfile.base
-echo '    mkdir -p apps/lib && \' >> Dockerfile.base
-echo '    apt-get -y install default-jre-headless' >> Dockerfile.base
+echo '    apt-get -y install default-jre-headless && \' >> Dockerfile.base
+echo '    mkdir -p apps/lib' >> Dockerfile.base
 echo '' >> Dockerfile.base
 
 # Create directories for Group Applications and EDHOC Applications
