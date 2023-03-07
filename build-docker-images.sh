@@ -1,5 +1,8 @@
 #/bin/bash
 
+# This script builds Docker images for the Group & EDHOC Applications
+
+
 # Build the Jar files for the Group & EDHOC Applications if needed
 
 FILE=group-applications/OscoreAsServer.jar
