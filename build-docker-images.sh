@@ -1,8 +1,22 @@
 #/bin/bash
 
-# Build the Jar files for the Group & EDHOC Applications
-./build-edhoc-apps.sh
-./build-group-apps.sh
+# Build the Jar files for the Group & EDHOC Applications if needed
+
+FILE=group-applications/OscoreAsServer.jar
+if [ -f "$FILE" ]; then
+    echo "$FILE exists."
+else 
+    echo "$FILE does not exist."
+    ./build-group-apps.sh
+fi
+
+FILE=edhoc-applications/Phase0Server.jar
+if [ -f "$FILE" ]; then
+    echo "$FILE exists."
+else 
+    echo "$FILE does not exist."
+    ./build-edhoc-apps.sh
+fi
 
 # Create working directory for image building
 mkdir docker-images
