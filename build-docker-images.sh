@@ -3,7 +3,7 @@
 # This script builds Docker images for the Group & EDHOC Applications
 
 
-# Build the Jar files for the Group & EDHOC Applications if needed
+## Build the Jar files for the Group & EDHOC Applications if needed
 
 FILE=group-applications/OscoreAsServer.jar
 if [ -f "$FILE" ]; then
@@ -21,13 +21,26 @@ else
     ./build-edhoc-apps.sh
 fi
 
-# Create working directory for image building
+## Create working directory for image building
+
 mkdir docker-images
 cd docker-images
 
-# Create base Dockerfile. Initial part is same for all images.
-# Uses Ubuntu 20.04 as base. Then sets the timezone, and installs OpenJDK.
-# Setting the timezone is needed as the OpenJDK install otherwise interactively interrupts.
+# Create directories for Group Applications and EDHOC Applications
+mkdir group
+mkdir edhoc
+
+# Copy needed files (jar files and library files)
+cp ../group-applications/*.jar group/
+cp -r ../group-applications/lib group/lib
+
+cp ../edhoc-applications/*.jar edhoc/
+cp -r ../edhoc-applications/lib edhoc/lib
+
+
+## Create base Dockerfile. Initial part is same for all images.
+#  Uses Ubuntu 20.04 as base. Then sets the timezone, and installs OpenJDK.
+#  Setting the timezone is needed as the OpenJDK install otherwise interactively interrupts.
 
 echo 'FROM ubuntu:20.04' > Dockerfile.base
 echo 'ENV DEBIAN_FRONTEND noninteractive' >> Dockerfile.base
@@ -39,17 +52,6 @@ echo '    dpkg-reconfigure -f noninteractive tzdata && \' >> Dockerfile.base
 echo '    apt-get -y install default-jre-headless && \' >> Dockerfile.base
 echo '    mkdir -p apps/lib' >> Dockerfile.base
 echo '' >> Dockerfile.base
-
-# Create directories for Group Applications and EDHOC Applications
-mkdir group
-mkdir edhoc
-
-# Copy needed files
-cp ../group-applications/*.jar group/
-cp -r ../group-applications/lib group/lib
-
-cp ../edhoc-applications/*.jar edhoc/
-cp -r ../edhoc-applications/lib edhoc/lib
 
 
 ## Build images for Group Applications
@@ -134,7 +136,6 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Adversary.jar"]' >> $dockerfile
 ## Build images for EDHOC Applications
 
 cd ../edhoc
-
 
 # Phase0Server: CoAP-only server
 dockerfile=Dockerfile-Phase0Server
