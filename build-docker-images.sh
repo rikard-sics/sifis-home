@@ -58,6 +58,7 @@ cd group
 
 # OscoreAsServer: ACE Authorization Server
 cp ../Dockerfile.base Dockerfile-OscoreAsServer
+echo 'EXPOSE 5683/udp' >> Dockerfile-OscoreAsServer
 echo 'ADD OscoreAsServer.jar /apps' >> Dockerfile-OscoreAsServer
 echo 'ADD lib /apps/lib/' >> Dockerfile-OscoreAsServer
 echo '' >> Dockerfile-OscoreAsServer
@@ -66,6 +67,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreAsServer.jar"]' >> Dockerfile-Osc
 
 # OscoreRsServer: Group Manager (ACE Resource Server)
 cp ../Dockerfile.base Dockerfile-OscoreRsServer
+echo 'EXPOSE 5783/udp' >> Dockerfile-OscoreRsServer
 echo 'ADD OscoreRsServer.jar /apps' >> Dockerfile-OscoreRsServer
 echo 'ADD lib /apps/lib/' >> Dockerfile-OscoreRsServer
 echo '' >> Dockerfile-OscoreRsServer
@@ -84,6 +86,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreAsRsClient.jar", "-delay", "60", 
 # OscoreAsRsClient: Group OSCORE Server/Client which will join the group(s)
 # Server 1 (for Group A)
 cp ../Dockerfile.base Dockerfile-OscoreAsRsClient-Server1
+echo 'EXPOSE 4683/udp' >> Dockerfile-OscoreAsRsClient-Server1
 echo 'ADD OscoreAsRsClient.jar /apps' >> Dockerfile-OscoreAsRsClient-Server1
 echo 'ADD lib /apps/lib/' >> Dockerfile-OscoreAsRsClient-Server1
 echo '' >> Dockerfile-OscoreAsRsClient-Server1
@@ -93,6 +96,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreAsRsClient.jar", "-name", "Server
 # OscoreAsRsClient: Group OSCORE Server/Client which will join the group(s)
 # Server 2 (for Group A)
 cp ../Dockerfile.base Dockerfile-OscoreAsRsClient-Server2
+echo 'EXPOSE 4683/udp' >> Dockerfile-OscoreAsRsClient-Server2
 echo 'ADD OscoreAsRsClient.jar /apps' >> Dockerfile-OscoreAsRsClient-Server2
 echo 'ADD lib /apps/lib/' >> Dockerfile-OscoreAsRsClient-Server2
 echo '' >> Dockerfile-OscoreAsRsClient-Server2
@@ -102,6 +106,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreAsRsClient.jar", "-name", "Server
 # OscoreAsRsClient: Group OSCORE Server/Client which will join the group(s)
 # Server 3 (for Group A)
 cp ../Dockerfile.base Dockerfile-OscoreAsRsClient-Server3
+echo 'EXPOSE 4683/udp' >> Dockerfile-OscoreAsRsClient-Server3
 echo 'ADD OscoreAsRsClient.jar /apps' >> Dockerfile-OscoreAsRsClient-Server3
 echo 'ADD lib /apps/lib/' >> Dockerfile-OscoreAsRsClient-Server3
 echo '' >> Dockerfile-OscoreAsRsClient-Server3
@@ -124,6 +129,7 @@ cd ../edhoc
 
 # Phase0Server: CoAP-only server
 cp ../Dockerfile.base Dockerfile-Phase0Server
+echo 'EXPOSE 5683/udp' >> Dockerfile-Phase0Server
 echo 'ADD Phase0Server.jar /apps' >> Dockerfile-Phase0Server
 echo 'ADD lib /apps/lib/' >> Dockerfile-Phase0Server
 echo '' >> Dockerfile-Phase0Server
@@ -140,6 +146,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase0Client.jar", "-server", "XX serve
 
 # Phase1Server: EDHOC server using method 0 and no optimized request
 cp ../Dockerfile.base Dockerfile-Phase1Server
+echo 'EXPOSE 5683/udp' >> Dockerfile-Phase1Server
 echo 'ADD Phase1Server.jar /apps' >> Dockerfile-Phase1Server
 echo 'ADD lib /apps/lib/' >> Dockerfile-Phase1Server
 echo '' >> Dockerfile-Phase1Server
@@ -156,6 +163,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase1Client.jar", "-server", "XX serve
 
 # Phase2Server: EDHOC server using method 3 and no optimized request
 cp ../Dockerfile.base Dockerfile-Phase2Server
+echo 'EXPOSE 5683/udp' >> Dockerfile-Phase2Server
 echo 'ADD Phase2Server.jar /apps' >> Dockerfile-Phase2Server
 echo 'ADD lib /apps/lib/' >> Dockerfile-Phase2Server
 echo '' >> Dockerfile-Phase2Server
@@ -172,6 +180,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase2Client.jar", "-server", "XX serve
 
 # Phase3Server: EDHOC server using method 0 and the optimized request
 cp ../Dockerfile.base Dockerfile-Phase3Server
+echo 'EXPOSE 5683/udp' >> Dockerfile-Phase3Server
 echo 'ADD Phase3Server.jar /apps' >> Dockerfile-Phase3Server
 echo 'ADD lib /apps/lib/' >> Dockerfile-Phase3Server
 echo '' >> Dockerfile-Phase3Server
@@ -188,6 +197,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase3Client.jar", "-server", "XX serve
 
 # Phase4Server: EDHOC server using method 3 and the optimized request
 cp ../Dockerfile.base Dockerfile-Phase4Server
+echo 'EXPOSE 5683/udp' >> Dockerfile-Phase4Server
 echo 'ADD Phase4Server.jar /apps' >> Dockerfile-Phase4Server
 echo 'ADD lib /apps/lib/' >> Dockerfile-Phase4Server
 echo '' >> Dockerfile-Phase4Server
