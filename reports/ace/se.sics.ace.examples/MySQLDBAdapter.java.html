@@ -107,10 +107,10 @@ import se.sics.ace.as.DBConnector;
     @Override
     public synchronized void createUser(String rootPwd) throws AceException {
 <span class="fc" id="L109">        String cUser = &quot;CREATE USER IF NOT EXISTS'&quot; + this.user</span>
-                + &quot;'@'localhost' IDENTIFIED BY '&quot; + this.password
+                + &quot;'@'%' IDENTIFIED BY '&quot; + this.password
                 + &quot;';&quot;;
 <span class="fc" id="L112">        String authzUser = &quot;GRANT DELETE, INSERT, SELECT, UPDATE, CREATE ON &quot;</span>
-                + this.dbName + &quot;.* TO '&quot; + this.user + &quot;'@'localhost';&quot;;
+                + this.dbName + &quot;.* TO '&quot; + this.user + &quot;'@'%';&quot;;
 
 <span class="fc" id="L115">        try (Connection rootConn = getRootConnection(rootPwd);</span>
 <span class="fc" id="L116">             Statement stmt = rootConn.createStatement()) {</span>
@@ -278,7 +278,7 @@ import se.sics.ace.as.DBConnector;
         {
 <span class="fc" id="L279">            String dropDB = &quot;DROP DATABASE IF EXISTS &quot; + this.dbName + &quot;;&quot;;</span>
 <span class="fc" id="L280">            String dropUser = &quot;DROP USER IF EXISTS '&quot; + this.user </span>
-                    + &quot;'@'localhost';&quot;;
+                    + &quot;'@'%';&quot;;
 <span class="fc" id="L282">            stmt.execute(dropDB);</span>
 <span class="fc" id="L283">            stmt.execute(dropUser);</span>
 <span class="nc" id="L284">        } catch (SQLException e) {</span>
