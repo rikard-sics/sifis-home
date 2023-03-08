@@ -59,9 +59,13 @@ echo '' >> Dockerfile.base
 cd group
 
 # OscoreAsServer: ACE Authorization Server
+# Assumes container name MySQL for MySQL server
+# Assumes root password xxxxxx for MySQL server
+echo "xxxxxx MySQL" >> db.pwd
 dockerfile=Dockerfile-OscoreAsServer
 cp ../Dockerfile.base $dockerfile
 echo 'EXPOSE 5683/udp' >> $dockerfile
+echo 'ADD db.pwd /apps' >> $dockerfile
 echo 'ADD OscoreAsServer.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
 echo '' >> $dockerfile
