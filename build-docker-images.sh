@@ -59,9 +59,9 @@ echo '' >> Dockerfile.base
 cd group
 
 # OscoreAsServer: ACE Authorization Server
-# Assumes container name MySQL for MySQL server
+# Assumes container name mysql for MySQL server
 # Assumes root password xxxxxx for MySQL server
-echo "xxxxxx MySQL" >> db.pwd
+echo "xxxxxx mysql" >> db.pwd
 dockerfile=Dockerfile-OscoreAsServer
 cp ../Dockerfile.base $dockerfile
 echo 'EXPOSE 5683/udp' >> $dockerfile
@@ -84,14 +84,14 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreRsServer.jar"]' >> $dockerfile
 
 # OscoreAsRsClient: Group OSCORE Server/Client which will join the group(s)
 # Client 1 (for Group A)
-# Assumes container name OscoreAsServer for ACE Authorization Server
-# Assumes container name OscoreRsServer for ACE Resource Server
+# Assumes container name oscoreasserver for ACE Authorization Server
+# Assumes container name oscorersserver for ACE Resource Server
 dockerfile=Dockerfile-OscoreAsRsClient-Client1
 cp ../Dockerfile.base $dockerfile
 echo 'ADD OscoreAsRsClient.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
 echo '' >> $dockerfile
-echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreAsRsClient.jar", "-name", "Client1", "-delay", "60", "-as", "coap://OscoreAsServer:5683", "-gm", "coap://OscoreRsServer:5783", "-dht"]' >> $dockerfile
+echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreAsRsClient.jar", "-name", "Client1", "-delay", "60", "-as", "coap://oscoreasserver:5683", "-gm", "coap://oscorersserver:5783", "-dht"]' >> $dockerfile
 #docker build -f $dockerfile -t oscoreasrsclient-client1 .
 
 # OscoreAsRsClient: Group OSCORE Server/Client which will join the group(s)
@@ -152,13 +152,13 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase0Server.jar"]' >> $dockerfile
 #docker build -f $dockerfile -t phase0server .
 
 # Phase0Client: CoAP-only client
-# Assumes container name Phase0Server for server-side
+# Assumes container name phase0server for server-side
 dockerfile=Dockerfile-Phase0Client
 cp ../Dockerfile.base $dockerfile
 echo 'ADD Phase0Client.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
 echo '' >> $dockerfile
-echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase0Client.jar", "-server", "coap://Phase0Server:5683", "-dht"]' >> $dockerfile
+echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase0Client.jar", "-server", "coap://phase0server:5683", "-dht"]' >> $dockerfile
 #docker build -f $dockerfile -t phase0client .
 
 # Phase1Server: EDHOC server using method 0 and no optimized request
@@ -172,13 +172,13 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase1Server.jar"]' >> $dockerfile
 #docker build -f $dockerfile -t phase1server .
 
 # Phase1Client: EDHOC client using method 0 and no optimized request
-# Assumes container name Phase1Server for server-side
+# Assumes container name phase1server for server-side
 dockerfile=Dockerfile-Phase1Client
 cp ../Dockerfile.base $dockerfile
 echo 'ADD Phase1Client.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
 echo '' >> $dockerfile
-echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase1Client.jar", "-server", "coap://Phase1Server:5683", "-dht"]' >> $dockerfile
+echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase1Client.jar", "-server", "coap://phase1server:5683", "-dht"]' >> $dockerfile
 #docker build -f $dockerfile -t phase1client .
 
 # Phase2Server: EDHOC server using method 3 and no optimized request
@@ -192,13 +192,13 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase2Server.jar"]' >> $dockerfile
 #docker build -f $dockerfile -t phase2server .
 
 # Phase2Client: EDHOC client using method 3 and no optimized request
-# Assumes container name Phase2Server for server-side
+# Assumes container name phase2server for server-side
 dockerfile=Dockerfile-Phase2Client
 cp ../Dockerfile.base $dockerfile
 echo 'ADD Phase2Client.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
 echo '' >> $dockerfile
-echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase2Client.jar", "-server", "coap://Phase2Server:5683", "-dht"]' >> $dockerfile
+echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase2Client.jar", "-server", "coap://phase2server:5683", "-dht"]' >> $dockerfile
 #docker build -f $dockerfile -t phase2client .
 
 # Phase3Server: EDHOC server using method 0 and the optimized request
@@ -212,13 +212,13 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase3Server.jar"]' >> $dockerfile
 #docker build -f $dockerfile -t phase3server .
 
 # Phase3Client: EDHOC client using method 0 and the optimized request
-# Assumes container name Phase3Server for server-side
+# Assumes container name phase3server for server-side
 dockerfile=Dockerfile-Phase3Client
 cp ../Dockerfile.base $dockerfile
 echo 'ADD Phase3Client.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
 echo '' >> $dockerfile
-echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase3Client.jar", "-server", "coap://Phase3Server:5683", "-dht"]' >> $dockerfile
+echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase3Client.jar", "-server", "coap://phase3server:5683", "-dht"]' >> $dockerfile
 #docker build -f $dockerfile -t phase3client .
 
 # Phase4Server: EDHOC server using method 3 and the optimized request
@@ -232,12 +232,12 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase4Server.jar"]' >> $dockerfile
 #docker build -f $dockerfile -t phase4server .
 
 # Phase4Client: EDHOC client using method 3 and the optimized request
-# Assumes container name Phase4Server for server-side
+# Assumes container name phase4server for server-side
 dockerfile=Dockerfile-Phase4Client
 cp ../Dockerfile.base $dockerfile
 echo 'ADD Phase4Client.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
 echo '' >> $dockerfile
-echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase4Client.jar", "-server", "coap://Phase4Server:5683", "-dht"]' >> $dockerfile
+echo 'ENTRYPOINT ["java", "-jar", "/apps/Phase4Client.jar", "-server", "coap://phase4server:5683", "-dht"]' >> $dockerfile
 #docker build -f $dockerfile -t phase4client .
 
