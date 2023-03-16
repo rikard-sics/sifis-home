@@ -1,6 +1,9 @@
 name: wp3-solutions 
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build:
