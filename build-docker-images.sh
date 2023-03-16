@@ -90,7 +90,7 @@ echo 'ENTRYPOINT ["java", "-jar", "/apps/OscoreRsServer.jar"]' >> $dockerfile
 # Client 2 (for Group B)
 # Assumes container name oscoreasserver for ACE Authorization Server
 # Assumes container name oscorersserver for ACE Resource Server
-dockerfile=Dockerfile-OscoreAsRsClient-Client1
+dockerfile=Dockerfile-OscoreAsRsClient-Client2
 cp ../Dockerfile.base $dockerfile
 echo 'ADD OscoreAsRsClient.jar /apps' >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
