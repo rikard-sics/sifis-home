@@ -67,9 +67,99 @@ jobs:
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+#      -
+#        name: Login to Docker Hub
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: Login to Docker Hub
-        uses: docker/login-action@v2
+        name: Build and push image (Authorization Server)
+        uses: docker/build-push-action@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          context: docker-build/group/.
+          file: docker-build/group/Dockerfile-OscoreAsServer
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/authorization-server:latest
+      -
+        name: Build and push image (Group Manager)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/group/.
+          file: docker-build/group/Dockerfile-OscoreRsServer
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/group-manager:latest
+      -
+        name: Build and push image (Group OSCORE Client)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/group/.
+          file: docker-build/group/Dockerfile-OscoreAsRsClient-Client2
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/group-client:latest
+      -
+        name: Build and push image (Group OSCORE Server 1)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/group/.
+          file: docker-build/group/Dockerfile-OscoreAsRsClient-Server4
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/group-server1:latest
+      -
+        name: Build and push image (Group OSCORE Server 2)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/group/.
+          file: docker-build/group/Dockerfile-OscoreAsRsClient-Server5
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/group-server2:latest
+      -
+        name: Build and push image (Group OSCORE Server 3)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/group/.
+          file: docker-build/group/Dockerfile-OscoreAsRsClient-Server6
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/group-server3:latest
+      -
+        name: Build and push image (CoAP Server)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/edhoc/.
+          file: docker-build/edhoc/Dockerfile-Phase0Server
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/coap-server:latest
+      -
+        name: Build and push image (CoAP Client)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/edhoc/.
+          file: docker-build/edhoc/Dockerfile-Phase0Client
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/coap-client:latest
+      -
+        name: Build and push image (EDHOC Server)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/edhoc/.
+          file: docker-build/edhoc/Dockerfile-Phase4Server
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/edhoc-server:latest
+      -
+        name: Build and push image (EDHOC Client)
+        uses: docker/build-push-action@v4
+        with:
+          context: docker-build/edhoc/.
+          file: docker-build/edhoc/Dockerfile-Phase4Client
+          platforms: linux/amd64, linux/arm64, linux/arm
+          push: false
+          tags: sifishome/edhoc-client:latest
