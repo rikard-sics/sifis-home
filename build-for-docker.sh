@@ -283,7 +283,7 @@ echo 'ENTRYPOINT ["java", "-jar", "Phase4Client.jar", "-server", "coap://edhoc-s
 # If indicated actually build the images, otherwise exit here
 if [ "$1" != "--build-images" ]
 then
-  return
+  exit 0
 fi
 
 # Build a selection of the images for the Group Applications
