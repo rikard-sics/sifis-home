@@ -339,8 +339,8 @@ public class CWT implements AccessToken {
 <span class="fc" id="L339">	        return;</span>
 	    }
 <span class="fc bfc" id="L341" title="All 2 branches covered.">	    for (Map.Entry&lt;HeaderKeys, CBORObject&gt; h : headers.entrySet()) {</span>
-<span class="fc" id="L342">            m.addAttribute(h.getKey(), h.getValue().EncodeToBytes(), </span>
-<span class="pc bpc" id="L343" title="1 of 2 branches missed.">                    (protect ? Attribute.PROTECTED : Attribute.UNPROTECTED));</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">            m.addAttribute(h.getKey(), h.getValue().EncodeToBytes(), </span>
+                    (protect ? Attribute.PROTECTED : Attribute.UNPROTECTED));
 <span class="fc" id="L344">        }   </span>
 <span class="fc" id="L345">	}</span>
 	

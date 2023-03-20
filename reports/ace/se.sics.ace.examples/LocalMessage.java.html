@@ -186,8 +186,8 @@ public class LocalMessage implements Message {
 <span class="pc bpc" id="L186" title="3 of 4 branches missed.">        if (this.payload == null &amp;&amp; this.params == null) {</span>
 <span class="nc" id="L187">            return &quot;SenderId: &quot; + this.senderId;</span>
         }
-<span class="fc" id="L189">        return &quot;SenderId: &quot; + this.senderId + &quot; Parameters: &quot;</span>
-<span class="fc bfc" id="L190" title="All 2 branches covered.">                + ((this.params == null)? </span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        return &quot;SenderId: &quot; + this.senderId + &quot; Parameters: &quot;</span>
+                + ((this.params == null)? 
 <span class="fc" id="L191">                        this.payload.toString() : this.params.toString());</span>
     }
  }

@@ -111,8 +111,8 @@ public class OscoreAceEndpoint extends OSCoreResource implements AutoCloseable {
 <span class="nc" id="L111">            LOGGER.info(e.getMessage());</span>
 <span class="nc" id="L112">            exchange.respond(ResponseCode.BAD_REQUEST);</span>
 <span class="fc" id="L113">        }</span>
-<span class="fc" id="L114">        LOGGER.log(Level.FINEST, &quot;Received request: &quot; </span>
-<span class="pc bpc" id="L115" title="1 of 2 branches missed.">                + ((req==null)?&quot;null&quot; : req.toString()));</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        LOGGER.log(Level.FINEST, &quot;Received request: &quot; </span>
+<span class="fc" id="L115">                + ((req==null)?&quot;null&quot; : req.toString()));</span>
 
 <span class="fc" id="L117">        Message m = this.e.processMessage(req);</span>
 <span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if (m instanceof CoapRes) {</span>

@@ -10,7 +10,7 @@ Cf-OSCORE,org.eclipse.californium.oscore.group,OptionEncoder,3,60,0,4,1,14,1,7,1
 Cf-OSCORE,org.eclipse.californium.oscore.group,KeyRemapping,3,408,0,2,1,82,1,16,1,15
 Cf-OSCORE,org.eclipse.californium.oscore.group,SharedSecretCalculation.Tuple,0,31,0,0,0,6,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.cose,ASN1.TagValue,0,18,0,0,0,8,0,2,0,2
-Cf-OSCORE,org.eclipse.californium.cose,AlgorithmID,10,421,2,4,1,53,2,7,0,6
+Cf-OSCORE,org.eclipse.californium.cose,AlgorithmID,10,586,2,4,1,53,2,7,0,6
 Cf-OSCORE,org.eclipse.californium.cose,EncryptCommon,291,408,34,32,66,105,31,19,2,13
 Cf-OSCORE,org.eclipse.californium.cose,MAC0Message,158,0,18,0,28,0,14,0,5,0
 Cf-OSCORE,org.eclipse.californium.cose,KeySet,51,0,2,0,15,0,6,0,5,0
@@ -22,17 +22,17 @@ Cf-OSCORE,org.eclipse.californium.cose,Attribute,111,138,15,17,26,30,23,15,11,10
 Cf-OSCORE,org.eclipse.californium.cose,EncryptMessage,236,136,34,12,38,39,25,8,4,6
 Cf-OSCORE,org.eclipse.californium.cose,Recipient,1003,742,135,60,168,154,104,26,8,13
 Cf-OSCORE,org.eclipse.californium.cose,CoseException,4,5,0,0,2,2,1,1,1,1
-Cf-OSCORE,org.eclipse.californium.cose,OneKey,719,934,130,70,151,223,102,33,8,20
+Cf-OSCORE,org.eclipse.californium.cose,OneKey,719,938,130,70,151,223,102,33,8,20
 Cf-OSCORE,org.eclipse.californium.cose,SignCommon,85,254,7,23,20,80,10,15,3,4
-Cf-OSCORE,org.eclipse.californium.cose,MessageTag,27,60,4,0,3,11,3,2,1,2
+Cf-OSCORE,org.eclipse.californium.cose,MessageTag,27,89,4,0,3,11,3,2,1,2
 Cf-OSCORE,org.eclipse.californium.cose,Encrypt0Message,148,23,20,0,32,9,13,3,3,3
 Cf-OSCORE,org.eclipse.californium.cose,MacCommon,373,0,32,0,85,0,24,0,6,0
 Cf-OSCORE,org.eclipse.californium.cose,CounterSign,79,0,4,0,26,0,11,0,9,0
-Cf-OSCORE,org.eclipse.californium.cose,ASN1,284,998,50,50,28,137,42,24,1,15
+Cf-OSCORE,org.eclipse.californium.cose,ASN1,286,999,50,50,28,137,42,24,1,15
 Cf-OSCORE,org.eclipse.californium.cose,MACMessage,394,0,50,0,82,0,34,0,9,0
 Cf-OSCORE,org.eclipse.californium.cose,CounterSign1,37,34,4,2,13,10,7,3,4,3
-Cf-OSCORE,org.eclipse.californium.cose,KeyKeys,0,136,0,0,0,28,0,3,0,3
-Cf-OSCORE,org.eclipse.californium.cose,HeaderKeys,0,155,0,0,0,25,0,3,0,3
+Cf-OSCORE,org.eclipse.californium.cose,KeyKeys,0,189,0,0,0,28,0,3,0,3
+Cf-OSCORE,org.eclipse.californium.cose,HeaderKeys,0,236,0,0,0,25,0,3,0,3
 Cf-OSCORE,org.eclipse.californium.oscore,Utility,359,0,12,0,110,0,13,0,7,0
 Cf-OSCORE,org.eclipse.californium.oscore,RequestDecryptor,42,165,2,12,12,43,3,7,1,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.1.new Runnable() {...},0,31,0,0,0,4,0,2,0,2
@@ -43,7 +43,7 @@ Cf-OSCORE,org.eclipse.californium.oscore,InstallCryptoProviders,68,0,0,0,18,0,6,
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreEndpointContextInfo.OSCoreEndpointContextOperator,0,11,0,0,0,4,0,2,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.new MessageObserverAdapter() {...},39,37,2,2,15,7,8,2,6,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.new Runnable() {...},0,20,0,0,0,3,0,2,0,2
-Cf-OSCORE,org.eclipse.californium.oscore,ContextRederivation.PHASE,0,57,0,0,0,2,0,1,0,1
+Cf-OSCORE,org.eclipse.californium.oscore,ContextRederivation.PHASE,0,94,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSException,0,4,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCoapStackFactory,14,38,1,5,1,11,1,6,0,4
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCtx,183,905,22,59,47,210,26,76,8,53

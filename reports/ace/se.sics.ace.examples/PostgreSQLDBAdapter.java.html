@@ -152,7 +152,7 @@ import java.util.Properties;
                 // Treat this as a &quot;create if not exist&quot;, so if it exists, end method without doing anything.
 <span class="nc" id="L153">                return;</span>
             }
-<span class="nc bnc" id="L155" title="All 6 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L155">        } catch (SQLException e) {</span>
 <span class="nc" id="L156">            e.printStackTrace();</span>
 <span class="nc" id="L157">            throw new AceException(e.getMessage());</span>
 <span class="nc" id="L158">        }</span>
