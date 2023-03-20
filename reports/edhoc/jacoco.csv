@@ -15,4 +15,4 @@ Cf-EDHOC,org.eclipse.californium.edhoc,Hkdf,5,215,2,10,1,50,3,7,1,3
 Cf-EDHOC,org.eclipse.californium.edhoc,SharedSecretCalculation.Tuple,0,31,0,0,0,6,0,1,0,1
 Cf-EDHOC,org.eclipse.californium.edhoc,KeyRemapping,263,408,6,2,49,82,7,16,4,15
 Cf-EDHOC,org.eclipse.californium.edhoc,EdhocResource,1162,0,117,0,309,0,64,0,5,0
-Cf-EDHOC,org.eclipse.californium.edhoc,SharedSecretCalculation,3546,1270,41,59,380,269,49,35,16,18
+Cf-EDHOC,org.eclipse.californium.edhoc,SharedSecretCalculation,3541,1275,39,61,379,270,47,37,16,18
