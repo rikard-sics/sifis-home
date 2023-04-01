@@ -6,9 +6,6 @@
 # OscoreAsRsClient: Group OSCORE Server/Client which will join the group(s)
 # Adversary: Adversary for testing attacks against the group(s)
 
-# Fail script with error if any command fails
-set -e
-
 # Build Californium (if needed)
 FILE=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
 if [ -f "$FILE" ]; then

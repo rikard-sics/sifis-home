@@ -3,9 +3,6 @@
 # This script prepares Docker Dockerfiles and Contexts for the Group & EDHOC Applications
 # If the flag --build-images is specified, it also builds the Docker images
 
-# Fail script with error if any command fails
-set -e
-
 ## Build the Jar files for the Group & EDHOC Applications if needed
 
 # Separately install these two dependencies

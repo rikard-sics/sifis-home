@@ -12,9 +12,6 @@
 # Phase4Server: EDHOC server using method 3 and the optimized request
 # Phase4Client: EDHOC client using method 3 and the optimized request
 
-# Fail script with error if any command fails
-set -e
-
 # Build Californium (if needed)
 FILE=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
 if [ -f "$FILE" ]; then
