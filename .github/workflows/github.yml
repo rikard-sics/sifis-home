@@ -3,7 +3,7 @@ name: wp3-solutions
 on:
   push:
     branches:
-      - test1
+      - test2
 
 jobs:
 
@@ -22,6 +22,6 @@ jobs:
      
       - name: Build Jar files and prepare dependencies for applications
         run: |
-          ./build-edhoc-apps.sh
           ./build-group-apps.sh
+          ./build-edhoc-apps.sh
 
