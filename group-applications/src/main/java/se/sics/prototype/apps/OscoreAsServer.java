@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, RISE AB
+ * Copyright (c) 2023, RISE AB
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -49,6 +49,7 @@ import org.eclipse.californium.cose.OneKey;
 import se.sics.ace.COSEparams;
 import se.sics.ace.Constants;
 import se.sics.ace.as.AccessTokenFactory;
+import se.sics.ace.as.logging.DhtLogger;
 import se.sics.ace.coap.as.CoapDBConnector;
 import se.sics.ace.coap.as.OscoreAS;
 import se.sics.ace.examples.KissTime;
@@ -106,6 +107,23 @@ public class OscoreAsServer {
 	public static void main(String[] args) throws Exception {
 
 		System.out.println("Starting Authorization Server: OscoreAsServer...");
+
+		// Parse command line arguments
+		boolean useDht = false;
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].toLowerCase().equals("-dht") || args[i].toLowerCase().equals("-usedht")) {
+				useDht = true;
+			}
+		}
+
+		// Possibly set up connection to the DHT for sending logging statements
+		if (useDht) {
+			System.out.println("Connecting to the DHT for logging.");
+			boolean dhtConnected = DhtLogger.establishConnection();
+			if (dhtConnected == false) {
+				System.err.println("Failed to connect to DHT for logging.");
+			}
+		}
 
 		byte[] idContext = null;
 		String myIdentity = buildOscoreIdentity(KeyStorage.aceSenderIds.get("AS"), idContext);

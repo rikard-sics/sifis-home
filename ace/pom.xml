@@ -139,6 +139,27 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.5</version>
 		</dependency>
+		<dependency> <!-- Rikard: Added for WebSocket -->
+			<groupId>javax.websocket</groupId>
+			<artifactId>javax.websocket-api</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency> <!-- Rikard: Added for JSON -->
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.9.1</version>
+		</dependency>
+		<dependency> <!-- Rikard: Added for WebSocket -->
+			<groupId>org.glassfish.tyrus</groupId>
+			<artifactId>tyrus-client</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		<dependency> <!-- Rikard: Added for WebSocket -->
+			<groupId>org.glassfish.tyrus</groupId>
+			<artifactId>tyrus-container-grizzly-client</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
