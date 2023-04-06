@@ -442,6 +442,83 @@ import org.eclipse.californium.cose.OneKey;
 <span class="fc" id="L442">        return pubKey;</span>
 		
 	}
+	
+    /**
+     * Read a hex string and transform to bytes
+     * 
+     * @param hex  the hex string
+     * @return  the byte array representation
+     */
+    public static byte[] hexString2byteArray(String hex) {
+<span class="fc" id="L453">        int len = hex.length();</span>
+<span class="fc" id="L454">        byte[] data = new byte[len / 2];</span>
+<span class="fc bfc" id="L455" title="All 2 branches covered.">        for (int i = 0; i &lt; len; i += 2) {</span>
+<span class="fc" id="L456">            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) &lt;&lt; 4)</span>
+<span class="fc" id="L457">                    + Character.digit(hex.charAt(i+1), 16));</span>
+        }
+<span class="fc" id="L459">        return data;</span>
+    }
+	
+    /**
+     * Build a CBOR map specifying a public key, possibly together with the corresponding private key
+     * 
+     * @param signKeyCurve  the curve of the signature algorithm
+     * @param x  the x-coordinate of the public key
+     * @param y  the y-coordinate of the public key, or null if not applicable
+     * @param d  the private key, or null if the CBOR map specifies only the public key
+     * @return  The CBOR map specifying a public key, possibly together with the corresponding private key
+     */
+    public static CBORObject buildRpkData (int signKeyCurve, String x, String y, String d) {
+    	
+<span class="fc" id="L473">    	CBORObject rpkData = CBORObject.NewMap();</span>
+    	
+<span class="pc bpc" id="L475" title="1 of 2 branches missed.">    	if (signKeyCurve == KeyKeys.EC2_P256.AsInt32()) {</span>
+<span class="fc" id="L476">	        rpkData.Add(KeyKeys.KeyType.AsCBOR(), KeyKeys.KeyType_EC2);</span>
+<span class="fc" id="L477">	        rpkData.Add(KeyKeys.Algorithm.AsCBOR(), AlgorithmID.ECDSA_256.AsCBOR());</span>
+<span class="fc" id="L478">	        rpkData.Add(KeyKeys.EC2_Curve.AsCBOR(), KeyKeys.EC2_P256);</span>
+<span class="fc" id="L479">	        CBORObject Cx = CBORObject.FromObject(hexString2byteArray(x));</span>
+<span class="fc" id="L480">	        CBORObject Cy = CBORObject.FromObject(hexString2byteArray(y));</span>
+<span class="fc" id="L481">	        rpkData.Add(KeyKeys.EC2_X.AsCBOR(), Cx);</span>
+<span class="fc" id="L482">	        rpkData.Add(KeyKeys.EC2_Y.AsCBOR(), Cy);</span>
+<span class="pc bpc" id="L483" title="1 of 2 branches missed.">	        if (d != null) {</span>
+<span class="fc" id="L484">		        CBORObject Cd = CBORObject.FromObject(hexString2byteArray(d));</span>
+<span class="fc" id="L485">		        rpkData.Add(KeyKeys.EC2_D.AsCBOR(), Cd);</span>
+	        }
+    	}
+<span class="pc bpc" id="L488" title="1 of 2 branches missed.">    	if (signKeyCurve == KeyKeys.OKP_Ed25519.AsInt32()) {</span>
+<span class="nc" id="L489">	        rpkData.Add(KeyKeys.KeyType.AsCBOR(), KeyKeys.KeyType_OKP);</span>
+<span class="nc" id="L490">	        rpkData.Add(KeyKeys.Algorithm.AsCBOR(), AlgorithmID.EDDSA.AsCBOR());</span>
+<span class="nc" id="L491">	        rpkData.Add(KeyKeys.OKP_Curve.AsCBOR(), KeyKeys.OKP_Ed25519);</span>
+<span class="nc" id="L492">	        CBORObject Cx = CBORObject.FromObject(hexString2byteArray(x));</span>
+<span class="nc" id="L493">	        rpkData.Add(KeyKeys.OKP_X.AsCBOR(), Cx);</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">	        if (d != null) {</span>
+<span class="nc" id="L495">		        CBORObject Cd = CBORObject.FromObject(hexString2byteArray(d));</span>
+<span class="nc" id="L496">		        rpkData.Add(KeyKeys.OKP_D.AsCBOR(), Cd);</span>
+	        }
+    	}
+        
+<span class="fc" id="L500">    	return rpkData;</span>
+    }
+    
+    /**
+     * Return the used major version of Java
+     * 
+     * @return  The used major version of Java
+     */
+    public static int getJavaVersion() {
+<span class="nc" id="L509">        String version = System.getProperty(&quot;java.version&quot;);</span>
+        
+<span class="nc bnc" id="L511" title="All 2 branches missed.">        if(version.startsWith(&quot;1.&quot;)) {</span>
+<span class="nc" id="L512">            version = version.substring(2, 3);</span>
+        } else {
+<span class="nc" id="L514">            int dot = version.indexOf(&quot;.&quot;);</span>
+<span class="nc bnc" id="L515" title="All 2 branches missed.">            if(dot != -1) {</span>
+<span class="nc" id="L516">            	version = version.substring(0, dot);</span>
+            }
+        }
+        
+<span class="nc" id="L520">        return Integer.parseInt(version);</span>
+    }
     
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

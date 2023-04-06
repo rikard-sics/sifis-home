@@ -966,13 +966,13 @@ public class TokenRepository implements AutoCloseable {
 <span class="nc" id="L966">	    	this.id2cti.remove(id);</span>
 	    	
 	    	// Remove the mapping from the subject ID to the OSCORE Input Material ID
-<span class="nc" id="L969">			Set&lt;String&gt; sidsToRemove = new HashSet&lt;&gt;();</span>
-<span class="nc bnc" id="L970" title="All 2 branches missed.">	    	for (String sid: sid2id.keySet()) {</span>
-<span class="nc bnc" id="L971" title="All 2 branches missed.">				if (sid2id.get(sid).equals(id)) {</span>
-<span class="nc" id="L972">					sidsToRemove.add(sid);</span>
-				}
-<span class="nc" id="L974">			}</span>
-<span class="nc bnc" id="L975" title="All 2 branches missed.">			for (String sid : sidsToRemove) {</span>
+<span class="nc" id="L969">	    	Set&lt;String&gt; sidsToRemove = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L970" title="All 2 branches missed.">			for (String sid : sid2id.keySet()) {</span>
+<span class="nc bnc" id="L971" title="All 2 branches missed.">	    	      if (sid2id.get(sid).equals(id)) {</span>
+<span class="nc" id="L972">	    	         sidsToRemove.add(sid);</span>
+	    	      }
+<span class="nc" id="L974">	    	}	    	</span>
+<span class="nc bnc" id="L975" title="All 2 branches missed.">	    	for (String sid: sidsToRemove) {</span>
 <span class="nc" id="L976">					sid2id.remove(sid);</span>
 
 					// Remove the OSCORE Security Context
@@ -1037,11 +1037,11 @@ public class TokenRepository implements AutoCloseable {
 <span class="fc bfc" id="L1037" title="All 2 branches covered.">		        if (exp == null) {</span>
 <span class="fc" id="L1038">		            continue; //This token never expires</span>
 		        }
-<span class="pc bpc" id="L1040" title="1 of 2 branches missed.">		        if (!exp.isIntegral()) {</span>
+<span class="pc bpc" id="L1040" title="2 of 4 branches missed.">		        if (!(exp.isNumber() &amp;&amp; exp.AsNumber().IsInteger())) {</span>
 <span class="nc" id="L1041">		            throw new AceException(&quot;Expiration time is in wrong format&quot;);</span>
 		        }
 		        
-<span class="fc bfc" id="L1044" title="All 2 branches covered.">		        if (this.time.getCurrentTime() &gt; exp.AsInt64()) {</span>
+<span class="fc bfc" id="L1044" title="All 2 branches covered.">		        if (this.time.getCurrentTime() &gt; exp.AsNumber().ToInt64Checked()) {</span>
 		        	// This Access Token is expired and has to be removed
 <span class="fc" id="L1046">		            tokenToRemove.add(foo.getKey());</span>
 		            
@@ -1178,21 +1178,21 @@ public class TokenRepository implements AutoCloseable {
             
             //Check if the token is expired
 <span class="fc" id="L1180">            CBORObject exp = claims.get(Constants.EXP); </span>
-<span class="pc bpc" id="L1181" title="1 of 4 branches missed.">             if (exp != null &amp;&amp; !exp.isIntegral()) {</span>
+<span class="pc bpc" id="L1181" title="2 of 6 branches missed.">             if (exp != null &amp;&amp; !(exp.isNumber() &amp;&amp; exp.AsNumber().IsInteger())) {</span>
 <span class="nc" id="L1182">                    throw new AceException(</span>
                             &quot;Expiration time is in wrong format&quot;);
              }
-<span class="pc bpc" id="L1185" title="1 of 4 branches missed.">             if (exp != null &amp;&amp; exp.AsInt64() &lt; this.time.getCurrentTime()) {</span>
+<span class="pc bpc" id="L1185" title="1 of 4 branches missed.">             if (exp != null &amp;&amp; exp.AsNumber().ToInt64Checked() &lt; this.time.getCurrentTime()) {</span>
                  //Token is expired
 <span class="nc" id="L1187">                 continue;</span>
              }
             
              //Check nbf
 <span class="fc" id="L1191">             CBORObject nbf = claims.get(Constants.NBF);</span>
-<span class="pc bpc" id="L1192" title="3 of 4 branches missed.">             if (nbf != null &amp;&amp;  !nbf.isIntegral()) {</span>
+<span class="pc bpc" id="L1192" title="5 of 6 branches missed.">             if (nbf != null &amp;&amp;  !(nbf.isNumber() &amp;&amp; nbf.AsNumber().IsInteger())) {</span>
 <span class="nc" id="L1193">                 throw new AceException(&quot;NotBefore time is in wrong format&quot;);</span>
              }
-<span class="pc bpc" id="L1195" title="3 of 4 branches missed.">             if (nbf != null &amp;&amp; nbf.AsInt64() &gt; this.time.getCurrentTime()) {</span>
+<span class="pc bpc" id="L1195" title="3 of 4 branches missed.">             if (nbf != null &amp;&amp; nbf.AsNumber().ToInt64Checked() &gt; this.time.getCurrentTime()) {</span>
                  //Token not valid yet
 <span class="nc" id="L1197">                 continue;</span>
              }

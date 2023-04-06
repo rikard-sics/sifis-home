@@ -187,7 +187,7 @@ public class OscoreAuthzInfoGroupOSCORE extends AuthzInfo {
 <span class="nc" id="L187">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map); </span>
 	        }
 	        
-<span class="fc" id="L190">	        senderIdCBOR = cbor.get(CBORObject.FromObject(Constants.ID1));</span>
+<span class="fc" id="L190">	        senderIdCBOR = cbor.get(CBORObject.FromObject(Constants.ACE_CLIENT_RECIPIENTID));</span>
 <span class="pc bpc" id="L191" title="2 of 4 branches missed.">	        if (senderIdCBOR == null || !senderIdCBOR.getType().equals(CBORType.ByteString)) {</span>
 <span class="nc" id="L192">	            LOGGER.info(&quot;Missing or invalid parameter type for:&quot;</span>
 	                    + &quot;'id1', must be present and byte-string&quot;);
@@ -361,7 +361,7 @@ public class OscoreAuthzInfoGroupOSCORE extends AuthzInfo {
 <span class="fc" id="L361">	        }</span>
 	        
 <span class="fc" id="L363">	        payload.Add(Constants.NONCE2, n2);</span>
-<span class="fc" id="L364">	        payload.Add(Constants.ID2, recipientId);</span>
+<span class="fc" id="L364">	        payload.Add(Constants.ACE_SERVER_RECIPIENTID, recipientId);</span>
         
         }
         

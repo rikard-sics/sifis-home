@@ -120,7 +120,7 @@ public class Aif implements ScopeValidator {
 <span class="nc" id="L120">                throw new AceException(&quot;Invalid scope format&quot;);</span>
             }
 <span class="fc" id="L122">            String resource = scopeElement.get(0).AsString();</span>
-<span class="fc" id="L123">            short action = scopeElement.get(1).AsInt16();</span>
+<span class="fc" id="L123">            short action = scopeElement.get(1).AsNumber().ToInt16Checked();</span>
 <span class="fc bfc" id="L124" title="All 2 branches covered.">            if (resource.equals(resourceId)) {</span>
                 //Check action
 <span class="fc bfc" id="L126" title="All 2 branches covered.">                if ((action &amp; powers[(short)actionId]) != 0) {</span>

@@ -265,7 +265,7 @@ import se.sics.ace.coap.rs.oscoreProfile.OscoreSecurityContext;
 <span class="pc bpc" id="L265" title="1 of 2 branches missed.">        if (!found) {</span>
 <span class="nc" id="L266">            throw new AceException(&quot;No Recipient ID available to use&quot;);</span>
         }
-<span class="fc" id="L268">        payload.Add(Constants.ID1, recipientId);</span>
+<span class="fc" id="L268">        payload.Add(Constants.ACE_CLIENT_RECIPIENTID, recipientId);</span>
         
         
         
@@ -329,7 +329,7 @@ import se.sics.ace.coap.rs.oscoreProfile.OscoreSecurityContext;
 <span class="fc" id="L329">        byte[] n2 = n2C.GetByteString();</span>
         
 <span class="fc" id="L331">        CBORObject senderIdCBOR = rsPayload.get(</span>
-<span class="fc" id="L332">                CBORObject.FromObject(Constants.ID2));</span>
+<span class="fc" id="L332">                CBORObject.FromObject(Constants.ACE_SERVER_RECIPIENTID));</span>
 <span class="pc bpc" id="L333" title="2 of 4 branches missed.">        if (senderIdCBOR == null || !senderIdCBOR.getType().equals(CBORType.ByteString)) {</span>
 <span class="nc" id="L334">            throw new AceException(&quot;Missing or malformed 'id2' in RS response&quot;);</span>
         }

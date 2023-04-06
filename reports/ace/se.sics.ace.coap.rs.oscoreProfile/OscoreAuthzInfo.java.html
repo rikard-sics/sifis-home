@@ -163,7 +163,7 @@ public class OscoreAuthzInfo extends AuthzInfo {
 <span class="fc" id="L163">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map); </span>
 	        }
 	        
-<span class="fc" id="L166">	        senderIdCBOR = cbor.get(CBORObject.FromObject(Constants.ID1));</span>
+<span class="fc" id="L166">	        senderIdCBOR = cbor.get(CBORObject.FromObject(Constants.ACE_CLIENT_RECIPIENTID));</span>
 <span class="pc bpc" id="L167" title="2 of 4 branches missed.">	        if (senderIdCBOR == null || !senderIdCBOR.getType().equals(CBORType.ByteString)) {</span>
 <span class="nc" id="L168">	            LOGGER.info(&quot;Missing or invalid parameter type for:&quot;</span>
 	                    + &quot;'id1', must be present and byte-string&quot;);
@@ -249,94 +249,93 @@ public class OscoreAuthzInfo extends AuthzInfo {
 	            
 	        OSCoreCtx ctx;
 	        try {
-<span class="fc" id="L252">	        	byte[] senderId = senderIdCBOR.GetByteString();        	</span>
-<span class="fc" id="L253">	            ctx = osc.getContext(false, n1, n2);</span>
+<span class="fc" id="L252">	            ctx = osc.getContext(false, n1, n2);</span>
 	            
-<span class="fc" id="L255">	            OSCoreCtxDB db = OscoreCtxDbSingleton.getInstance();</span>
+<span class="fc" id="L254">	            OSCoreCtxDB db = OscoreCtxDbSingleton.getInstance();</span>
 	            
-<span class="fc" id="L257">	            synchronized(db) {</span>
+<span class="fc" id="L256">	            synchronized(db) {</span>
 	            	
-<span class="fc" id="L259">	            	boolean install = true;</span>
-<span class="fc" id="L260">					byte[] idContext = null;</span>
+<span class="fc" id="L258">	            	boolean install = true;</span>
+<span class="fc" id="L259">					byte[] idContext = null;</span>
 	            	
-<span class="fc" id="L262">					CBORObject responseMap = CBORObject.DecodeFromBytes(reply.getRawPayload());</span>
-<span class="fc" id="L263">					CBORObject subjectCbor = responseMap.get(Constants.SUB);</span>
-<span class="fc" id="L264">					String subjectStr = subjectCbor.AsString();</span>
-<span class="fc" id="L265">					int index = subjectStr.indexOf(&quot;:&quot;);</span>
+<span class="fc" id="L261">					CBORObject responseMap = CBORObject.DecodeFromBytes(reply.getRawPayload());</span>
+<span class="fc" id="L262">					CBORObject subjectCbor = responseMap.get(Constants.SUB);</span>
+<span class="fc" id="L263">					String subjectStr = subjectCbor.AsString();</span>
+<span class="fc" id="L264">					int index = subjectStr.indexOf(&quot;:&quot;);</span>
 
-<span class="fc bfc" id="L267" title="All 2 branches covered.">					if (index &gt;= 0) {</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">					if (index &gt;= 0) {</span>
 						// Extract the OSCORE ID Context
-<span class="fc" id="L269">						String idContextStr = subjectStr.substring(0, index);</span>
-<span class="fc" id="L270">						idContext = Base64.getDecoder().decode(idContextStr);</span>
+<span class="fc" id="L268">						String idContextStr = subjectStr.substring(0, index);</span>
+<span class="fc" id="L269">						idContext = Base64.getDecoder().decode(idContextStr);</span>
 					}
 	            	
 	    			try {
 	    					
 	    				// Double check in the database that the OSCORE Security Context
 	    				// with the selected Recipient ID is actually still not present
-<span class="pc bpc" id="L277" title="1 of 4 branches missed.">						if (idContext == null &amp;&amp; db.getContext(recipientId) != null) {</span>
+<span class="pc bpc" id="L276" title="1 of 4 branches missed.">						if (idContext == null &amp;&amp; db.getContext(recipientId) != null) {</span>
 	        				// A Security Context with this Recipient ID exists!
-<span class="nc" id="L279">	        				install = false;</span>
+<span class="nc" id="L278">	        				install = false;</span>
 	        			}
-<span class="pc bpc" id="L281" title="1 of 4 branches missed.">						else if (idContext != null &amp;&amp; db.getContext(recipientId, idContext) != null) {</span>
+<span class="pc bpc" id="L280" title="1 of 4 branches missed.">						else if (idContext != null &amp;&amp; db.getContext(recipientId, idContext) != null) {</span>
 							// A Security Context with this ID Context and Recipient ID exists!
-<span class="nc" id="L283">							install = false;</span>
+<span class="nc" id="L282">							install = false;</span>
 						}
 
 	    			}
-<span class="nc" id="L287">	        		catch(RuntimeException e) {</span>
+<span class="nc" id="L286">	        		catch(RuntimeException e) {</span>
 	    				// Multiple Security Contexts with this Recipient ID exist!
-<span class="nc" id="L289">	    				install = false;</span>
-<span class="fc" id="L290">	        		}</span>
+<span class="nc" id="L288">	    				install = false;</span>
+<span class="fc" id="L289">	        		}</span>
 	            	
-<span class="pc bpc" id="L292" title="1 of 2 branches missed.">	    			if (install)</span>
-<span class="fc" id="L293">	    				db.addContext(ctx);</span>
+<span class="pc bpc" id="L291" title="1 of 2 branches missed.">	    			if (install)</span>
+<span class="fc" id="L292">	    				db.addContext(ctx);</span>
 	    			else {
-<span class="nc" id="L295">	    	            LOGGER.info(&quot;An OSCORE Security Context with the same Recipient ID&quot;</span>
+<span class="nc" id="L294">	    	            LOGGER.info(&quot;An OSCORE Security Context with the same Recipient ID&quot;</span>
 					               + &quot; has been installed while running the OSCORE profile&quot;);
 	    	            
 	    	            // Delete the stored Access Token to prevent a deadlock
-<span class="nc" id="L299">	    	    	    CBORObject ctiCbor = responseMap.get(Constants.CTI);</span>
-<span class="nc" id="L300">	    	    	    String cti = Base64.getEncoder().encodeToString(ctiCbor.GetByteString());</span>
+<span class="nc" id="L298">	    	    	    CBORObject ctiCbor = responseMap.get(Constants.CTI);</span>
+<span class="nc" id="L299">	    	    	    String cti = Base64.getEncoder().encodeToString(ctiCbor.GetByteString());</span>
 	    	    	    try {
-<span class="nc" id="L302">	    	    	    	TokenRepository.getInstance().removeToken(cti);</span>
+<span class="nc" id="L301">	    	    	    	TokenRepository.getInstance().removeToken(cti);</span>
 	    	    	    }
-<span class="nc" id="L304">	    	    	    catch (AceException e) {</span>
-<span class="nc" id="L305">	    	                LOGGER.info(&quot;Error while deleting an Access Token: &quot; + e.getMessage());</span>
-<span class="nc" id="L306">	    	    	    }</span>
-<span class="nc" id="L307">	    	            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
+<span class="nc" id="L303">	    	    	    catch (AceException e) {</span>
+<span class="nc" id="L304">	    	                LOGGER.info(&quot;Error while deleting an Access Token: &quot; + e.getMessage());</span>
+<span class="nc" id="L305">	    	    	    }</span>
+<span class="nc" id="L306">	    	            return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
 	    			}
-<span class="fc" id="L309">	            }</span>
+<span class="fc" id="L308">	            }</span>
 	            
-<span class="fc" id="L311">	        } catch (OSException e) {</span>
-<span class="fc" id="L312">	            LOGGER.info(&quot;Error while creating OSCORE context: &quot; </span>
-<span class="fc" id="L313">	                    + e.getMessage());</span>
-<span class="fc" id="L314">	            CBORObject map = CBORObject.NewMap();</span>
-<span class="fc" id="L315">	            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
-<span class="fc" id="L316">	            map.Add(Constants.ERROR_DESCRIPTION, </span>
+<span class="fc" id="L310">	        } catch (OSException e) {</span>
+<span class="fc" id="L311">	            LOGGER.info(&quot;Error while creating OSCORE context: &quot; </span>
+<span class="fc" id="L312">	                    + e.getMessage());</span>
+<span class="fc" id="L313">	            CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L314">	            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="fc" id="L315">	            map.Add(Constants.ERROR_DESCRIPTION, </span>
 	                    &quot;Error while creating OSCORE security context: &quot;
-<span class="fc" id="L318">	                    + e.getMessage());</span>
-<span class="fc" id="L319">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
-<span class="fc" id="L320">	        }</span>
+<span class="fc" id="L317">	                    + e.getMessage());</span>
+<span class="fc" id="L318">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+<span class="fc" id="L319">	        }</span>
 	        
-<span class="fc" id="L322">	        payload.Add(Constants.NONCE2, n2);</span>
-<span class="fc" id="L323">	        payload.Add(Constants.ID2, recipientId);</span>
+<span class="fc" id="L321">	        payload.Add(Constants.NONCE2, n2);</span>
+<span class="fc" id="L322">	        payload.Add(Constants.ACE_SERVER_RECIPIENTID, recipientId);</span>
         
 		}
         
-<span class="fc" id="L327">        LOGGER.info(&quot;Successfully processed OSCORE token&quot;);</span>
-<span class="fc" id="L328">        return msg.successReply(reply.getMessageCode(), payload);</span>
+<span class="fc" id="L326">        LOGGER.info(&quot;Successfully processed OSCORE token&quot;);</span>
+<span class="fc" id="L327">        return msg.successReply(reply.getMessageCode(), payload);</span>
 	}
 
 	@Override
 	protected synchronized void processOther(Map&lt;Short, CBORObject&gt; claims) {
-<span class="fc" id="L333">	    this.cnf = claims.get(Constants.CNF);</span>
-<span class="fc" id="L334">	}</span>
+<span class="fc" id="L332">	    this.cnf = claims.get(Constants.CNF);</span>
+<span class="fc" id="L333">	}</span>
 
     @Override
     public void close() throws AceException {
-<span class="fc" id="L338">       super.close();</span>
+<span class="fc" id="L337">       super.close();</span>
         
-<span class="fc" id="L340">    }	</span>
+<span class="fc" id="L339">    }	</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

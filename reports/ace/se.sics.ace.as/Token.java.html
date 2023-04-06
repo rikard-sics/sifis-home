@@ -1407,7 +1407,7 @@ public class Token implements Endpoint, AutoCloseable {
 <span class="pc bpc" id="L1407" title="1 of 4 branches missed.">			if (claims.containsKey(Constants.EXI) &amp;&amp; !claims.containsKey(Constants.EXP)) {</span>
 				
 <span class="fc" id="L1409">				Long now = this.time.getCurrentTime();</span>
-<span class="fc" id="L1410">				Long exp = now + claims.get(Constants.EXI).AsInt64();</span>
+<span class="fc" id="L1410">				Long exp = now + claims.get(Constants.EXI).AsNumber().ToInt64Checked();</span>
 				
 <span class="fc" id="L1412">				claims.put(Constants.EXP, CBORObject.FromObject(exp));</span>
 				

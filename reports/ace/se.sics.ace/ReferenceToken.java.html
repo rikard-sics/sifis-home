@@ -122,7 +122,7 @@ public class ReferenceToken implements AccessToken {
 <span class="nc" id="L122">		    throw new AceException(&quot;Token reference not found: &quot; + this.refS);</span>
 		}
 <span class="nc" id="L124">		CBORObject expO = params.get(Constants.EXP);</span>
-<span class="nc bnc" id="L125" title="All 4 branches missed.">		if (expO != null &amp;&amp; expO.AsInt64() &lt; now) {</span>
+<span class="nc bnc" id="L125" title="All 4 branches missed.">		if (expO != null &amp;&amp; expO.AsNumber().ToInt64Checked() &lt; now) {</span>
 			//Token has expired
 <span class="nc" id="L127">			return true;</span>
 		}
@@ -146,11 +146,11 @@ public class ReferenceToken implements AccessToken {
 		}
 		//Check nbf and exp for the found match
 <span class="nc" id="L148">		CBORObject nbfO = params.get(Constants.NBF);</span>
-<span class="nc bnc" id="L149" title="All 4 branches missed.">		if (nbfO != null &amp;&amp;  nbfO.AsInt64()	&gt; now) {</span>
+<span class="nc bnc" id="L149" title="All 4 branches missed.">		if (nbfO != null &amp;&amp;  nbfO.AsNumber().ToInt64Checked()	&gt; now) {</span>
 <span class="nc" id="L150">		    return false;</span>
 		}	
 <span class="nc" id="L152">		CBORObject expO = params.get(Constants.EXP);</span>
-<span class="nc bnc" id="L153" title="All 4 branches missed.">		if (expO != null &amp;&amp; expO.AsInt64() &lt; now) {</span>
+<span class="nc bnc" id="L153" title="All 4 branches missed.">		if (expO != null &amp;&amp; expO.AsNumber().ToInt64Checked() &lt; now) {</span>
 		    //Token has expired
 <span class="nc" id="L155">		    return false;</span>
 		}

@@ -241,7 +241,7 @@ public class AuthzInfo implements Endpoint, AutoCloseable {
 
 	    //3. Check that the token is not expired (exp)
 <span class="fc" id="L243">	    CBORObject exp = claims.get(Constants.EXP);</span>
-<span class="pc bpc" id="L244" title="1 of 4 branches missed.">	    if (exp != null &amp;&amp; exp.AsInt64() &lt; this.time.getCurrentTime()) { </span>
+<span class="pc bpc" id="L244" title="1 of 4 branches missed.">	    if (exp != null &amp;&amp; exp.AsNumber().ToInt64Checked() &lt; this.time.getCurrentTime()) { </span>
 <span class="fc" id="L245">	        CBORObject map = CBORObject.NewMap();</span>
 <span class="fc" id="L246">	        map.Add(Constants.ERROR, Constants.UNAUTHORIZED_CLIENT);</span>
 <span class="fc" id="L247">            map.Add(Constants.ERROR_DESCRIPTION, &quot;Token is expired&quot;);</span>
@@ -419,7 +419,7 @@ public class AuthzInfo implements Endpoint, AutoCloseable {
 <span class="fc" id="L419">    	    }</span>
     		
 <span class="fc" id="L421">	    	CBORObject cbor = CBORObject.DecodeFromBytes(msg.getRawPayload());</span>
-<span class="fc" id="L422">	    	byte[] senderId = cbor.get(Constants.ID1).GetByteString();</span>
+<span class="fc" id="L422">	    	byte[] senderId = cbor.get(Constants.ACE_CLIENT_RECIPIENTID).GetByteString();</span>
 	    	
 <span class="fc" id="L424">	        OSCoreCtxDB db = OscoreCtxDbSingleton.getInstance();</span>
 	        
@@ -700,7 +700,7 @@ public class AuthzInfo implements Endpoint, AutoCloseable {
         
         // Determine the expiration time and add it to the Access Token as value of an 'exp' claim
 <span class="fc" id="L702">        Long now = this.time.getCurrentTime();</span>
-<span class="fc" id="L703">        Long exp = now + exi.AsInt64();</span>
+<span class="fc" id="L703">        Long exp = now + exi.AsNumber().ToInt64Checked();</span>
 <span class="fc" id="L704">        claims.put(Constants.EXP, CBORObject.FromObject(exp));</span>
         
         // Check that the 'cti' claim is also present

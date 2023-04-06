@@ -107,7 +107,7 @@ import se.sics.ace.AceException;
 <span class="nc" id="L107">	                throw new AceException(&quot;CBOR key was not a Short: &quot;</span>
 <span class="nc" id="L108">	                        + key.toString());</span>
 	            }
-<span class="nc" id="L110">	            ret.put(key.AsInt16(), cbor.get(key));</span>
+<span class="nc" id="L110">	            ret.put(key.AsNumber().ToInt16Checked(), cbor.get(key));</span>
 <span class="nc" id="L111">	        }</span>
 <span class="nc" id="L112">	        return ret;</span>
 	    }
