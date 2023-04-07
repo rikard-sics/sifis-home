@@ -119,9 +119,11 @@ public class OscoreAsServer {
 		// Possibly set up connection to the DHT for sending logging statements
 		if (useDht) {
 			System.out.println("Connecting to the DHT for logging.");
+			DhtLogger.setLogging(true);
 			boolean dhtConnected = DhtLogger.establishConnection();
 			if (dhtConnected == false) {
 				System.err.println("Failed to connect to DHT for logging.");
+				DhtLogger.setLogging(false);
 			}
 		}
 

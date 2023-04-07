@@ -23,6 +23,7 @@ public class DhtLogger {
 	private static CountDownLatch latch;
 	private static ClientManager dhtClient = null;
 	private static Session session = null;
+	private static boolean loggingEnabled = false;
 
 	/**
 	 * Sends a logging message to the DHT
@@ -34,6 +35,17 @@ public class DhtLogger {
 	 */
 	static public void sendLog(String message, int priority, int severity, String category) {
 
+		// Return if DHT logging is not used
+		if (loggingEnabled == false) {
+			return;
+		}
+		
+//		// If a connection is not established yet (which it should
+//		// have been done from the application), do it now
+//		if (dhtClient == null || session == null) {
+//			establishConnection();
+//		}
+//		
 		// Build the outgoing JSON payload for the DHT
 		JsonOut outgoing = new JsonOut();
 
@@ -62,6 +74,15 @@ public class DhtLogger {
 		}
 	}
 
+	/**
+	 * Enable or disable logging to the DHT
+	 * 
+	 * @param logging true/false
+	 */
+	static public void setLogging(boolean logging) {
+		loggingEnabled = logging;
+	}
+	
 	// {"Command":{"value":{"logs":{"message":"error","priority":1,"severity":5,"category":"AS"}}}}
 	static public void main(String[] args) {
 

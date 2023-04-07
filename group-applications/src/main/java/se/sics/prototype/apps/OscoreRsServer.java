@@ -76,6 +76,7 @@ import se.sics.ace.AceException;
 import se.sics.ace.COSEparams;
 import se.sics.ace.Constants;
 import se.sics.ace.Util;
+import se.sics.ace.as.logging.DhtLogger;
 import se.sics.ace.coap.CoapReq;
 import se.sics.ace.coap.rs.CoapAuthzInfo;
 import se.sics.ace.coap.rs.CoapDeliverer;
@@ -98,6 +99,15 @@ import se.sics.prototype.support.KeyStorage;
  *
  */
 public class OscoreRsServer {
+
+	/**
+	 * Enums for DHT logging levels
+	 */
+	private static int PRIO1 = 1;
+	private static int SEV0 = 0;
+	private static int SEV1 = 1;
+	private static int SEV2 = 2;
+	private static String CATEGORY_GM = "ACE Group Manager";
 
 	// For old tests - PSK to encrypt the token (used for both audiences rs1 and
 	// rs2)
@@ -511,6 +521,7 @@ public class OscoreRsServer {
 			if (subject == null) {
 				// At this point, this should not really happen, due to the
 				// earlier check at the Token Repository
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.UNAUTHORIZED, "Unauthenticated client tried to get access");
 				return;
 			}
@@ -526,6 +537,7 @@ public class OscoreRsServer {
 				responseMap.Add(Constants.KDCCHALLENGE, rsnonce);
 				TokenRepository.getInstance().setRsnonce(subject, Base64.getEncoder().encodeToString(rsnonce));
 				byte[] responsePayload = responseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, responsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -535,6 +547,7 @@ public class OscoreRsServer {
 			byte[] requestPayload = exchange.getRequestPayload();
 
 			if (requestPayload == null) {
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, "A payload must be present");
 				return;
 			}
@@ -554,6 +567,7 @@ public class OscoreRsServer {
 
 			// This should never happen if active groups are maintained properly
 			if (targetedGroup == null) {
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.SERVICE_UNAVAILABLE,
 						"Error when retrieving material for the OSCORE group");
 				return;
@@ -562,6 +576,7 @@ public class OscoreRsServer {
 			if (!targetedGroup.getStatus()) {
 				// The group is currently inactive and no new members are
 				// admitted
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.SERVICE_UNAVAILABLE, "The OSCORE group is currently not active");
 				return;
 			}
@@ -621,6 +636,7 @@ public class OscoreRsServer {
 			// The payload of the join request must be a CBOR Map
 			if (!joinRequest.getType().equals(CBORType.Map)) {
 				byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -647,6 +663,7 @@ public class OscoreRsServer {
 			// Scope must be included for joining OSCORE groups
 			if (scope == null) {
 				byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -655,6 +672,7 @@ public class OscoreRsServer {
 			// groups
 			if (!scope.getType().equals(CBORType.ByteString)) {
 				byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -665,6 +683,7 @@ public class OscoreRsServer {
 			// Invalid scope format for joining OSCORE groups
 			if (!cborScope.getType().equals(CBORType.Array)) {
 				byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -672,6 +691,7 @@ public class OscoreRsServer {
 			// Invalid scope format for joining OSCORE groups
 			if (cborScope.size() != 2) {
 				byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -686,6 +706,7 @@ public class OscoreRsServer {
 				// group-membership resource
 				if (!groupName.equals(this.getName())) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -694,6 +715,7 @@ public class OscoreRsServer {
 			// Invalid scope format for joining OSCORE groups
 			else {
 				byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -710,6 +732,7 @@ public class OscoreRsServer {
 				// Invalid format of roles
 				if (roleSet < 0) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -717,6 +740,7 @@ public class OscoreRsServer {
 				// Invalid combination of roles
 				if (!validRoleCombinations.contains(roleSet)) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -742,6 +766,7 @@ public class OscoreRsServer {
 			// Invalid format of roles
 			else {
 				byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -751,6 +776,7 @@ public class OscoreRsServer {
 			boolean allowed = false;
 			int[] roleSetToken = getRolesFromToken(subject, groupName);
 			if (roleSetToken == null) {
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR,
 						"Error when retrieving allowed roles from Access Tokens");
 				return;
@@ -766,6 +792,7 @@ public class OscoreRsServer {
 
 			if (!allowed) {
 				byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.FORBIDDEN, errorResponsePayload, Constants.APPLICATION_ACE_CBOR);
 				return;
 			}
@@ -779,6 +806,7 @@ public class OscoreRsServer {
 				// Invalid format of 'get_pub_keys'
 				if (!getPubKeys.getType().equals(CBORType.Array) && !getPubKeys.equals(CBORObject.Null)) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -792,6 +820,7 @@ public class OscoreRsServer {
 							|| !getPubKeys.get(2).getType().equals(CBORType.Array) || getPubKeys.get(2).size() != 0) {
 
 						byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+						DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 						exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 								Constants.APPLICATION_ACE_CBOR);
 						return;
@@ -809,6 +838,7 @@ public class OscoreRsServer {
 								|| !validRoleCombinations.contains(getPubKeys.get(1).get(i).AsInt32())) {
 
 							byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+							DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 							exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 									Constants.APPLICATION_ACE_CBOR);
 							return;
@@ -860,6 +890,7 @@ public class OscoreRsServer {
 			nodeName = myGroup.allocateNodeName(senderId);
 
 			if (nodeName == null) {
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, "Error when assigning a node name");
 				return;
 			}
@@ -874,6 +905,7 @@ public class OscoreRsServer {
 
 			}
 			if (clientCred == null && (roleSet != (1 << Constants.GROUP_OSCORE_MONITOR))) {
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.BAD_REQUEST,
 						"A public key was neither provided nor found as already stored");
 				return;
@@ -885,6 +917,7 @@ public class OscoreRsServer {
 				boolean valid = false;
 
 				if (clientCred == null || clientCred.getType() != CBORType.ByteString) {
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST,
 							"The parameter 'client_cred' must be a CBOR byte string");
 					return;
@@ -924,6 +957,7 @@ public class OscoreRsServer {
 				}
 				if (publicKey == null || valid == false) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -943,6 +977,7 @@ public class OscoreRsServer {
 						myGroup.deallocateSenderId(senderId);
 
 						byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+						DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 						exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 								Constants.APPLICATION_ACE_CBOR);
 						return;
@@ -961,6 +996,7 @@ public class OscoreRsServer {
 						myGroup.deallocateSenderId(senderId);
 
 						byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+						DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 						exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 								Constants.APPLICATION_ACE_CBOR);
 						return;
@@ -976,6 +1012,7 @@ public class OscoreRsServer {
 				// A client nonce must be included for proof-of-possession
 				if (cnonce == null) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -984,6 +1021,7 @@ public class OscoreRsServer {
 				// The client nonce must be wrapped in a binary string
 				if (!cnonce.getType().equals(CBORType.ByteString)) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -996,6 +1034,7 @@ public class OscoreRsServer {
 				// A client PoP evidence must be included
 				if (clientPopEvidence == null) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -1004,6 +1043,7 @@ public class OscoreRsServer {
 				// The client PoP evidence must be wrapped in a binary string
 				if (!clientPopEvidence.getType().equals(CBORType.ByteString)) {
 					byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 							Constants.APPLICATION_ACE_CBOR);
 					return;
@@ -1016,11 +1056,13 @@ public class OscoreRsServer {
 					pubKey = publicKey.AsPublicKey();
 				} catch (CoseException e) {
 					System.out.println(e.getMessage());
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR,
 							"Failed to use the Client's public key to verify the PoP signature");
 					return;
 				}
 				if (pubKey == null) {
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR,
 							"Failed to use the Client's public key to verify the PoP signature");
 					return;
@@ -1050,6 +1092,7 @@ public class OscoreRsServer {
 					// This should never happen, due to the previous sanity
 					// checks
 					if (signKeyCurve == 0) {
+						DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 						exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR,
 								"Error when setting up the signature verification");
 						return;
@@ -1058,6 +1101,7 @@ public class OscoreRsServer {
 					// Invalid Client's PoP signature
 					if (!Util.verifySignature(signKeyCurve, pubKey, popInput, rawClientPopEvidence)) {
 						byte[] errorResponsePayload = errorResponseMap.EncodeToBytes();
+						DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 						exchange.respond(CoAP.ResponseCode.BAD_REQUEST, errorResponsePayload,
 								Constants.APPLICATION_ACE_CBOR);
 						return;
@@ -1070,6 +1114,7 @@ public class OscoreRsServer {
 
 				if (!myGroup.storeAuthCred(senderId, clientCred)) {
 					myGroup.deallocateSenderId(senderId);
+					DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 					exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, "Error when storing the public key");
 					return;
 
@@ -1101,6 +1146,7 @@ public class OscoreRsServer {
 					myGroup.deallocateNodeName(nodeName);
 				}
 				myGroup.deleteBirthGid(nodeName);
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, "Error when adding the new group member");
 				return;
 			}
@@ -1121,6 +1167,7 @@ public class OscoreRsServer {
 					myGroup.deleteAuthCred(senderId);
 				}
 
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, "Error when creating the node sub-resource");
 				return;
 			}
@@ -1280,6 +1327,7 @@ public class OscoreRsServer {
 				gmPrivKey = targetedGroup.getGmKeyPair().AsPrivateKey();
 			} catch (CoseException e) {
 				System.err.println("Error when computing the GM PoP evidence " + e.getMessage());
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, "Error when computing the GM PoP evidence");
 				return;
 			}
@@ -1288,6 +1336,7 @@ public class OscoreRsServer {
 			if (gmSignature != null) {
 				joinResponse.Add(Constants.KDC_CRED_VERIFY, gmSignature);
 			} else {
+				DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 				exchange.respond(CoAP.ResponseCode.INTERNAL_SERVER_ERROR, "Error when computing the GM PoP evidence");
 				return;
 			}
@@ -1300,6 +1349,7 @@ public class OscoreRsServer {
 			coapJoinResponse.getOptions().setContentFormat(Constants.APPLICATION_ACE_GROUPCOMM_CBOR);
 			coapJoinResponse.getOptions().setLocationPath(uriNodeResource);
 
+			DhtLogger.sendLog("PLACEHOLDER", PRIO1, SEV1, CATEGORY_GM);
 			exchange.respond(coapJoinResponse);
 
 		}
@@ -2988,6 +3038,25 @@ public class OscoreRsServer {
 	public static void main(String[] args) throws Exception {
 
 		System.out.println("Starting Resource Server (Group Manager): OscoreRsServer...");
+
+		// Parse command line arguments
+		boolean useDht = false;
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].toLowerCase().equals("-dht") || args[i].toLowerCase().equals("-usedht")) {
+				useDht = true;
+			}
+		}
+
+		// Possibly set up connection to the DHT for sending logging statements
+		if (useDht) {
+			System.out.println("Connecting to the DHT for logging.");
+			DhtLogger.setLogging(true);
+			boolean dhtConnected = DhtLogger.establishConnection();
+			if (dhtConnected == false) {
+				System.err.println("Failed to connect to DHT for logging.");
+				DhtLogger.setLogging(false);
+			}
+		}
 
 		rand = new Random();
 
