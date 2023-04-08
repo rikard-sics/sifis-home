@@ -10,7 +10,11 @@ import org.glassfish.tyrus.client.ClientManager;
 import com.google.gson.Gson;
 
 import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.CloseReason;
 import jakarta.websocket.DeploymentException;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 
 /**
@@ -39,13 +43,13 @@ public class DhtLogger {
 		if (loggingEnabled == false) {
 			return;
 		}
-		
-//		// If a connection is not established yet (which it should
-//		// have been done from the application), do it now
-//		if (dhtClient == null || session == null) {
-//			establishConnection();
-//		}
-//		
+
+		// // If a connection is not established yet (which it should
+		// // have been done from the application), do it now
+		// if (dhtClient == null || session == null) {
+		// establishConnection();
+		// }
+		//
 		// Build the outgoing JSON payload for the DHT
 		JsonOut outgoing = new JsonOut();
 
@@ -82,7 +86,7 @@ public class DhtLogger {
 	static public void setLogging(boolean logging) {
 		loggingEnabled = logging;
 	}
-	
+
 	// {"Command":{"value":{"logs":{"message":"error","priority":1,"severity":5,"category":"AS"}}}}
 	static public void main(String[] args) {
 
@@ -158,6 +162,29 @@ public class DhtLogger {
 		}
 
 		return true;
+	}
+
+	// DHT related methods
+
+	@OnOpen
+	public void onOpen(Session session) {
+		System.out.println("--- Connected " + session.getId());
+		// try {
+		// session.getBasicRemote().sendText("start");
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+	}
+
+	@OnMessage
+	public String onMessage(String message, Session session) {
+		return null;
+	}
+
+	@OnClose
+	public void onClose(Session session, CloseReason closeReason) {
+		System.out.println("Session " + session.getId() + " closed because " + closeReason);
+		latch.countDown();
 	}
 
 }

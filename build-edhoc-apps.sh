@@ -79,7 +79,7 @@ cp -n ~/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar edhoc-app
 cp -n ~/.m2/repository/org/slf4j/jul-to-slf4j/1.7.36/jul-to-slf4j-1.7.36.jar edhoc-applications/lib
 cp -n ~/.m2/repository/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar edhoc-applications/lib
 
-#More
+# More
 cp -n ~/.m2/repository/org/eclipse/californium/californium-core/3.1.0-SNAPSHOT/californium-core-3.1.0-SNAPSHOT.jar edhoc-applications/lib
 cp -n ~/.m2/repository/org/eclipse/californium/cf-edhoc/3.1.0-SNAPSHOT/cf-edhoc-3.1.0-SNAPSHOT.jar edhoc-applications/lib
 cp -n ~/.m2/repository/org/eclipse/californium/element-connector/3.1.0-SNAPSHOT/element-connector-3.1.0-SNAPSHOT.jar edhoc-applications/lib
