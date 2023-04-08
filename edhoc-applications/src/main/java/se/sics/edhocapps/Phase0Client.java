@@ -109,6 +109,8 @@ public class Phase0Client {
 			}
 		}
 
+		OSCoreCoapStackFactory.useAsDefault(db);
+
 		// Wait for EDHOC Server to become available
 		boolean serverAvailable = false;
 		do {
@@ -131,7 +133,6 @@ public class Phase0Client {
 				MAX_UNFRAGMENTED_SIZE);
 		db.addContext(serverUri, ctx);
 
-		OSCoreCoapStackFactory.useAsDefault(db);
 		c = new CoapClient(lightURI);
 
 		// Send requests
