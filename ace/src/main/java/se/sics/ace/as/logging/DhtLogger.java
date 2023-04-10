@@ -44,12 +44,12 @@ public class DhtLogger {
 			return;
 		}
 
-		// // If a connection is not established yet (which it should
-		// // have been done from the application), do it now
-		// if (dhtClient == null || session == null) {
-		// establishConnection();
-		// }
-		//
+		// If a connection is not established yet (which should
+		// have been done from the application), do it now
+		if (dhtClient == null || session == null) {
+			establishConnection();
+		}
+
 		// Build the outgoing JSON payload for the DHT
 		JsonOut outgoing = new JsonOut();
 
@@ -154,8 +154,8 @@ public class DhtLogger {
 			// wss://socketsbay.com/wss/v2/2/demo/
 			URI uri = new URI("ws://localhost:3000/ws");
 			session = dhtClient.connectToServer(DhtLogger.class, uri);
-			latch.await();
-		} catch (DeploymentException | URISyntaxException | InterruptedException | IOException e) {
+			// latch.await();
+		} catch (DeploymentException | URISyntaxException | IOException e) {
 			System.err.println("Error: Failed to connect to DHT for logging");
 			e.printStackTrace();
 			return false;
