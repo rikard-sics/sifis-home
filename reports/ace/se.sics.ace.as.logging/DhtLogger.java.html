@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DhtLogger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ACE library</a> &gt; <a href="index.source.html" class="el_package">se.sics.ace.as.logging</a> &gt; <span class="el_source">DhtLogger.java</span></div><h1>DhtLogger.java</h1><pre class="source lang-java linenums">package se.sics.ace.as.logging;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.CountDownLatch;
+
+import org.glassfish.tyrus.client.ClientManager;
+
+import com.google.gson.Gson;
+
+import jakarta.websocket.ClientEndpoint;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+
+/*
+ * Log message format:
+{
+   &quot;RequestPostTopicUUID&quot;:{
+      &quot;topic_name&quot;:&quot;SIFIS:Logs&quot;,
+      &quot;topic_uuid&quot;:&quot;Logs&quot;,
+      &quot;value&quot;:{
+         &quot;logs&quot;:{
+            &quot;message&quot;:&quot;Returning token. ctiStr: cnMyMA\u003d\u003d. rsName: rs2. audStr: rs2. id: Server1&quot;,
+            &quot;priority&quot;:1,
+            &quot;severity&quot;:0,
+            &quot;category&quot;:&quot;ACE Authorization Server&quot;
+         }
+      }
+   }
+}
+*/
+
+/**
+ * Handles connection establishment and sending of log messages to the DHT.
+ *
+ */
+@ClientEndpoint
+<span class="nc" id="L43">public class DhtLogger {</span>
+
+	private static CountDownLatch latch;
+<span class="fc" id="L46">	private static ClientManager dhtClient = null;</span>
+<span class="fc" id="L47">	private static Session session = null;</span>
+<span class="fc" id="L48">	private static boolean loggingEnabled = false;</span>
+
+<span class="fc" id="L50">	private static String LOG_TOPIC_NAME = &quot;SIFIS:Logs&quot;;</span>
+<span class="fc" id="L51">	private static String LOG_TOPIC_UUID = &quot;Logs&quot;;</span>
+
+	/**
+	 * Sends a logging message to the DHT
+	 * 
+	 * @param message the message
+	 * @param priority the priority
+	 * @param severity the severity
+	 * @param category the category
+	 */
+	static public void sendLog(String message, int priority, int severity, String category) {
+
+		// Return if DHT logging is not used
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">		if (loggingEnabled == false) {</span>
+<span class="fc" id="L65">			return;</span>
+		}
+
+		// If a connection is not established yet (which should
+		// have been done from the application), do it now
+<span class="nc" id="L70">		boolean dhtConnected = false;</span>
+<span class="nc bnc" id="L71" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
+<span class="nc" id="L72">			dhtConnected = establishConnection();</span>
+		}
+
+		// If the connection failed to be established, do nothing
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if (dhtConnected == false) {</span>
+<span class="nc" id="L77">			return;</span>
+		}
+
+		// Build the outgoing JSON payload for the DHT
+<span class="nc" id="L81">		JsonOut outgoing = new JsonOut();</span>
+
+<span class="nc" id="L83">		RequestPostTopicUUID requestVal = new RequestPostTopicUUID();</span>
+<span class="nc" id="L84">		OutValue valueVal = new OutValue();</span>
+<span class="nc" id="L85">		Logs logsVal = new Logs();</span>
+
+<span class="nc" id="L87">		requestVal.setTopicName(LOG_TOPIC_NAME);</span>
+<span class="nc" id="L88">		requestVal.setTopicUuid(LOG_TOPIC_UUID);</span>
+
+<span class="nc" id="L90">		logsVal.setMessage(message);</span>
+<span class="nc" id="L91">		logsVal.setPriority(priority);</span>
+<span class="nc" id="L92">		logsVal.setSeverity(severity);</span>
+<span class="nc" id="L93">		logsVal.setCategory(category);</span>
+
+<span class="nc" id="L95">		valueVal.setLogs(logsVal);</span>
+<span class="nc" id="L96">		requestVal.setValue(valueVal);</span>
+<span class="nc" id="L97">		outgoing.setPayload(requestVal);</span>
+
+<span class="nc" id="L99">		Gson gsonOut = new Gson();</span>
+<span class="nc" id="L100">		String jsonOut = gsonOut.toJson(outgoing);</span>
+
+		// Now send the payload to the DHT
+		try {
+<span class="nc" id="L104">			session.getBasicRemote().sendText(jsonOut);</span>
+<span class="nc" id="L105">		} catch (IOException e) {</span>
+<span class="nc" id="L106">			System.err.println(&quot;Error: Sending logging payload to DHT failed&quot;);</span>
+<span class="nc" id="L107">			e.printStackTrace();</span>
+<span class="nc" id="L108">		}</span>
+<span class="nc" id="L109">	}</span>
+
+	/**
+	 * Enable or disable logging to the DHT
+	 * 
+	 * @param logging true/false
+	 */
+	static public void setLogging(boolean logging) {
+<span class="nc" id="L117">		loggingEnabled = logging;</span>
+<span class="nc" id="L118">	}</span>
+
+	// {&quot;Command&quot;:{&quot;value&quot;:{&quot;logs&quot;:{&quot;message&quot;:&quot;error&quot;,&quot;priority&quot;:1,&quot;severity&quot;:5,&quot;category&quot;:&quot;AS&quot;}}}}
+	static public void main(String[] args) {
+
+		// Build outgoing JSON to DHT
+<span class="nc" id="L124">		JsonOut outgoing = new JsonOut();</span>
+
+<span class="nc" id="L126">		RequestPostTopicUUID commandVal = new RequestPostTopicUUID();</span>
+<span class="nc" id="L127">		OutValue valueVal = new OutValue();</span>
+<span class="nc" id="L128">		Logs logsVal = new Logs();</span>
+
+<span class="nc" id="L130">		logsVal.setMessage(&quot;Error&quot;);</span>
+<span class="nc" id="L131">		logsVal.setPriority(10);</span>
+<span class="nc" id="L132">		logsVal.setSeverity(4);</span>
+<span class="nc" id="L133">		logsVal.setCategory(&quot;AS&quot;);</span>
+
+<span class="nc" id="L135">		valueVal.setLogs(logsVal);</span>
+<span class="nc" id="L136">		commandVal.setValue(valueVal);</span>
+<span class="nc" id="L137">		outgoing.setPayload(commandVal);</span>
+
+<span class="nc" id="L139">		Gson gsonOut = new Gson();</span>
+<span class="nc" id="L140">		String jsonOut = gsonOut.toJson(outgoing);</span>
+<span class="nc" id="L141">		System.out.println(&quot;AAAAAAAAAAA &quot; + jsonOut);</span>
+<span class="nc" id="L142">	}</span>
+
+	/**
+	 * Retrieve the client instance connected to the DHT.
+	 * 
+	 * @return the client
+	 */
+	public static ClientManager getClientInstance() {
+
+<span class="nc bnc" id="L151" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
+<span class="nc" id="L152">			establishConnection();</span>
+		}
+
+<span class="nc" id="L155">		return dhtClient;</span>
+	}
+
+	/**
+	 * Retrieve the session instance associated with the connection to the DHT.
+	 * 
+	 * @return the session
+	 */
+	public static Session getSessionInstance() {
+
+<span class="nc bnc" id="L165" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
+<span class="nc" id="L166">			establishConnection();</span>
+		}
+
+<span class="nc" id="L169">		return session;</span>
+	}
+
+	/**
+	 * Establish the connection to the DHT.
+	 * 
+	 * @return if the connection was successfully established
+	 */
+	public static boolean establishConnection() {
+
+<span class="nc" id="L179">		System.out.println(&quot;Connecting to DHT for logging&quot;);</span>
+
+<span class="nc" id="L181">		latch = new CountDownLatch(1000);</span>
+<span class="nc" id="L182">		dhtClient = ClientManager.createClient();</span>
+		try {
+			// wss://socketsbay.com/wss/v2/2/demo/
+<span class="nc" id="L185">			URI uri = new URI(&quot;ws://localhost:3000/ws&quot;);</span>
+<span class="nc" id="L186">			session = dhtClient.connectToServer(DhtLogger.class, uri);</span>
+			// latch.await();
+<span class="nc" id="L188">		} catch (DeploymentException | URISyntaxException | IOException e) {</span>
+<span class="nc" id="L189">			System.err.println(&quot;Error: Failed to connect to DHT for logging&quot;);</span>
+<span class="nc" id="L190">			e.printStackTrace();</span>
+<span class="nc" id="L191">			return false;</span>
+<span class="nc" id="L192">		}</span>
+
+<span class="nc" id="L194">		return true;</span>
+	}
+
+	// DHT related methods
+
+	@OnOpen
+	public void onOpen(Session session) {
+<span class="nc" id="L201">		System.out.println(&quot;--- Connected &quot; + session.getId());</span>
+		// try {
+		// session.getBasicRemote().sendText(&quot;start&quot;);
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
+<span class="nc" id="L207">	}</span>
+
+	@OnMessage
+	public String onMessage(String message, Session session) {
+<span class="nc" id="L211">		return null;</span>
+	}
+
+	@OnClose
+	public void onClose(Session session, CloseReason closeReason) {
+<span class="nc" id="L216">		System.out.println(&quot;Session &quot; + session.getId() + &quot; closed because &quot; + closeReason);</span>
+<span class="nc" id="L217">		latch.countDown();</span>
+<span class="nc" id="L218">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
