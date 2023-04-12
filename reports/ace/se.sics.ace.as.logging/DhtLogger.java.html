@@ -96,7 +96,7 @@ import jakarta.websocket.Session;
 <span class="nc" id="L96">		requestVal.setValue(valueVal);</span>
 <span class="nc" id="L97">		outgoing.setPayload(requestVal);</span>
 
-<span class="nc" id="L99">		Gson gsonOut = new Gson();</span>
+<span class="nc" id="L99">		Gson gsonOut = new GsonBuilder().disableHtmlEscaping().create();</span>
 <span class="nc" id="L100">		String jsonOut = gsonOut.toJson(outgoing);</span>
 
 		// Now send the payload to the DHT
