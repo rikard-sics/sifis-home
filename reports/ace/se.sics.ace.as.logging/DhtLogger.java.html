@@ -1,4 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DhtLogger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ACE library</a> &gt; <a href="index.source.html" class="el_package">se.sics.ace.as.logging</a> &gt; <span class="el_source">DhtLogger.java</span></div><h1>DhtLogger.java</h1><pre class="source lang-java linenums">package se.sics.ace.as.logging;
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DhtLogger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ACE library</a> &gt; <a href="index.source.html" class="el_package">se.sics.ace.as.logging</a> &gt; <span class="el_source">DhtLogger.java</span></div><h1>DhtLogger.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright (c) 2023, RISE AB
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, 
+ *    this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, 
+ *    this list of conditions and the following disclaimer in the documentation 
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY 
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+package se.sics.ace.as.logging;
 
 import java.io.IOException;
 import java.net.URI;
@@ -41,15 +72,17 @@ import jakarta.websocket.Session;
  *
  */
 @ClientEndpoint
-<span class="nc" id="L44">public class DhtLogger {</span>
+<span class="nc" id="L75">public class DhtLogger {</span>
 
 	private static CountDownLatch latch;
-<span class="fc" id="L47">	private static ClientManager dhtClient = null;</span>
-<span class="fc" id="L48">	private static Session session = null;</span>
-<span class="fc" id="L49">	private static boolean loggingEnabled = false;</span>
+<span class="fc" id="L78">	private static ClientManager dhtClient = null;</span>
+<span class="fc" id="L79">	private static Session session = null;</span>
+<span class="fc" id="L80">	private static boolean loggingEnabled = false;</span>
 
-<span class="fc" id="L51">	private static String LOG_TOPIC_NAME = &quot;SIFIS:Logs&quot;;</span>
-<span class="fc" id="L52">	private static String LOG_TOPIC_UUID = &quot;Logs&quot;;</span>
+<span class="fc" id="L82">	private static String LOG_TOPIC_NAME = &quot;SIFIS:Logs&quot;;</span>
+<span class="fc" id="L83">	private static String LOG_TOPIC_UUID = &quot;Logs&quot;;</span>
+
+<span class="fc" id="L85">	private static String websocketUri = &quot;ws://localhost:3000/ws&quot;;</span>
 
 	/**
 	 * Sends a logging message to the DHT
@@ -62,51 +95,51 @@ import jakarta.websocket.Session;
 	static public void sendLog(String message, int priority, int severity, String category) {
 
 		// Return if DHT logging is not used
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">		if (loggingEnabled == false) {</span>
-<span class="fc" id="L66">			return;</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">		if (loggingEnabled == false) {</span>
+<span class="fc" id="L99">			return;</span>
 		}
 
 		// If a connection is not established yet (which should
 		// have been done from the application), do it now
-<span class="nc bnc" id="L71" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
-<span class="nc" id="L72">			boolean dhtConnected = establishConnection();</span>
+<span class="nc bnc" id="L104" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
+<span class="nc" id="L105">			boolean dhtConnected = establishConnection();</span>
 
 			// If the connection failed to be established, return
-<span class="nc bnc" id="L75" title="All 2 branches missed.">			if (dhtConnected == false) {</span>
-<span class="nc" id="L76">				return;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			if (dhtConnected == false) {</span>
+<span class="nc" id="L109">				return;</span>
 			}
 		}
 
 		// Build the outgoing JSON payload for the DHT
-<span class="nc" id="L81">		JsonOut outgoing = new JsonOut();</span>
+<span class="nc" id="L114">		JsonOut outgoing = new JsonOut();</span>
 
-<span class="nc" id="L83">		RequestPostTopicUUID requestVal = new RequestPostTopicUUID();</span>
-<span class="nc" id="L84">		OutValue valueVal = new OutValue();</span>
-<span class="nc" id="L85">		Logs logsVal = new Logs();</span>
+<span class="nc" id="L116">		RequestPostTopicUUID requestVal = new RequestPostTopicUUID();</span>
+<span class="nc" id="L117">		OutValue valueVal = new OutValue();</span>
+<span class="nc" id="L118">		Logs logsVal = new Logs();</span>
 
-<span class="nc" id="L87">		requestVal.setTopicName(LOG_TOPIC_NAME);</span>
-<span class="nc" id="L88">		requestVal.setTopicUuid(LOG_TOPIC_UUID);</span>
+<span class="nc" id="L120">		requestVal.setTopicName(LOG_TOPIC_NAME);</span>
+<span class="nc" id="L121">		requestVal.setTopicUuid(LOG_TOPIC_UUID);</span>
 
-<span class="nc" id="L90">		logsVal.setMessage(message);</span>
-<span class="nc" id="L91">		logsVal.setPriority(priority);</span>
-<span class="nc" id="L92">		logsVal.setSeverity(severity);</span>
-<span class="nc" id="L93">		logsVal.setCategory(category);</span>
+<span class="nc" id="L123">		logsVal.setMessage(message);</span>
+<span class="nc" id="L124">		logsVal.setPriority(priority);</span>
+<span class="nc" id="L125">		logsVal.setSeverity(severity);</span>
+<span class="nc" id="L126">		logsVal.setCategory(category);</span>
 
-<span class="nc" id="L95">		valueVal.setLogs(logsVal);</span>
-<span class="nc" id="L96">		requestVal.setValue(valueVal);</span>
-<span class="nc" id="L97">		outgoing.setPayload(requestVal);</span>
+<span class="nc" id="L128">		valueVal.setLogs(logsVal);</span>
+<span class="nc" id="L129">		requestVal.setValue(valueVal);</span>
+<span class="nc" id="L130">		outgoing.setPayload(requestVal);</span>
 
-<span class="nc" id="L99">		Gson gsonOut = new GsonBuilder().disableHtmlEscaping().create();</span>
-<span class="nc" id="L100">		String jsonOut = gsonOut.toJson(outgoing);</span>
+<span class="nc" id="L132">		Gson gsonOut = new GsonBuilder().disableHtmlEscaping().create();</span>
+<span class="nc" id="L133">		String jsonOut = gsonOut.toJson(outgoing);</span>
 
 		// Now send the payload to the DHT
 		try {
-<span class="nc" id="L104">			session.getBasicRemote().sendText(jsonOut);</span>
-<span class="nc" id="L105">		} catch (IOException e) {</span>
-<span class="nc" id="L106">			System.err.println(&quot;Error: Sending logging payload to DHT failed&quot;);</span>
-<span class="nc" id="L107">			e.printStackTrace();</span>
-<span class="nc" id="L108">		}</span>
-<span class="nc" id="L109">	}</span>
+<span class="nc" id="L137">			session.getBasicRemote().sendText(jsonOut);</span>
+<span class="nc" id="L138">		} catch (IOException e) {</span>
+<span class="nc" id="L139">			System.err.println(&quot;Error: Sending logging payload to DHT failed&quot;);</span>
+<span class="nc" id="L140">			e.printStackTrace();</span>
+<span class="nc" id="L141">		}</span>
+<span class="nc" id="L142">	}</span>
 
 	/**
 	 * Enable or disable logging to the DHT
@@ -114,8 +147,8 @@ import jakarta.websocket.Session;
 	 * @param logging true/false
 	 */
 	static public void setLogging(boolean logging) {
-<span class="nc" id="L117">		loggingEnabled = logging;</span>
-<span class="nc" id="L118">	}</span>
+<span class="nc" id="L150">		loggingEnabled = logging;</span>
+<span class="nc" id="L151">	}</span>
 
 	/**
 	 * Retrieve the client instance connected to the DHT.
@@ -124,11 +157,11 @@ import jakarta.websocket.Session;
 	 */
 	public static ClientManager getClientInstance() {
 
-<span class="nc bnc" id="L127" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
-<span class="nc" id="L128">			establishConnection();</span>
+<span class="nc bnc" id="L160" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
+<span class="nc" id="L161">			establishConnection();</span>
 		}
 
-<span class="nc" id="L131">		return dhtClient;</span>
+<span class="nc" id="L164">		return dhtClient;</span>
 	}
 
 	/**
@@ -138,12 +171,30 @@ import jakarta.websocket.Session;
 	 */
 	public static Session getSessionInstance() {
 
-<span class="nc bnc" id="L141" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
-<span class="nc" id="L142">			establishConnection();</span>
+<span class="nc bnc" id="L174" title="All 4 branches missed.">		if (dhtClient == null || session == null) {</span>
+<span class="nc" id="L175">			establishConnection();</span>
 		}
 
-<span class="nc" id="L145">		return session;</span>
+<span class="nc" id="L178">		return session;</span>
 	}
+
+	/**
+	 * Get the URI used for the WebSocket connection to the DHT.
+	 * 
+	 * @return the URI
+	 */
+	public static String getWebsocketUri() {
+<span class="nc" id="L187">		return websocketUri;</span>
+	}
+
+	/**
+	 * Set the URI to use for the WebSocket connection to the DHT.
+	 * 
+	 * @param websocketUri the desired URI
+	 */
+	public static void setWebsocketUri(String websocketUri) {
+<span class="nc" id="L196">		DhtLogger.websocketUri = websocketUri;</span>
+<span class="nc" id="L197">	}</span>
 
 	/**
 	 * Establish the connection to the DHT.
@@ -152,43 +203,54 @@ import jakarta.websocket.Session;
 	 */
 	public static boolean establishConnection() {
 
-<span class="nc" id="L155">		System.out.println(&quot;Connecting to DHT for logging&quot;);</span>
+<span class="nc" id="L206">		System.out.println(&quot;Connecting to DHT for logging&quot;);</span>
 
-<span class="nc" id="L157">		latch = new CountDownLatch(1000);</span>
-<span class="nc" id="L158">		dhtClient = ClientManager.createClient();</span>
+<span class="nc" id="L208">		latch = new CountDownLatch(1000);</span>
+<span class="nc" id="L209">		dhtClient = ClientManager.createClient();</span>
 		try {
 			// wss://socketsbay.com/wss/v2/2/demo/
-<span class="nc" id="L161">			URI uri = new URI(&quot;ws://localhost:3000/ws&quot;);</span>
-<span class="nc" id="L162">			session = dhtClient.connectToServer(DhtLogger.class, uri);</span>
+<span class="nc" id="L212">			URI uri = new URI(websocketUri);</span>
+<span class="nc" id="L213">			session = dhtClient.connectToServer(DhtLogger.class, uri);</span>
 			// latch.await();
-<span class="nc" id="L164">		} catch (DeploymentException | URISyntaxException | IOException e) {</span>
-<span class="nc" id="L165">			System.err.println(&quot;Error: Failed to connect to DHT for logging&quot;);</span>
-<span class="nc" id="L166">			e.printStackTrace();</span>
-<span class="nc" id="L167">			return false;</span>
-<span class="nc" id="L168">		}</span>
+<span class="nc" id="L215">		} catch (DeploymentException | URISyntaxException | IOException e) {</span>
+<span class="nc" id="L216">			System.err.println(&quot;Error: Failed to connect to DHT for logging&quot;);</span>
+<span class="nc" id="L217">			e.printStackTrace();</span>
+<span class="nc" id="L218">			return false;</span>
+<span class="nc" id="L219">		}</span>
 
-<span class="nc" id="L170">		return true;</span>
+<span class="nc" id="L221">		return true;</span>
+	}
+
+	/**
+	 * Establish the connection to the DHT.
+	 * 
+	 * @param dhtWebsocketUri the URI to connect to the DHT using WebSocket
+	 * @return if the connection was successfully established
+	 */
+	public static boolean establishConnection(String dhtWebsocketUri) {
+<span class="nc" id="L231">		setWebsocketUri(dhtWebsocketUri);</span>
+<span class="nc" id="L232">		return establishConnection();</span>
 	}
 
 	// DHT related methods
 
 	@OnOpen
 	public void onOpen(Session session) {
-<span class="nc" id="L177">		System.out.println(&quot;--- Connected &quot; + session.getId());</span>
+<span class="nc" id="L239">		System.out.println(&quot;--- Connected &quot; + session.getId());</span>
 
-<span class="nc" id="L179">	}</span>
+<span class="nc" id="L241">	}</span>
 
 	@OnMessage
 	public String onMessage(String message, Session session) {
 		// Do nothing for incoming messages from DHT
-<span class="nc" id="L184">		return null;</span>
+<span class="nc" id="L246">		return null;</span>
 	}
 
 	@OnClose
 	public void onClose(Session session, CloseReason closeReason) {
-<span class="nc" id="L189">		System.out.println(&quot;Session &quot; + session.getId() + &quot; closed because &quot; + closeReason);</span>
-<span class="nc" id="L190">		latch.countDown();</span>
-<span class="nc" id="L191">	}</span>
+<span class="nc" id="L251">		System.out.println(&quot;Session &quot; + session.getId() + &quot; closed because &quot; + closeReason);</span>
+<span class="nc" id="L252">		latch.countDown();</span>
+<span class="nc" id="L253">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
