@@ -46,7 +46,7 @@ Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.new Runnable
 Cf-OSCORE,org.eclipse.californium.oscore,ContextRederivation.PHASE,0,94,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSException,0,4,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCoapStackFactory,14,38,1,5,1,11,1,6,0,4
-Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCtx,183,905,22,59,47,210,26,76,8,53
+Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCtx,364,932,36,61,86,217,37,77,11,54
 Cf-OSCORE,org.eclipse.californium.oscore,ResponseEncryptor,30,107,7,17,5,29,8,7,1,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityLayer.new MessageObserverAdapter() {...},0,47,0,2,0,7,0,3,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreEndpointContextInfo,3,92,0,2,1,22,1,7,1,6
