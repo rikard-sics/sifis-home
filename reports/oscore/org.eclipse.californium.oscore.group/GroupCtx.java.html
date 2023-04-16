@@ -363,10 +363,10 @@ public class GroupCtx {
 	byte[] deriveGroupEncryptionKey() {
 
 <span class="fc" id="L365">		String digest = &quot;&quot;;</span>
-<span class="pc bpc" id="L366" title="1 of 2 branches missed.">		if (algKeyAgreement.toString().contains(&quot;HKDF_256&quot;)) {</span>
+<span class="fc bfc" id="L366" title="All 2 branches covered.">		if (senderCtx.getKdf().toString().contains(&quot;SHA_256&quot;)) {</span>
 <span class="fc" id="L367">			digest = &quot;SHA256&quot;;</span>
-<span class="nc bnc" id="L368" title="All 2 branches missed.">		} else if (algKeyAgreement.toString().contains(&quot;HKDF_512&quot;)) {</span>
-<span class="nc" id="L369">			digest = &quot;SHA512&quot;;</span>
+<span class="pc bpc" id="L368" title="1 of 2 branches missed.">		} else if (senderCtx.getKdf().toString().contains(&quot;SHA_512&quot;)) {</span>
+<span class="fc" id="L369">			digest = &quot;SHA512&quot;;</span>
 		}
 
 <span class="fc" id="L372">		CBORObject info = CBORObject.NewArray();</span>
@@ -402,10 +402,10 @@ public class GroupCtx {
 		}
 
 <span class="fc" id="L404">		String digest = &quot;&quot;;</span>
-<span class="pc bpc" id="L405" title="1 of 2 branches missed.">		if (algKeyAgreement.toString().contains(&quot;HKDF_256&quot;)) {</span>
+<span class="fc bfc" id="L405" title="All 2 branches covered.">		if (senderCtx.getKdf().toString().contains(&quot;SHA_256&quot;)) {</span>
 <span class="fc" id="L406">			digest = &quot;SHA256&quot;;</span>
-<span class="nc bnc" id="L407" title="All 2 branches missed.">		} else if (algKeyAgreement.toString().contains(&quot;HKDF_512&quot;)) {</span>
-<span class="nc" id="L408">			digest = &quot;SHA512&quot;;</span>
+<span class="pc bpc" id="L407" title="1 of 2 branches missed.">		} else if (senderCtx.getKdf().toString().contains(&quot;SHA_512&quot;)) {</span>
+<span class="fc" id="L408">			digest = &quot;SHA512&quot;;</span>
 		}
 
 <span class="fc" id="L411">		CBORObject info = CBORObject.NewArray();</span>
@@ -453,10 +453,10 @@ public class GroupCtx {
 		}
 
 <span class="fc" id="L455">		String digest = &quot;&quot;;</span>
-<span class="pc bpc" id="L456" title="1 of 2 branches missed.">		if (algKeyAgreement.toString().contains(&quot;HKDF_256&quot;)) {</span>
+<span class="fc bfc" id="L456" title="All 2 branches covered.">		if (senderCtx.getKdf().toString().contains(&quot;SHA_256&quot;)) {</span>
 <span class="fc" id="L457">			digest = &quot;SHA256&quot;;</span>
-<span class="nc bnc" id="L458" title="All 2 branches missed.">		} else if (algKeyAgreement.toString().contains(&quot;HKDF_512&quot;)) {</span>
-<span class="nc" id="L459">			digest = &quot;SHA512&quot;;</span>
+<span class="pc bpc" id="L458" title="1 of 2 branches missed.">		} else if (senderCtx.getKdf().toString().contains(&quot;SHA_512&quot;)) {</span>
+<span class="fc" id="L459">			digest = &quot;SHA512&quot;;</span>
 		}
 
 <span class="fc" id="L462">		CBORObject info = CBORObject.NewArray();</span>
