@@ -387,12 +387,12 @@ public class Token implements Endpoint, AutoCloseable {
 	    
 	    //1. Check if this client can request tokens
 <span class="fc" id="L389">		String id = msg.getSenderId();  </span>
-<span class="pc bpc" id="L390" title="1 of 2 branches missed.">		if (id == null) {</span>
-<span class="nc" id="L391">            CBORObject map = CBORObject.NewMap();</span>
-<span class="nc" id="L392">            map.Add(Constants.ERROR, Constants.UNAUTHORIZED_CLIENT);</span>
-<span class="nc" id="L393">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+<span class="fc bfc" id="L390" title="All 2 branches covered.">		if (id == null) {</span>
+<span class="fc" id="L391">            CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L392">            map.Add(Constants.ERROR, Constants.UNAUTHORIZED_CLIENT);</span>
+<span class="fc" id="L393">            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
                     + &quot;unauthorized client: &quot; + id);
-<span class="nc" id="L395">            return msg.failReply(Message.FAIL_UNAUTHORIZED, map);</span>
+<span class="fc" id="L395">            return msg.failReply(Message.FAIL_UNAUTHORIZED, map);</span>
 		}
 		
 <span class="fc bfc" id="L398" title="All 2 branches covered.">		if (peerIdentitiesToNames != null) {</span>
@@ -426,14 +426,14 @@ public class Token implements Endpoint, AutoCloseable {
 <span class="fc" id="L426">	        || msg.getParameter(</span>
 <span class="fc bfc" id="L427" title="All 2 branches covered.">	                Constants.GRANT_TYPE).equals(clientCredentials)) {</span>
 <span class="fc" id="L428">	        return processCC(msg);</span>
-<span class="pc bpc" id="L429" title="1 of 2 branches missed.">	    } else if (msg.getParameter(Constants.GRANT_TYPE).equals(authzCode)) {</span>
+<span class="fc bfc" id="L429" title="All 2 branches covered.">	    } else if (msg.getParameter(Constants.GRANT_TYPE).equals(authzCode)) {</span>
 <span class="fc" id="L430">	        return processAC(msg);</span>
 	    }
-<span class="nc" id="L432">	    CBORObject map = CBORObject.NewMap();</span>
-<span class="nc" id="L433">	    map.Add(Constants.ERROR, Constants.UNSUPPORTED_GRANT_TYPE);</span>
-<span class="nc" id="L434">	    LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L432">	    CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L433">	    map.Add(Constants.ERROR, Constants.UNSUPPORTED_GRANT_TYPE);</span>
+<span class="fc" id="L434">	    LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
 	            + &quot;unsupported_grant_type&quot;);
-<span class="nc" id="L436">	    return msg.failReply(Message.FAIL_BAD_REQUEST, map); 	    </span>
+<span class="fc" id="L436">	    return msg.failReply(Message.FAIL_BAD_REQUEST, map); 	    </span>
 	}
 	
 	/**
@@ -475,18 +475,18 @@ public class Token implements Endpoint, AutoCloseable {
 		} else {
 <span class="fc bfc" id="L476" title="All 2 branches covered.">		    if (cbor.getType().equals(CBORType.TextString)) {</span>
 <span class="fc" id="L477">		        scope = cbor.AsString();</span>
-<span class="pc bpc" id="L478" title="1 of 2 branches missed.">		    } else if (cbor.getType().equals(CBORType.ByteString)) {</span>
+<span class="fc bfc" id="L478" title="All 2 branches covered.">		    } else if (cbor.getType().equals(CBORType.ByteString)) {</span>
 <span class="fc" id="L479">		        scope = cbor.GetByteString();		        </span>
 		    } else {
-<span class="nc" id="L481">		        CBORObject map = CBORObject.NewMap();</span>
-<span class="nc" id="L482">		        map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
-<span class="nc" id="L483">	            map.Add(Constants.ERROR_DESCRIPTION, </span>
+<span class="fc" id="L481">		        CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L482">		        map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="fc" id="L483">	            map.Add(Constants.ERROR_DESCRIPTION, </span>
 	                    &quot;Invalid datatype for scope&quot;);
-<span class="nc" id="L485">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L485">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
 	                    + &quot;Invalid datatype for scope in message&quot;);
-<span class="nc" id="L487">	            DhtLogger.sendLog(&quot;Message processing aborted: &quot; </span>
+<span class="fc" id="L487">	            DhtLogger.sendLog(&quot;Message processing aborted: &quot; </span>
 	            		+ &quot;Invalid datatype for scope in message&quot;, PRIO1, SEV1, CATEGORY_AS);
-<span class="nc" id="L489">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+<span class="fc" id="L489">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
 		    }
 		}
 <span class="fc bfc" id="L492" title="All 2 branches covered.">		if (scope == null) {</span>
@@ -523,19 +523,19 @@ public class Token implements Endpoint, AutoCloseable {
 <span class="nc" id="L523">                return msg.failReply(Message.FAIL_INTERNAL_SERVER_ERROR, null);</span>
 <span class="fc" id="L524">            }</span>
 		} else {
-<span class="pc bpc" id="L526" title="1 of 2 branches missed.">			  if (cbor.getType().equals(CBORType.TextString)) {</span>
+<span class="fc bfc" id="L526" title="All 2 branches covered.">			  if (cbor.getType().equals(CBORType.TextString)) {</span>
 <span class="fc" id="L527">				  aud.add(cbor.AsString());</span>
 <span class="fc" id="L528">				  audStr = new String(cbor.AsString());</span>
 		    } else {//error
-<span class="nc" id="L530">		        CBORObject map = CBORObject.NewMap();</span>
-<span class="nc" id="L531">	            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
-<span class="nc" id="L532">	            map.Add(Constants.ERROR_DESCRIPTION, </span>
+<span class="fc" id="L530">		        CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L531">	            map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="fc" id="L532">	            map.Add(Constants.ERROR_DESCRIPTION, </span>
 	                    &quot;Audience malformed&quot;);
-<span class="nc" id="L534">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L534">	            LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
 	                    + &quot;Audience malformed&quot;);
-<span class="nc" id="L536">	            DhtLogger.sendLog(&quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L536">	            DhtLogger.sendLog(&quot;Message processing aborted: &quot;</span>
 	            		+ &quot;Audience malformed&quot;, PRIO1, SEV1, CATEGORY_AS);
-<span class="nc" id="L538">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+<span class="fc" id="L538">	            return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
 		    }
 		}
 <span class="fc bfc" id="L541" title="All 2 branches covered.">		if (aud.isEmpty()) {</span>
@@ -1014,60 +1014,60 @@ public class Token implements Endpoint, AutoCloseable {
                                 Message.FAIL_INTERNAL_SERVER_ERROR, null);
 <span class="fc" id="L1015">                    }</span>
 		            
-<span class="pc bpc" id="L1017" title="1 of 2 branches missed.">		        } else if (cnf.ContainsKey(Constants.COSE_KID_CBOR)) {</span>
+<span class="fc bfc" id="L1017" title="All 2 branches covered.">		        } else if (cnf.ContainsKey(Constants.COSE_KID_CBOR)) {</span>
 		            // The client requested a specific kid,
 	                // assume the client knows what it's doing
 	                // i.e. that the RS has that key and can process it
 		            
 		            //Check that the kid is well-formed
 <span class="fc" id="L1023">		            CBORObject kidC = cnf.get(Constants.COSE_KID_CBOR);</span>
-<span class="pc bpc" id="L1024" title="1 of 2 branches missed.">		            if (!kidC.getType().equals(CBORType.ByteString)) {</span>
-<span class="nc bnc" id="L1025" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="fc bfc" id="L1024" title="All 2 branches covered.">		            if (!kidC.getType().equals(CBORType.ByteString)) {</span>
+<span class="pc bpc" id="L1025" title="1 of 2 branches missed.">		            	if (!includeExi) {</span>
 <span class="nc" id="L1026">		            		this.cti--; //roll-back</span>
 		            	}
 		               	else {
 		            		//roll-back
-<span class="nc" id="L1030">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+<span class="fc" id="L1030">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
 		            	}
-<span class="nc" id="L1032">		                LOGGER.info(&quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L1032">		                LOGGER.info(&quot;Message processing aborted: &quot;</span>
 		                        + &quot; Malformed kid in request parameter 'cnf'&quot;);
-<span class="nc" id="L1034">		                DhtLogger.sendLog(&quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L1034">		                DhtLogger.sendLog(&quot;Message processing aborted: &quot;</span>
 		                		+ &quot; Malformed kid in request parameter 'cnf'&quot;, PRIO1, SEV1, CATEGORY_AS);
-<span class="nc" id="L1036">		                CBORObject map = CBORObject.NewMap();</span>
-<span class="nc" id="L1037">		                map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
-<span class="nc" id="L1038">		                map.Add(Constants.ERROR_DESCRIPTION, </span>
+<span class="fc" id="L1036">		                CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L1037">		                map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="fc" id="L1038">		                map.Add(Constants.ERROR_DESCRIPTION, </span>
 		                        &quot;Malformed kid in 'cnf' parameter&quot;);
-<span class="nc" id="L1040">		                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+<span class="fc" id="L1040">		                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
 		            }
 <span class="fc" id="L1042">		            keyType = &quot;KID&quot;;</span>
 <span class="fc" id="L1043">		            claims.put(Constants.CNF, cnf);</span>
 <span class="fc" id="L1044">		        } else {//Client has provided a key </span>
 		            //Check what key the client provided
-<span class="nc" id="L1046">		            OneKey key = null;</span>
+<span class="fc" id="L1046">		            OneKey key = null;</span>
 		            try {
-<span class="nc" id="L1048">		                key = getKey(cnf, id);</span>
-<span class="nc" id="L1049">		            } catch (AceException | CoseException e) {</span>
-<span class="nc bnc" id="L1050" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="fc" id="L1048">		                key = getKey(cnf, id);</span>
+<span class="fc" id="L1049">		            } catch (AceException | CoseException e) {</span>
+<span class="pc bpc" id="L1050" title="1 of 2 branches missed.">		            	if (!includeExi) {</span>
 <span class="nc" id="L1051">		            		this.cti--; //roll-back</span>
 		            	}
 		               	else {
 		            		//roll-back
-<span class="nc" id="L1055">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+<span class="fc" id="L1055">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
 		            	}
-<span class="nc" id="L1057">		                LOGGER.severe(&quot;Message processing aborted: &quot;</span>
-<span class="nc" id="L1058">		                        + e.getMessage());</span>
-<span class="nc" id="L1059">		                DhtLogger.sendLog(&quot;Message processing aborted&quot;, PRIO1, SEV2, CATEGORY_AS);</span>
-<span class="nc bnc" id="L1060" title="All 2 branches missed.">		                if (e.getMessage().startsWith(&quot;Malformed&quot;)) {</span>
-<span class="nc" id="L1061">		                    CBORObject map = CBORObject.NewMap();</span>
-<span class="nc" id="L1062">		                    map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
-<span class="nc" id="L1063">		                    map.Add(Constants.ERROR_DESCRIPTION, </span>
+<span class="fc" id="L1057">		                LOGGER.severe(&quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L1058">		                        + e.getMessage());</span>
+<span class="fc" id="L1059">		                DhtLogger.sendLog(&quot;Message processing aborted&quot;, PRIO1, SEV2, CATEGORY_AS);</span>
+<span class="fc bfc" id="L1060" title="All 2 branches covered.">		                if (e.getMessage().startsWith(&quot;Malformed&quot;)) {</span>
+<span class="fc" id="L1061">		                    CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L1062">		                    map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="fc" id="L1063">		                    map.Add(Constants.ERROR_DESCRIPTION, </span>
 		                            &quot;Malformed 'cnf' parameter in request&quot;);
-<span class="nc" id="L1065">		                    return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+<span class="fc" id="L1065">		                    return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
 		                } 
-<span class="nc" id="L1067">		                return msg.failReply(</span>
+<span class="fc" id="L1067">		                return msg.failReply(</span>
 		                        Message.FAIL_INTERNAL_SERVER_ERROR, null);
-<span class="nc" id="L1069">		            }</span>
-<span class="nc bnc" id="L1070" title="All 2 branches missed.">		            if (key == null) {</span>
+<span class="fc" id="L1069">		            }</span>
+<span class="pc bpc" id="L1070" title="1 of 2 branches missed.">		            if (key == null) {</span>
 <span class="nc bnc" id="L1071" title="All 2 branches missed.">		            	if (!includeExi) {</span>
 <span class="nc" id="L1072">		            		this.cti--; //roll-back</span>
 		            	}
@@ -1086,50 +1086,50 @@ public class Token implements Endpoint, AutoCloseable {
 <span class="nc" id="L1086">		                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
 		            }
 		            
-<span class="nc bnc" id="L1089" title="All 2 branches missed.">		            if (key.get(KeyKeys.KeyType).equals(KeyKeys.KeyType_Octet)) {</span>
+<span class="fc bfc" id="L1089" title="All 2 branches covered.">		            if (key.get(KeyKeys.KeyType).equals(KeyKeys.KeyType_Octet)) {</span>
 		                //Client tried to submit a symmetric key =&gt; reject
-<span class="nc bnc" id="L1091" title="All 2 branches missed.">		            	if (!includeExi) {</span>
+<span class="pc bpc" id="L1091" title="1 of 2 branches missed.">		            	if (!includeExi) {</span>
 <span class="nc" id="L1092">		            		this.cti--; //roll-back</span>
 		            	}
 		               	else {
 		            		//roll-back
-<span class="nc" id="L1096">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+<span class="fc" id="L1096">		            		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
 		            	}
-<span class="nc" id="L1098">		                CBORObject map = CBORObject.NewMap();</span>
-<span class="nc" id="L1099">		                map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
-<span class="nc" id="L1100">		                map.Add(Constants.ERROR_DESCRIPTION, </span>
+<span class="fc" id="L1098">		                CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L1099">		                map.Add(Constants.ERROR, Constants.INVALID_REQUEST);</span>
+<span class="fc" id="L1100">		                map.Add(Constants.ERROR_DESCRIPTION, </span>
 		                        &quot;Client tried to provide cnf PSK&quot;);
-<span class="nc" id="L1102">		                LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L1102">		                LOGGER.log(Level.INFO, &quot;Message processing aborted: &quot;</span>
 		                        + &quot;Client tried to provide cnf PSK&quot;);
-<span class="nc" id="L1104">		                DhtLogger.sendLog(&quot;Message processing aborted: &quot; </span>
+<span class="fc" id="L1104">		                DhtLogger.sendLog(&quot;Message processing aborted: &quot; </span>
 		                		+ &quot;Client tried to provide cnf PSK&quot;, PRIO1, SEV1, CATEGORY_AS);
-<span class="nc" id="L1106">		                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
+<span class="fc" id="L1106">		                return msg.failReply(Message.FAIL_BAD_REQUEST, map);</span>
 		            }
                     
 		            //At this point we assume the client wants to use RPK
-<span class="nc" id="L1110">		            keyType = &quot;RPK&quot;;</span>
+<span class="fc" id="L1110">		            keyType = &quot;RPK&quot;;</span>
 		            
 		            //Check that the client used this RPK to create this session
 		            try {
-<span class="nc" id="L1114">                        RawPublicKeyIdentity rpkId = new RawPublicKeyIdentity(</span>
-<span class="nc" id="L1115">                                key.AsPublicKey());</span>
-<span class="nc bnc" id="L1116" title="All 2 branches missed.">                        if (!rpkId.getName().equals(id)) {</span>
-<span class="nc bnc" id="L1117" title="All 2 branches missed.">                        	if (!includeExi) {</span>
+<span class="fc" id="L1114">                        RawPublicKeyIdentity rpkId = new RawPublicKeyIdentity(</span>
+<span class="fc" id="L1115">                                key.AsPublicKey());</span>
+<span class="pc bpc" id="L1116" title="1 of 2 branches missed.">                        if (!rpkId.getName().equals(id)) {</span>
+<span class="pc bpc" id="L1117" title="1 of 2 branches missed.">                        	if (!includeExi) {</span>
 <span class="nc" id="L1118">                        		this.cti--; //roll-back</span>
                         	}
                            	else {
                         		//roll-back
-<span class="nc" id="L1122">                        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
+<span class="fc" id="L1122">                        		exiSequenceNumbers.put(rsName, exiSeqNum);</span>
                         	}
-<span class="nc" id="L1124">                            CBORObject map = CBORObject.NewMap();</span>
-<span class="nc" id="L1125">                            map.Add(Constants.ERROR, </span>
-<span class="nc" id="L1126">                                Constants.UNSUPPORTED_POP_KEY);</span>
-<span class="nc" id="L1127">                            LOGGER.log(Level.INFO, </span>
+<span class="fc" id="L1124">                            CBORObject map = CBORObject.NewMap();</span>
+<span class="fc" id="L1125">                            map.Add(Constants.ERROR, </span>
+<span class="fc" id="L1126">                                Constants.UNSUPPORTED_POP_KEY);</span>
+<span class="fc" id="L1127">                            LOGGER.log(Level.INFO, </span>
                                     &quot;Message processing aborted: &quot;
                                        + &quot;Client used unauthenticated RPK&quot;);
-<span class="nc" id="L1130">                            DhtLogger.sendLog(&quot;Message processing aborted: &quot;</span>
+<span class="fc" id="L1130">                            DhtLogger.sendLog(&quot;Message processing aborted: &quot;</span>
                             		+ &quot;Client used unauthenticated RPK&quot;, PRIO1, SEV1, CATEGORY_AS);
-<span class="nc" id="L1132">                            return msg.failReply(</span>
+<span class="fc" id="L1132">                            return msg.failReply(</span>
                                     Message.FAIL_BAD_REQUEST, map);
                         }
                         
@@ -1773,16 +1773,16 @@ public class Token implements Endpoint, AutoCloseable {
 	 */
 	private OneKey getKey(CBORObject cnf, String id) 
 	        throws AceException, CoseException {
-<span class="nc" id="L1776">	    CBORObject crpk = null; </span>
-<span class="nc bnc" id="L1777" title="All 2 branches missed.">	    if (cnf.ContainsKey(Constants.COSE_KEY_CBOR)) {</span>
-<span class="nc" id="L1778">	        crpk = cnf.get(Constants.COSE_KEY_CBOR);</span>
-<span class="nc bnc" id="L1779" title="All 2 branches missed.">	        if (crpk == null) {</span>
+<span class="fc" id="L1776">	    CBORObject crpk = null; </span>
+<span class="fc bfc" id="L1777" title="All 2 branches covered.">	    if (cnf.ContainsKey(Constants.COSE_KEY_CBOR)) {</span>
+<span class="fc" id="L1778">	        crpk = cnf.get(Constants.COSE_KEY_CBOR);</span>
+<span class="pc bpc" id="L1779" title="1 of 2 branches missed.">	        if (crpk == null) {</span>
 <span class="nc" id="L1780">	            return null;</span>
 	        }
-<span class="nc" id="L1782">	        return new OneKey(crpk);</span>
-<span class="nc bnc" id="L1783" title="All 2 branches missed.">	    } else if (cnf.ContainsKey(Constants.COSE_ENCRYPTED_CBOR)) {</span>
-<span class="nc" id="L1784">	        Encrypt0Message msg = new Encrypt0Message();</span>
-<span class="nc" id="L1785">            CBORObject encC = cnf.get(Constants.COSE_ENCRYPTED_CBOR);</span>
+<span class="fc" id="L1782">	        return new OneKey(crpk);</span>
+<span class="fc bfc" id="L1783" title="All 2 branches covered.">	    } else if (cnf.ContainsKey(Constants.COSE_ENCRYPTED_CBOR)) {</span>
+<span class="fc" id="L1784">	        Encrypt0Message msg = new Encrypt0Message();</span>
+<span class="fc" id="L1785">            CBORObject encC = cnf.get(Constants.COSE_ENCRYPTED_CBOR);</span>
           try {
 <span class="nc" id="L1787">              msg.DecodeFromCBORObject(encC);</span>
 <span class="nc" id="L1788">              OneKey psk = this.db.getCPSK(id);</span>
@@ -1799,13 +1799,13 @@ public class Token implements Endpoint, AutoCloseable {
 <span class="nc" id="L1799">              msg.decrypt(key.GetByteString());</span>
 <span class="nc" id="L1800">              CBORObject keyData = CBORObject.DecodeFromBytes(msg.GetContent());</span>
 <span class="nc" id="L1801">              return new OneKey(keyData);</span>
-<span class="nc" id="L1802">          } catch (CoseException e) {</span>
-<span class="nc" id="L1803">              LOGGER.severe(&quot;Error while decrypting a cnf claim: &quot;</span>
-<span class="nc" id="L1804">                      + e.getMessage());</span>
-<span class="nc" id="L1805">              throw new AceException(&quot;Error while decrypting a cnf parameter&quot;);</span>
+<span class="fc" id="L1802">          } catch (CoseException e) {</span>
+<span class="fc" id="L1803">              LOGGER.severe(&quot;Error while decrypting a cnf claim: &quot;</span>
+<span class="fc" id="L1804">                      + e.getMessage());</span>
+<span class="fc" id="L1805">              throw new AceException(&quot;Error while decrypting a cnf parameter&quot;);</span>
           }
 	    } //Note: We checked the COSE_KID_CBOR case before 
-<span class="nc" id="L1808">	    throw new AceException(&quot;Malformed cnf structure&quot;);</span>
+<span class="fc" id="L1808">	    throw new AceException(&quot;Malformed cnf structure&quot;);</span>
     }
 
 	/**

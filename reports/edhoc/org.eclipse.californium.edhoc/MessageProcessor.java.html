@@ -261,44 +261,44 @@ import com.upokecenter.cbor.CBORType;
 												AppProfile appProfile,
 												SideProcessor sideProcessor) {
 		
-<span class="nc bnc" id="L264" title="All 4 branches missed.">		if (sequence == null || supportedCipherSuites == null)</span>
+<span class="pc bpc" id="L264" title="2 of 4 branches missed.">		if (sequence == null || supportedCipherSuites == null)</span>
 <span class="nc" id="L265">				return null;</span>
 		
-<span class="nc" id="L267">		CBORObject[] ead1 = null; // Will be set if External Authorization Data is present as EAD1</span>
+<span class="fc" id="L267">		CBORObject[] ead1 = null; // Will be set if External Authorization Data is present as EAD1</span>
 		
-<span class="nc" id="L269">		List&lt;CBORObject&gt; processingResult = new ArrayList&lt;CBORObject&gt;(); // List of CBOR Objects to return as result</span>
+<span class="fc" id="L269">		List&lt;CBORObject&gt; processingResult = new ArrayList&lt;CBORObject&gt;(); // List of CBOR Objects to return as result</span>
 		
 		// Serialization of the message to be sent back to the Initiator
-<span class="nc" id="L272">		byte[] replyPayload = new byte[] {};</span>
+<span class="fc" id="L272">		byte[] replyPayload = new byte[] {};</span>
 		
-<span class="nc" id="L274">		boolean error = false; // Will be set to True if an EDHOC Error Message has to be returned</span>
-<span class="nc" id="L275">		int errorCode = Constants.ERR_CODE_UNSPECIFIED_ERROR; // The error code to use for the EDHOC Error Message</span>
-<span class="nc" id="L276">		ResponseCode responseCode = null; // Will be set to the CoAP response code to use for the EDHOC Error Message</span>
-<span class="nc" id="L277">		String errMsg = null; // The text string to be possibly returned as DIAG_MSG in an EDHOC Error Message</span>
-<span class="nc" id="L278">		CBORObject cI = null; // The Connection Identifier C_I as encoded in the EDHOC message</span>
-<span class="nc" id="L279">		CBORObject suitesR = null; // The SUITE_R element to be possibly returned as SUITES_R in an EDHOC Error Message</span>
+<span class="fc" id="L274">		boolean error = false; // Will be set to True if an EDHOC Error Message has to be returned</span>
+<span class="fc" id="L275">		int errorCode = Constants.ERR_CODE_UNSPECIFIED_ERROR; // The error code to use for the EDHOC Error Message</span>
+<span class="fc" id="L276">		ResponseCode responseCode = null; // Will be set to the CoAP response code to use for the EDHOC Error Message</span>
+<span class="fc" id="L277">		String errMsg = null; // The text string to be possibly returned as DIAG_MSG in an EDHOC Error Message</span>
+<span class="fc" id="L278">		CBORObject cI = null; // The Connection Identifier C_I as encoded in the EDHOC message</span>
+<span class="fc" id="L279">		CBORObject suitesR = null; // The SUITE_R element to be possibly returned as SUITES_R in an EDHOC Error Message</span>
 
 		
-<span class="nc" id="L282">		int index = -1;	</span>
-<span class="nc" id="L283">		CBORObject[] objectList = null;</span>
+<span class="fc" id="L282">		int index = -1;	</span>
+<span class="fc" id="L283">		CBORObject[] objectList = null;</span>
 		try {
-<span class="nc" id="L285">			objectList = CBORObject.DecodeSequenceFromBytes(sequence);</span>
+<span class="fc" id="L285">			objectList = CBORObject.DecodeSequenceFromBytes(sequence);</span>
 		}
 <span class="nc" id="L287">		catch (Exception e) {</span>
 <span class="nc" id="L288">		    errMsg = new String(&quot;Malformed or invalid EDHOC message_1&quot;);</span>
 <span class="nc" id="L289">		    responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L290">		    error = true;</span>
-<span class="nc" id="L291">		}</span>
+<span class="fc" id="L291">		}</span>
 		
 		/* Consistency checks */
 		
-<span class="nc bnc" id="L295" title="All 4 branches missed.">		if (error == false &amp;&amp; objectList.length == 0) {</span>
+<span class="pc bpc" id="L295" title="2 of 4 branches missed.">		if (error == false &amp;&amp; objectList.length == 0) {</span>
 <span class="nc" id="L296">		    errMsg = new String(&quot;Malformed or invalid EDHOC message_1&quot;);</span>
 <span class="nc" id="L297">		    responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L298">		    error = true;</span>
 		}
 		
-<span class="nc bnc" id="L301" title="All 4 branches missed.">    	if (error == false &amp;&amp; appProfile == null) {</span>
+<span class="pc bpc" id="L301" title="2 of 4 branches missed.">    	if (error == false &amp;&amp; appProfile == null) {</span>
 <span class="nc" id="L302">			errMsg = new String(&quot;Impossible to retrieve the application profile&quot;);</span>
 <span class="nc" id="L303">			responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L304">			error = true;</span>
@@ -306,9 +306,9 @@ import com.upokecenter.cbor.CBORType;
     	else {
     	    // If the received message is a request (i.e. the CoAP client is the initiator), the first element
     	    // before the actual message_1 is the CBOR simple value 'true', i.e. the byte 0xf5, and it can be skipped
-<span class="nc bnc" id="L309" title="All 2 branches missed.">	    	if (isReq) {</span>
-<span class="nc" id="L310">	    		index++;</span>
-<span class="nc bnc" id="L311" title="All 2 branches missed.">	    		if (!objectList[index].equals(CBORObject.True)) {</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">	    	if (isReq) {</span>
+<span class="fc" id="L310">	    		index++;</span>
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">	    		if (!objectList[index].equals(CBORObject.True)) {</span>
 <span class="nc" id="L312">	    			errMsg = new String(&quot;The first element must be the CBOR simple value 'true'&quot;);</span>
 <span class="nc" id="L313">	    			responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L314">	    			error = true;</span>
@@ -318,18 +318,18 @@ import com.upokecenter.cbor.CBORType;
 		
     	
 		// METHOD
-<span class="nc" id="L321">    	index++;</span>
-<span class="nc" id="L322">    	int method = -1;</span>
-<span class="nc bnc" id="L323" title="All 2 branches missed.">    	if (error == false) {</span>
-<span class="nc bnc" id="L324" title="All 2 branches missed.">			if (objectList[index].getType() != CBORType.Integer) {</span>
+<span class="fc" id="L321">    	index++;</span>
+<span class="fc" id="L322">    	int method = -1;</span>
+<span class="pc bpc" id="L323" title="1 of 2 branches missed.">    	if (error == false) {</span>
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">			if (objectList[index].getType() != CBORType.Integer) {</span>
 <span class="nc" id="L325">				errMsg = new String(&quot;METHOD must be an integer&quot;);</span>
 <span class="nc" id="L326">				responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L327">				error = true;</span>
 			}
 			else {
 				// Check that the indicated authentication method is supported
-<span class="nc" id="L331">		    	method = objectList[index].AsInt32();</span>
-<span class="nc bnc" id="L332" title="All 2 branches missed.">		    	if (!appProfile.isAuthMethodSupported(method)) {</span>
+<span class="fc" id="L331">		    	method = objectList[index].AsInt32();</span>
+<span class="pc bpc" id="L332" title="1 of 2 branches missed.">		    	if (!appProfile.isAuthMethodSupported(method)) {</span>
 <span class="nc" id="L333">					errMsg = new String(&quot;Authentication method &quot; + method + &quot; is not supported&quot;);</span>
 <span class="nc" id="L334">					responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L335">					error = true;</span>
@@ -338,24 +338,24 @@ import com.upokecenter.cbor.CBORType;
 		}
 		
 		// SUITES_I
-<span class="nc" id="L341">		index++;</span>
-<span class="nc" id="L342">		int indexCredI = index;</span>
-<span class="nc bnc" id="L343" title="All 2 branches missed.">		if (error == false &amp;&amp;</span>
-<span class="nc bnc" id="L344" title="All 2 branches missed.">			objectList[index].getType() != CBORType.Integer &amp;&amp;</span>
+<span class="fc" id="L341">		index++;</span>
+<span class="fc" id="L342">		int indexCredI = index;</span>
+<span class="pc bpc" id="L343" title="1 of 2 branches missed.">		if (error == false &amp;&amp;</span>
+<span class="pc bpc" id="L344" title="1 of 2 branches missed.">			objectList[index].getType() != CBORType.Integer &amp;&amp;</span>
 <span class="nc bnc" id="L345" title="All 2 branches missed.">			objectList[index].getType() != CBORType.Array) {</span>
 <span class="nc" id="L346">				errMsg = new String(&quot;SUITES_I must be an integer or an array&quot;);</span>
 <span class="nc" id="L347">				responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L348">				error = true;</span>
 		}
-<span class="nc bnc" id="L350" title="All 2 branches missed.">		if (error == false &amp;&amp;</span>
-<span class="nc bnc" id="L351" title="All 2 branches missed.">			objectList[index].getType() == CBORType.Integer &amp;&amp;</span>
-<span class="nc bnc" id="L352" title="All 2 branches missed.">			objectList[index].AsInt32() &lt; 0) {</span>
+<span class="pc bpc" id="L350" title="1 of 2 branches missed.">		if (error == false &amp;&amp;</span>
+<span class="pc bpc" id="L351" title="1 of 2 branches missed.">			objectList[index].getType() == CBORType.Integer &amp;&amp;</span>
+<span class="pc bpc" id="L352" title="1 of 2 branches missed.">			objectList[index].AsInt32() &lt; 0) {</span>
 <span class="nc" id="L353">				errMsg = new String(&quot;SUITES_I as an integer must be greater than 0&quot;);</span>
 <span class="nc" id="L354">				responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L355">				error = true;</span>
 		}
-<span class="nc bnc" id="L357" title="All 2 branches missed.">		if (error == false &amp;&amp;</span>
-<span class="nc bnc" id="L358" title="All 2 branches missed.">			objectList[index].getType() == CBORType.Array) {</span>
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">		if (error == false &amp;&amp;</span>
+<span class="pc bpc" id="L358" title="1 of 2 branches missed.">			objectList[index].getType() == CBORType.Array) {</span>
 <span class="nc bnc" id="L359" title="All 2 branches missed.">				if (objectList[index].size() &lt; 2) {</span>
 <span class="nc" id="L360">					errMsg = new String(&quot;SUITES_I as an array must have at least 2 elements&quot;);</span>
 <span class="nc" id="L361">					responseCode = ResponseCode.BAD_REQUEST;</span>
@@ -380,16 +380,16 @@ import com.upokecenter.cbor.CBORType;
 		}
 
 		// Check if the selected cipher suite is supported and that no prior cipher suite in SUITES_I is supported
-<span class="nc" id="L383">		List&lt;Integer&gt; cipherSuitesToOffer = new ArrayList&lt;Integer&gt;();</span>
-<span class="nc bnc" id="L384" title="All 2 branches missed.">		if (error == false) {</span>
+<span class="fc" id="L383">		List&lt;Integer&gt; cipherSuitesToOffer = new ArrayList&lt;Integer&gt;();</span>
+<span class="pc bpc" id="L384" title="1 of 2 branches missed.">		if (error == false) {</span>
 			int selectedCipherSuite;
 			
-<span class="nc bnc" id="L387" title="All 2 branches missed.">			if (objectList[index].getType() == CBORType.Integer) {</span>
+<span class="pc bpc" id="L387" title="1 of 2 branches missed.">			if (objectList[index].getType() == CBORType.Integer) {</span>
 				// SUITES_I is the selected cipher suite
-<span class="nc" id="L389">				selectedCipherSuite = objectList[index].AsInt32();</span>
+<span class="fc" id="L389">				selectedCipherSuite = objectList[index].AsInt32();</span>
 				
 				// This peer does not support the selected cipher suite
-<span class="nc bnc" id="L392" title="All 2 branches missed.">				if (!supportedCipherSuites.contains(Integer.valueOf(selectedCipherSuite))) {</span>
+<span class="pc bpc" id="L392" title="1 of 2 branches missed.">				if (!supportedCipherSuites.contains(Integer.valueOf(selectedCipherSuite))) {</span>
 <span class="nc" id="L393">					errMsg = new String(&quot;The selected cipher suite is not supported&quot;);</span>
 <span class="nc" id="L394">					errorCode = Constants.ERR_CODE_WRONG_SELECTED_CIPHER_SUITE;</span>
 <span class="nc" id="L395">					responseCode = ResponseCode.BAD_REQUEST;</span>
@@ -456,45 +456,45 @@ import com.upokecenter.cbor.CBORType;
 		}
 		
 		// G_X
-<span class="nc" id="L459">		index++;</span>
-<span class="nc" id="L460">		int indexGx = index;</span>
-<span class="nc bnc" id="L461" title="All 2 branches missed.">		if (error == false &amp;&amp;</span>
-<span class="nc bnc" id="L462" title="All 2 branches missed.">			objectList[index].getType() != CBORType.ByteString) {</span>
+<span class="fc" id="L459">		index++;</span>
+<span class="fc" id="L460">		int indexGx = index;</span>
+<span class="pc bpc" id="L461" title="1 of 2 branches missed.">		if (error == false &amp;&amp;</span>
+<span class="pc bpc" id="L462" title="1 of 2 branches missed.">			objectList[index].getType() != CBORType.ByteString) {</span>
 <span class="nc" id="L463">				errMsg = new String(&quot;G_X must be a byte string&quot;);</span>
 <span class="nc" id="L464">				responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L465">				error = true;</span>
 		}
 		
 		// C_I
-<span class="nc" id="L469">		index++;</span>
-<span class="nc bnc" id="L470" title="All 2 branches missed.">		if (error == false &amp;&amp;</span>
-<span class="nc bnc" id="L471" title="All 2 branches missed.">			objectList[index].getType() != CBORType.ByteString &amp;&amp;</span>
+<span class="fc" id="L469">		index++;</span>
+<span class="pc bpc" id="L470" title="1 of 2 branches missed.">		if (error == false &amp;&amp;</span>
+<span class="pc bpc" id="L471" title="1 of 2 branches missed.">			objectList[index].getType() != CBORType.ByteString &amp;&amp;</span>
 <span class="nc bnc" id="L472" title="All 2 branches missed.">			objectList[index].getType() != CBORType.Integer) {</span>
 <span class="nc" id="L473">				errMsg = new String(&quot;C_I must be a byte string or an integer&quot;);</span>
 <span class="nc" id="L474">				responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L475">				error = true;</span>
 		}
 		
-<span class="nc bnc" id="L478" title="All 4 branches missed.">		if (error == false &amp;&amp; decodeIdentifier(objectList[index]) == null) {</span>
+<span class="pc bpc" id="L478" title="2 of 4 branches missed.">		if (error == false &amp;&amp; decodeIdentifier(objectList[index]) == null) {</span>
 <span class="nc" id="L479">			errMsg = new String(&quot;Invalid encoding of C_I&quot;);</span>
 <span class="nc" id="L480">			responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L481">			error = true;</span>
 		}
 
-<span class="nc" id="L484">		byte[] connectionIdentifierInitiator = null;</span>
-<span class="nc bnc" id="L485" title="All 2 branches missed.">		if (error == false) {</span>
-<span class="nc" id="L486">			cI = objectList[index];</span>
+<span class="fc" id="L484">		byte[] connectionIdentifierInitiator = null;</span>
+<span class="pc bpc" id="L485" title="1 of 2 branches missed.">		if (error == false) {</span>
+<span class="fc" id="L486">			cI = objectList[index];</span>
 			
-<span class="nc" id="L488">			connectionIdentifierInitiator = decodeIdentifier(cI);</span>
+<span class="fc" id="L488">			connectionIdentifierInitiator = decodeIdentifier(cI);</span>
 			if (debugPrint) {
-<span class="nc" id="L490">			    Util.nicePrint(&quot;Connection Identifier of the Initiator&quot;, connectionIdentifierInitiator);</span>
-<span class="nc" id="L491">			    Util.nicePrint(&quot;C_I&quot;, cI.EncodeToBytes());</span>
+<span class="fc" id="L490">			    Util.nicePrint(&quot;Connection Identifier of the Initiator&quot;, connectionIdentifierInitiator);</span>
+<span class="fc" id="L491">			    Util.nicePrint(&quot;C_I&quot;, cI.EncodeToBytes());</span>
 			}
 		}
 		
-<span class="nc" id="L495">		index++;</span>
+<span class="fc" id="L495">		index++;</span>
 		// EAD_1
-<span class="nc bnc" id="L497" title="All 4 branches missed.">		if (error == false &amp;&amp; objectList.length &gt; index) {</span>
+<span class="pc bpc" id="L497" title="2 of 4 branches missed.">		if (error == false &amp;&amp; objectList.length &gt; index) {</span>
 		    // EAD_1 is present
 <span class="nc" id="L499">			ead1 = preParseEAD(objectList, index, 1, supportedEADs);</span>
 			
@@ -507,7 +507,7 @@ import com.upokecenter.cbor.CBORType;
 		}
 		
 		// Invoke the processing of EAD items in EAD_1 (if any)
-<span class="nc bnc" id="L510" title="All 6 branches missed.">		if (error == false &amp;&amp; ead1!= null &amp;&amp; ead1.length != 0) {</span>
+<span class="pc bpc" id="L510" title="4 of 6 branches missed.">		if (error == false &amp;&amp; ead1!= null &amp;&amp; ead1.length != 0) {</span>
 			
 <span class="nc" id="L512">	 	    CBORObject[] sideProcessorInfo = new CBORObject[4];</span>
 
@@ -548,12 +548,12 @@ import com.upokecenter.cbor.CBORType;
 		}
 		
 		// If EAD_1 was present, print any available results from processing its EAD items.
-<span class="nc" id="L551">		sideProcessor.showResultsFromSideProcessing(Constants.EDHOC_MESSAGE_1, false);</span>
+<span class="fc" id="L551">		sideProcessor.showResultsFromSideProcessing(Constants.EDHOC_MESSAGE_1, false);</span>
 		
 		
 		/* Return an EDHOC Error Message */
 		
-<span class="nc bnc" id="L556" title="All 2 branches missed.">		if (error == true) {</span>
+<span class="pc bpc" id="L556" title="1 of 2 branches missed.">		if (error == true) {</span>
 			
 			// Prepare SUITES_R
 <span class="nc" id="L559">			suitesR = Util.buildSuitesR(cipherSuitesToOffer);</span>
@@ -568,10 +568,10 @@ import com.upokecenter.cbor.CBORType;
 		/* Return an indication to prepare EDHOC Message 2 */
 		
 		// A CBOR byte string with zero length, indicating that the EDHOC Message 2 can be prepared
-<span class="nc" id="L571">		processingResult.add(CBORObject.FromObject(replyPayload));</span>
+<span class="fc" id="L571">		processingResult.add(CBORObject.FromObject(replyPayload));</span>
 		
-<span class="nc" id="L573">		System.out.println(&quot;\nCompleted processing of EDHOC Message 1&quot;);</span>
-<span class="nc" id="L574">		return processingResult;</span>
+<span class="fc" id="L573">		System.out.println(&quot;\nCompleted processing of EDHOC Message 1&quot;);</span>
+<span class="fc" id="L574">		return processingResult;</span>
 		
 	}
 	
@@ -4471,11 +4471,11 @@ import com.upokecenter.cbor.CBORType;
 	
 <span class="fc" id="L4472">		byte[] identifier = null;</span>
 			
-<span class="pc bpc" id="L4474" title="2 of 4 branches missed.">		if (identifierCbor != null &amp;&amp; identifierCbor.getType() == CBORType.ByteString) {</span>
-<span class="nc" id="L4475">			identifier = identifierCbor.GetByteString();</span>
+<span class="pc bpc" id="L4474" title="1 of 4 branches missed.">		if (identifierCbor != null &amp;&amp; identifierCbor.getType() == CBORType.ByteString) {</span>
+<span class="fc" id="L4475">			identifier = identifierCbor.GetByteString();</span>
 			
 			// Consistency check
-<span class="nc bnc" id="L4478" title="All 2 branches missed.">			if (identifier.length == 1) {</span>
+<span class="pc bpc" id="L4478" title="1 of 2 branches missed.">			if (identifier.length == 1) {</span>
 <span class="nc" id="L4479">				int byteValue = Util.bytesToInt(identifier);</span>
 <span class="nc bnc" id="L4480" title="All 8 branches missed.">				if ((byteValue &gt;= 0 &amp;&amp; byteValue &lt;= 23) || (byteValue &gt;= 32 &amp;&amp; byteValue &lt;= 55))</span>
 					// This EDHOC connection identifier should have been encoded as a CBOR integer

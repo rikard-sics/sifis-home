@@ -498,9 +498,9 @@ public class SideProcessor {
 	}
 	
 	public void showResultsFromSideProcessing(int messageNumber, boolean postValidation) {
-<span class="nc" id="L501">		HashMap&lt;Integer, List&lt;HashMap&lt;Integer, CBORObject&gt;&gt;&gt; myResults = whichResults(messageNumber, postValidation);</span>
-<span class="nc bnc" id="L502" title="All 2 branches missed.">		if (myResults.size() == 0)</span>
-<span class="nc" id="L503">			return;</span>
+<span class="fc" id="L501">		HashMap&lt;Integer, List&lt;HashMap&lt;Integer, CBORObject&gt;&gt;&gt; myResults = whichResults(messageNumber, postValidation);</span>
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">		if (myResults.size() == 0)</span>
+<span class="fc" id="L503">			return;</span>
 
 <span class="nc" id="L505">		String myStr = new String(&quot;Results of side processing of message_&quot; + messageNumber);</span>
 <span class="nc bnc" id="L506" title="All 4 branches missed.">		if (messageNumber == Constants.EDHOC_MESSAGE_2 || messageNumber == Constants.EDHOC_MESSAGE_3) {</span>
