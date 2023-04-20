@@ -63,7 +63,7 @@
 				</dependency>
 			</dependencies>
 		</profile>
-		<profile>
+		<profile> <!-- Rikard: Profile for Eclipse with excluded dependencies -->
 			<id>eclipse</id>
 		</profile>
 	</profiles>
