@@ -17,58 +17,37 @@
 			<id>Maven Central Repo</id>
 			<url>https://repo1.maven.org/maven2/</url>
 		</repository>
+		<repository>
+			<id>local-californium-repo</id>
+			<url>file://${pom.basedir}/californium-extended-local-repo</url>
+		</repository>
 	</repositories>
-	<profiles>
-		<profile>
-			<id>default</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<dependencies>
-				<!-- Rikard: Jar file dependencies from Californium -->
-				<dependency>
-					<groupId>org.eclipse.californium</groupId>
-					<artifactId>cf-oscore</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/cf-oscore-3.1.0-SNAPSHOT.jar</systemPath>
-				</dependency>
-				<dependency>
-					<groupId>org.eclipse.californium</groupId>
-					<artifactId>californium-core</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/californium-core-3.1.0-SNAPSHOT.jar</systemPath>
-				</dependency>
-				<dependency>
-					<groupId>org.eclipse.californium</groupId>
-					<artifactId>element-connector</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/element-connector-3.1.0-SNAPSHOT.jar</systemPath>
-				</dependency>
-				<dependency>
-					<groupId>org.eclipse.californium</groupId>
-					<artifactId>scandium</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/scandium-3.1.0-SNAPSHOT.jar</systemPath>
-				</dependency>
-				<dependency>
-					<groupId>org.eclipse.californium</groupId>
-					<artifactId>cf-edhoc</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/cf-edhoc-3.1.0-SNAPSHOT.jar</systemPath>
-				</dependency>
-				<!-- Rikard: End Jar file dependencies from Californium -->
-			</dependencies>
-		</profile>
-		<profile>
-			<id>eclipse</id>
-		</profile>
-	</profiles>
 	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.californium</groupId>
+			<artifactId>cf-oscore</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.californium</groupId>
+			<artifactId>californium-core</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.californium</groupId>
+			<artifactId>element-connector</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.californium</groupId>
+			<artifactId>scandium</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.californium</groupId>
+			<artifactId>cf-edhoc</artifactId>
+			<version>3.1.0-SNAPSHOT</version>
+		</dependency>
 		<dependency> <!-- Rikard: Added for WebSocket -->
 			<groupId>javax.websocket</groupId>
 			<artifactId>javax.websocket-api</artifactId>
@@ -144,6 +123,38 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.5.0</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.basedir}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<finalName>${jarName}</finalName>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>${fully.qualified.main.class}</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 			</plugin>
 		</plugins>
