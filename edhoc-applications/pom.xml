@@ -22,32 +22,45 @@
 			<url>file://${pom.basedir}/californium-extended-local-repo</url>
 		</repository>
 	</repositories>
+	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>cf-oscore</artifactId>
+					<version>3.1.0-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>californium-core</artifactId>
+					<version>3.1.0-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>element-connector</artifactId>
+					<version>3.1.0-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>scandium</artifactId>
+					<version>3.1.0-SNAPSHOT</version>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.californium</groupId>
+					<artifactId>cf-edhoc</artifactId>
+					<version>3.1.0-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile> <!-- Rikard: Profile for Eclipse with excluded dependencies -->
+			<id>eclipse</id>
+		</profile>
+	</profiles>
 	<dependencies>
-		<dependency>
-			<groupId>org.eclipse.californium</groupId>
-			<artifactId>cf-oscore</artifactId>
-			<version>3.1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.californium</groupId>
-			<artifactId>californium-core</artifactId>
-			<version>3.1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.californium</groupId>
-			<artifactId>element-connector</artifactId>
-			<version>3.1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.californium</groupId>
-			<artifactId>scandium</artifactId>
-			<version>3.1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.californium</groupId>
-			<artifactId>cf-edhoc</artifactId>
-			<version>3.1.0-SNAPSHOT</version>
-		</dependency>
 		<dependency> <!-- Rikard: Added for WebSocket -->
 			<groupId>javax.websocket</groupId>
 			<artifactId>javax.websocket-api</artifactId>
@@ -74,14 +87,6 @@
 			<artifactId>numbers</artifactId>
 			<version>1.4.3</version> <!-- Rikard: Changed version -->
 		</dependency>
-		<!-- Rikard: Disabled these dependencies. They should instead be imported 
-			from the Californium-extended code (see README). <dependency> <groupId>org.eclipse.californium</groupId> 
-			<artifactId>californium-core</artifactId> <version>3.1.0-SNAPSHOT</version> 
-			</dependency> <dependency> <groupId>org.eclipse.californium</groupId> <artifactId>cf-edhoc</artifactId> 
-			<version>3.1.0-SNAPSHOT</version> </dependency> <dependency> <groupId>org.eclipse.californium</groupId> 
-			<artifactId>cf-oscore</artifactId> <version>3.1.0-SNAPSHOT</version> </dependency> 
-			<dependency> <groupId>org.eclipse.californium</groupId> <artifactId>element-connector</artifactId> 
-			<version>3.1.0-SNAPSHOT</version> </dependency> -->
 		<dependency> <!-- Rikard: Added for WebSocket -->
 			<groupId>org.glassfish.tyrus</groupId>
 			<artifactId>tyrus-client</artifactId>

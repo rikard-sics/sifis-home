@@ -13,15 +13,34 @@ else
     cd ..
 fi
 
-# Copy library Jar files from Californium to ACE lib folder
-mkdir ace/lib
-cp californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar ace/lib
+# Prepare dependencies from Californium for ACE
+mvn install:install-file -Dfile=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar \
+                         -DgroupId=org.eclipse.californium \
+                         -DartifactId=cf-oscore \
+                         -Dversion=3.1.0-SNAPSHOT \
+                         -Dpackaging=jar \
+                         -DlocalRepositoryPath=ace/californium-extended-local-repo
 
-cp californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar ace/lib
+mvn install:install-file -Dfile=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar \
+                         -DgroupId=org.eclipse.californium \
+                         -DartifactId=californium-core \
+                         -Dversion=3.1.0-SNAPSHOT \
+                         -Dpackaging=jar \
+                         -DlocalRepositoryPath=ace/californium-extended-local-repo
 
-cp californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar ace/lib
+mvn install:install-file -Dfile=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar \
+                         -DgroupId=org.eclipse.californium \
+                         -DartifactId=scandium \
+                         -Dversion=3.1.0-SNAPSHOT \
+                         -Dpackaging=jar \
+                         -DlocalRepositoryPath=ace/californium-extended-local-repo
 
-cp californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar ace/lib
+mvn install:install-file -Dfile=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar \
+                         -DgroupId=org.eclipse.californium \
+                         -DartifactId=element-connector \
+                         -Dversion=3.1.0-SNAPSHOT \
+                         -Dpackaging=jar \
+                         -DlocalRepositoryPath=ace/californium-extended-local-repo
 
 # If indicated install Mysql server
 if [ "$1" = "--with-mysql" ]

@@ -35,6 +35,7 @@ else
     cd ..
 fi
 
+# Prepare dependencies from Californium
 mvn install:install-file -Dfile=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=cf-oscore \
@@ -70,18 +71,11 @@ mvn install:install-file -Dfile=californium-extended/cf-edhoc/target/cf-edhoc-3.
                          -Dpackaging=jar \
                          -DlocalRepositoryPath=edhoc-applications/californium-extended-local-repo
 
-# Run EDHOC Apps JUnit tests
-# https://stackoverflow.com/questions/65092032/maven-build-failed-but-exit-code-is-still-0
+# Build standalone Jar files
 
 cd edhoc-applications
-echo "* Building EDHOC Applications *"
-# mvn clean install | tee mvn_res
-#mvn clean org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent install org.jacoco:jacoco-maven-plugin:0.8.6:report | tee mvn_res
-#if grep 'BUILD FAILURE' mvn_res;then exit 1; fi;
-#if grep 'BUILD SUCCESS' mvn_res;then echo "BUILD SUCCESS"; else exit 1; fi;
-#rm mvn_res
-
-mkdir lib
+echo "*** Building EDHOC Applications ***"
+mkdir -p lib
 
 # Servers
 mvn clean package -Dfully.qualified.main.class="se.sics.edhocapps.Phase0Server" -DjarName="Phase0Server"
@@ -104,10 +98,11 @@ mvn clean package -Dfully.qualified.main.class="se.sics.edhocapps.Phase2Client" 
 mv target/Phase2Client.jar .
 mvn clean package -Dfully.qualified.main.class="se.sics.edhocapps.Phase3Client" -DjarName="Phase3Client"
 mv target/Phase3Client.jar .
-mvn clean install -Dfully.qualified.main.class="se.sics.edhocapps.Phase4Client" -DjarName="Phase4Client"
+mvn clean package -Dfully.qualified.main.class="se.sics.edhocapps.Phase4Client" -DjarName="Phase4Client"
 mv target/Phase4Client.jar .
 
-# build with jacoco for code coverage
+# Run EDHOC Apps JUnit tests
+# https://stackoverflow.com/questions/65092032/maven-build-failed-but-exit-code-is-still-0
 mvn clean org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent install org.jacoco:jacoco-maven-plugin:0.8.6:report | tee mvn_res
 if grep 'BUILD FAILURE' mvn_res;then exit 1; fi;
 if grep 'BUILD SUCCESS' mvn_res;then echo "BUILD SUCCESS"; else exit 1; fi;

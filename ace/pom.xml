@@ -29,6 +29,10 @@
 			<id>central</id>
 			<url>https://repo1.maven.org/maven2/</url>
 		</repository>
+		<repository>
+			<id>local-californium-repo</id>
+			<url>file://${pom.basedir}/californium-extended-local-repo</url>
+		</repository>
 	</repositories>
 	<profiles>
 		<profile>
@@ -37,36 +41,26 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<dependencies>
-				<!-- Rikard: Jar file dependencies from Californium -->
 				<dependency>
 					<groupId>org.eclipse.californium</groupId>
 					<artifactId>cf-oscore</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/cf-oscore-3.1.0-SNAPSHOT.jar</systemPath>
+					<version>3.1.0-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.eclipse.californium</groupId>
 					<artifactId>californium-core</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/californium-core-3.1.0-SNAPSHOT.jar</systemPath>
+					<version>3.1.0-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.eclipse.californium</groupId>
 					<artifactId>element-connector</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/element-connector-3.1.0-SNAPSHOT.jar</systemPath>
+					<version>3.1.0-SNAPSHOT</version>
 				</dependency>
 				<dependency>
 					<groupId>org.eclipse.californium</groupId>
 					<artifactId>scandium</artifactId>
-					<version>3.1.0</version>
-					<scope>system</scope>
-					<systemPath>${pom.basedir}/lib/scandium-3.1.0-SNAPSHOT.jar</systemPath>
+					<version>3.1.0-SNAPSHOT</version>
 				</dependency>
-				<!-- Rikard: End Jar file dependencies from Californium -->
 			</dependencies>
 		</profile>
 		<profile>
@@ -121,14 +115,6 @@
 			<artifactId>postgresql</artifactId>
 			<version>9.3-1104-jdbc4</version>
 		</dependency>
-		<!-- Rikard: Disabled these dependencies. They should instead be imported 
-			from the Californium-extended code (see README). <dependency> <groupId>org.eclipse.californium</groupId> 
-			<artifactId>californium-core</artifactId> <version>3.1.0-SNAPSHOT</version> 
-			</dependency> <dependency> <groupId>org.eclipse.californium</groupId> <artifactId>cf-oscore</artifactId> 
-			<version>3.1.0-SNAPSHOT</version> </dependency> <dependency> <groupId>org.eclipse.californium</groupId> 
-			<artifactId>element-connector</artifactId> <version>3.1.0-SNAPSHOT</version> 
-			</dependency> <dependency> <groupId>org.eclipse.californium</groupId> <artifactId>scandium</artifactId> 
-			<version>3.1.0-SNAPSHOT</version> </dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
@@ -159,7 +145,6 @@
 			<artifactId>tyrus-container-grizzly-client</artifactId>
 			<version>2.0.0</version>
 		</dependency>
-
 	</dependencies>
 	<build>
 		<plugins>
