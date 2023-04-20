@@ -108,7 +108,10 @@ mvn clean install -Dfully.qualified.main.class="se.sics.edhocapps.Phase4Client" 
 mv target/Phase4Client.jar .
 
 # build with jacoco for code coverage
-mvn clean org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent install org.jacoco:jacoco-maven-plugin:0.8.6:report
+mvn clean org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent install org.jacoco:jacoco-maven-plugin:0.8.6:report | tee mvn_res
+if grep 'BUILD FAILURE' mvn_res;then exit 1; fi;
+if grep 'BUILD SUCCESS' mvn_res;then echo "BUILD SUCCESS"; else exit 1; fi;
+rm mvn_res
 
 rm -rf californium-extended-local-repo
 
