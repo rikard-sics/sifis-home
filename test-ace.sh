@@ -3,11 +3,14 @@
 # Execute Junit tests for ACE and save as Jacoco test reports
 
 # Build Californium (if needed)
-FILE=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
-if [ -f "$FILE" ]; then
-    echo "$FILE exists."
+FILE1=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
+FILE2=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar
+FILE3=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar
+FILE4=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar
+if [[ -f "$FILE1" ]] && [[ -f "$FILE2" ]] && [[ -f "$FILE3" ]] && [[ -f "$FILE4" ]]; then
+    echo "Californium files exist."
 else 
-    echo "$FILE does not exist."
+    echo "Californium files missing."
     cd californium-extended
     mvn -DskipTests clean install
     cd ..
