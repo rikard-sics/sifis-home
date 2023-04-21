@@ -19,28 +19,28 @@ mvn install:install-file -Dfile=californium-extended/cf-oscore/target/cf-oscore-
                          -DartifactId=cf-oscore \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/californium-extended-local-repo
+                         -DlocalRepositoryPath=ace/local-maven-repo
 
 mvn install:install-file -Dfile=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=californium-core \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/californium-extended-local-repo
+                         -DlocalRepositoryPath=ace/local-maven-repo
 
 mvn install:install-file -Dfile=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=scandium \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/californium-extended-local-repo
+                         -DlocalRepositoryPath=ace/local-maven-repo
 
 mvn install:install-file -Dfile=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=element-connector \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/californium-extended-local-repo
+                         -DlocalRepositoryPath=ace/local-maven-repo
 
 # If indicated install Mysql server
 if [ "$1" = "--with-mysql" ]

@@ -50,28 +50,28 @@ else
                          -DartifactId=cf-oscore \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/californium-extended-local-repo
+                         -DlocalRepositoryPath=ace/local-maven-repo
 
     mvn install:install-file -Dfile=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=californium-core \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/californium-extended-local-repo
+                         -DlocalRepositoryPath=ace/local-maven-repo
 
     mvn install:install-file -Dfile=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=scandium \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/californium-extended-local-repo
+                         -DlocalRepositoryPath=ace/local-maven-repo
 
     mvn install:install-file -Dfile=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=element-connector \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/californium-extended-local-repo
+                         -DlocalRepositoryPath=ace/local-maven-repo
 
     cd ace
     mvn -DskipTests clean install
@@ -84,35 +84,35 @@ mvn install:install-file -Dfile=californium-extended/cf-oscore/target/cf-oscore-
                          -DartifactId=cf-oscore \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=group-applications/californium-extended-local-repo
+                         -DlocalRepositoryPath=group-applications/local-maven-repo
 
 mvn install:install-file -Dfile=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=californium-core \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=group-applications/californium-extended-local-repo
+                         -DlocalRepositoryPath=group-applications/local-maven-repo
 
 mvn install:install-file -Dfile=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=scandium \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=group-applications/californium-extended-local-repo
+                         -DlocalRepositoryPath=group-applications/local-maven-repo
 
 mvn install:install-file -Dfile=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar \
                          -DgroupId=org.eclipse.californium \
                          -DartifactId=element-connector \
                          -Dversion=3.1.0-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=group-applications/californium-extended-local-repo
+                         -DlocalRepositoryPath=group-applications/local-maven-repo
 
 mvn install:install-file -Dfile=ace/target/ace-0.0.1-SNAPSHOT.jar \
                          -DgroupId=se.sics \
                          -DartifactId=ace \
                          -Dversion=0.0.1-SNAPSHOT \
                          -Dpackaging=jar \
-                         -DlocalRepositoryPath=group-applications/californium-extended-local-repo
+                         -DlocalRepositoryPath=group-applications/local-maven-repo
 
 # Build standalone Jar files
 cd group-applications
@@ -135,7 +135,7 @@ if grep 'BUILD FAILURE' mvn_res;then exit 1; fi;
 if grep 'BUILD SUCCESS' mvn_res;then echo "BUILD SUCCESS"; else exit 1; fi;
 rm mvn_res
 
-rm -rf californium-extended-local-repo
+rm -rf local-maven-repo
 
 # TODO: Take care of db.pwd
 echo "Warning: A MySQL server must be installed with the root password in db.pwd in the folder the Jars are launched from"

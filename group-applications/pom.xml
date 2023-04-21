@@ -22,7 +22,7 @@
 		</repository>
 		<repository>
 			<id>local-californium-repo</id>
-			<url>file://${pom.basedir}/californium-extended-local-repo</url>
+			<url>file://${pom.basedir}/local-maven-repo</url>
 		</repository>
 	</repositories>
 	<profiles>
