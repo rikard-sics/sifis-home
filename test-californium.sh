@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Execute Junit tests for Californium and save as Jacoco test reports
 

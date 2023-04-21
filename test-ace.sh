@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Execute Junit tests for ACE and save as Jacoco test reports
 
