@@ -15,15 +15,6 @@
 # Fail script with error if any command fails
 set -e
 
-# Separately install this dependency (if needed)
-FILE=~/.m2/repository/com/github/peteroupc/numbers/1.4.3/numbers-1.4.3.jar
-if [ -f "$FILE" ]; then
-    echo "$FILE exists."
-else 
-    echo "$FILE does not exist."
-    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=com.github.peteroupc:numbers:1.4.3
-fi
-
 # Build Californium (if needed)
 FILE1=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
 FILE2=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar

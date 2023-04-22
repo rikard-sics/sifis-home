@@ -2,6 +2,9 @@
 
 # Execute Junit tests for ACE and save as Jacoco test reports
 
+# Fail script with error if any command fails
+set -e
+
 # Build Californium (if needed)
 FILE1=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar
 FILE2=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar
