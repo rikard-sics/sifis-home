@@ -8,9 +8,9 @@ FILE2=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSH
 FILE3=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar
 FILE4=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar
 if [[ -f "$FILE1" ]] && [[ -f "$FILE2" ]] && [[ -f "$FILE3" ]] && [[ -f "$FILE4" ]]; then
-    echo "Californium files exist."
+    echo "Dependencies from Californium exist."
 else 
-    echo "Californium files missing."
+    echo "Dependencies from Californium missing. Building Californium..."
     cd californium-extended
     mvn -DskipTests clean install
     cd ..
@@ -58,10 +58,8 @@ fi
 
 # Run ACE JUnit tests
 # https://stackoverflow.com/questions/65092032/maven-build-failed-but-exit-code-is-still-0
-
 cd ace
 echo "*** Building and running ACE JUnit tests ***"
-# mvn clean install | tee mvn_res
 mvn clean org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent install org.jacoco:jacoco-maven-plugin:0.8.6:report | tee mvn_res
 if grep 'BUILD FAILURE' mvn_res;then exit 1; fi;
 if grep 'BUILD SUCCESS' mvn_res;then exit 0; else exit 1; fi;

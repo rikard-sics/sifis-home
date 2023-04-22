@@ -32,9 +32,9 @@ FILE2=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSH
 FILE3=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar
 FILE4=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar
 if [[ -f "$FILE1" ]] && [[ -f "$FILE2" ]] && [[ -f "$FILE3" ]] && [[ -f "$FILE4" ]]; then
-    echo "Californium files exist."
+    echo "Dependencies from Californium exist."
 else 
-    echo "Californium files missing."
+    echo "Dependencies from Californium missing. Building Californium..."
     cd californium-extended
     mvn -DskipTests clean install
     cd ..
@@ -45,36 +45,36 @@ FILE=ace/target/ace-0.0.1-SNAPSHOT.jar
 if [ -f "$FILE" ]; then
     echo "$FILE exists."
 else 
-    echo "$FILE does not exist."
+    echo "$FILE does not exist. Building ACE..."
     
     # Prepare dependencies from Californium for ACE
     mvn install:install-file -Dfile=californium-extended/cf-oscore/target/cf-oscore-3.1.0-SNAPSHOT.jar \
-                         -DgroupId=org.eclipse.californium \
-                         -DartifactId=cf-oscore \
-                         -Dversion=3.1.0-SNAPSHOT \
-                         -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/local-maven-repo
+                             -DgroupId=org.eclipse.californium \
+                             -DartifactId=cf-oscore \
+                             -Dversion=3.1.0-SNAPSHOT \
+                             -Dpackaging=jar \
+                             -DlocalRepositoryPath=ace/local-maven-repo
 
     mvn install:install-file -Dfile=californium-extended/californium-core/target/californium-core-3.1.0-SNAPSHOT.jar \
-                         -DgroupId=org.eclipse.californium \
-                         -DartifactId=californium-core \
-                         -Dversion=3.1.0-SNAPSHOT \
-                         -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/local-maven-repo
+                             -DgroupId=org.eclipse.californium \
+                             -DartifactId=californium-core \
+                             -Dversion=3.1.0-SNAPSHOT \
+                             -Dpackaging=jar \
+                             -DlocalRepositoryPath=ace/local-maven-repo
 
     mvn install:install-file -Dfile=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar \
-                         -DgroupId=org.eclipse.californium \
-                         -DartifactId=scandium \
-                         -Dversion=3.1.0-SNAPSHOT \
-                         -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/local-maven-repo
+                             -DgroupId=org.eclipse.californium \
+                             -DartifactId=scandium \
+                             -Dversion=3.1.0-SNAPSHOT \
+                             -Dpackaging=jar \
+                             -DlocalRepositoryPath=ace/local-maven-repo
 
     mvn install:install-file -Dfile=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar \
-                         -DgroupId=org.eclipse.californium \
-                         -DartifactId=element-connector \
-                         -Dversion=3.1.0-SNAPSHOT \
-                         -Dpackaging=jar \
-                         -DlocalRepositoryPath=ace/local-maven-repo
+                             -DgroupId=org.eclipse.californium \
+                             -DartifactId=element-connector \
+                             -Dversion=3.1.0-SNAPSHOT \
+                             -Dpackaging=jar \
+                             -DlocalRepositoryPath=ace/local-maven-repo
 
     cd ace
     mvn -DskipTests clean install
@@ -140,7 +140,6 @@ rm mvn_res
 
 rm -rf local-maven-repo
 
-# TODO: Take care of db.pwd
-echo "Warning: A MySQL server must be installed with the root password in db.pwd in the folder the Jars are launched from"
+echo "Note: A MySQL server must be installed with the root username & password indicated in db.pwd in the folder the Jars are launched from"
 echo "Jar files containing Group Applications built under group-applications/. Execute them with lib in the same folder. Use -help to see possible arguments when applicable."
 

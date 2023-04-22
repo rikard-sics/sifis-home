@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Configure and prepare projects for import in Eclipse
 

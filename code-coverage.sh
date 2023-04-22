@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Compile Jacoco code coverage reports
 echo "*** Collecting Jacoco code coverage reports ***"

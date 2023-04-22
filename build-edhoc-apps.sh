@@ -31,9 +31,9 @@ FILE3=californium-extended/scandium-core/target/scandium-3.1.0-SNAPSHOT.jar
 FILE4=californium-extended/element-connector/target/element-connector-3.1.0-SNAPSHOT.jar
 FILE5=californium-extended/cf-edhoc/target/cf-edhoc-3.1.0-SNAPSHOT.jar
 if [[ -f "$FILE1" ]] && [[ -f "$FILE2" ]] && [[ -f "$FILE3" ]] && [[ -f "$FILE4" ]] && [[ -f "$FILE5" ]]; then
-    echo "Californium files exist."
+    echo "Dependencies from Californium exist."
 else 
-    echo "Californium files missing."
+    echo "Dependencies from Californium missing. Building Californium..."
     cd californium-extended
     mvn -DskipTests clean install
     cd ..
@@ -76,7 +76,6 @@ mvn install:install-file -Dfile=californium-extended/cf-edhoc/target/cf-edhoc-3.
                          -DlocalRepositoryPath=edhoc-applications/local-maven-repo
 
 # Build standalone Jar files
-
 cd edhoc-applications
 echo "*** Building EDHOC Applications ***"
 mkdir -p lib
