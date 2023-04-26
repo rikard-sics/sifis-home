@@ -34,7 +34,7 @@ ACE library,se.sics.ace.examples,SQLConnector,767,2735,88,232,197,752,87,126,5,4
 ACE library,se.sics.ace.examples,KissTime,0,8,0,0,0,2,0,2,0,2
 ACE library,se.sics.ace.examples,XacmlPDP.new FilenameFilter() {...},11,0,0,0,2,0,2,0,2,0
 ACE library,se.sics.ace.examples,KissValidator,72,158,15,19,19,31,13,11,2,5
-ACE library,se.sics.ace.client,GetToken,197,22,37,3,49,7,24,1,4,1
+ACE library,se.sics.ace.client,GetToken,191,28,36,4,48,8,23,2,4,1
 ACE library,se.sics.ace.rs,TokenRepository,665,1836,111,201,154,426,96,89,3,26
 ACE library,se.sics.ace.rs,AuthzInfo,385,959,33,79,89,230,31,36,0,10
 ACE library,se.sics.ace.rs,CnonceHandler,98,267,12,18,25,66,9,13,1,6
@@ -54,7 +54,7 @@ ACE library,se.sics.ace.coap.rs,CoapDeliverer,286,217,16,17,66,63,13,11,2,4
 ACE library,se.sics.ace.coap.client,OSCOREProfileRequests,259,480,34,36,50,119,34,7,1,5
 ACE library,se.sics.ace.coap.client,OSCOREProfileRequestsGroupOSCORE,378,518,52,52,71,130,53,5,2,4
 ACE library,se.sics.ace.coap.client,DTLSProfileRequests,317,466,25,15,64,104,21,7,2,6
-ACE library,se.sics.ace.as,Token,1997,2078,149,182,354,483,101,84,2,12
+ACE library,se.sics.ace.as,Token,2021,2092,148,180,363,488,107,76,3,11
 ACE library,se.sics.ace.as,PDP.IntrospectAccessLevel,0,34,0,0,0,4,0,1,0,1
 ACE library,se.sics.ace.as,Authorize,29,0,0,0,10,0,4,0,4,0
 ACE library,se.sics.ace.as,EndpointUtils,116,106,14,15,29,29,13,8,2,2

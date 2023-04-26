@@ -176,13 +176,13 @@ import se.sics.ace.Constants;
      *   
      * @param aud  Audience restriction. OPTIONAL
      * @param scope  The requested scope. OPTIONAL 
-     * @param cnf  Proof-of-Possession key requested. OPTIONAL 
+     * @param req_cnf  Proof-of-Possession key requested. OPTIONAL 
      *   
      * @return  the CBOR map representing the access token request
      *      payload
      */
     public static CBORObject getClientCredentialsRequest(CBORObject aud, 
-            CBORObject scope, CBORObject cnf) {
+            CBORObject scope, CBORObject reqCnf) {
 <span class="fc" id="L186">        CBORObject payload = CBORObject.NewMap();</span>
 <span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if (aud != null) {</span>
 <span class="fc" id="L188">            payload.Add(Constants.AUDIENCE, aud);</span>
@@ -190,8 +190,8 @@ import se.sics.ace.Constants;
 <span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if (scope != null) {</span>
 <span class="fc" id="L191">            payload.Add(Constants.SCOPE, scope);</span>
         }
-<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if (cnf != null) {</span>
-<span class="nc" id="L194">            payload.Add(Constants.CNF, cnf);</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        if (reqCnf != null) {</span>
+<span class="fc" id="L194">            payload.Add(Constants.REQ_CNF, reqCnf);</span>
         }
 <span class="fc" id="L196">        return payload;</span>
     }

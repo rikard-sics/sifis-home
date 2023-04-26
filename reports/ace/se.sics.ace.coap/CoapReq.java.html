@@ -178,7 +178,7 @@ public class CoapReq implements Message {
     @Override
     public Message successReply(int code, CBORObject payload) {
 <span class="fc" id="L180">        ResponseCode coapCode = ResponseCode.valueOf(code);</span>
-<span class="fc" id="L181">        CoapRes res = new CoapRes(coapCode, payload);       </span>
+<span class="fc" id="L181">        CoapRes res = new CoapRes(coapCode, payload);</span>
 <span class="fc" id="L182">        return res;</span>
     }
 
