@@ -61,8 +61,8 @@ import jakarta.websocket.Session;
 <span class="fc" id="L61">	private static Session session = null;</span>
 <span class="fc" id="L62">	private static boolean loggingEnabled = false;</span>
 
-<span class="fc" id="L64">	private static String LOG_TOPIC_NAME = &quot;SIFIS:Logs&quot;;</span>
-<span class="fc" id="L65">	private static String LOG_TOPIC_UUID = &quot;Logs&quot;;</span>
+<span class="fc" id="L64">	private static String LOG_TOPIC_NAME = &quot;SIFIS:Log&quot;;</span>
+<span class="fc" id="L65">	private static String LOG_TOPIC_UUID = &quot;Log&quot;;</span>
 
 <span class="fc" id="L67">	private static String websocketUri = &quot;ws://localhost:3000/ws&quot;;</span>
 
@@ -105,19 +105,19 @@ import jakarta.websocket.Session;
 
 <span class="nc" id="L106">		RequestPostTopicUUID requestVal = new RequestPostTopicUUID();</span>
 <span class="nc" id="L107">		OutValue valueVal = new OutValue();</span>
-<span class="nc" id="L108">		Logs logsVal = new Logs();</span>
+<span class="nc" id="L108">		Log logVal = new Log();</span>
 
 <span class="nc" id="L110">		requestVal.setTopicName(LOG_TOPIC_NAME);</span>
 <span class="nc" id="L111">		requestVal.setTopicUuid(LOG_TOPIC_UUID);</span>
 
-<span class="nc" id="L113">		logsVal.setType(type);</span>
-<span class="nc" id="L114">		logsVal.setPriority(priority);</span>
-<span class="nc" id="L115">		logsVal.setCategory(category);</span>
+<span class="nc" id="L113">		logVal.setType(type);</span>
+<span class="nc" id="L114">		logVal.setPriority(priority);</span>
+<span class="nc" id="L115">		logVal.setCategory(category);</span>
 
 <span class="nc" id="L117">		int maxLen = Math.min(message.length(), LOG_MAX_LEN);</span>
-<span class="nc" id="L118">		logsVal.setMessage(message.substring(0, maxLen));</span>
+<span class="nc" id="L118">		logVal.setMessage(message.substring(0, maxLen));</span>
 
-<span class="nc" id="L120">		valueVal.setLogs(logsVal);</span>
+<span class="nc" id="L120">		valueVal.setLog(logVal);</span>
 <span class="nc" id="L121">		requestVal.setValue(valueVal);</span>
 <span class="nc" id="L122">		outgoing.setPayload(requestVal);</span>
 
