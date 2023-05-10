@@ -207,9 +207,8 @@ public class GroupRecipientCtx extends OSCoreCtx {
 	public byte[] getSenderKey() {
 <span class="nc" id="L208">		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();</span>
 <span class="nc" id="L209">		System.err.println(&quot;Bad call to getSenderKey on GroupRecipientCtx&quot; + stackTraceElements[2].toString());</span>
-<span class="nc" id="L210">		System.out.println(&quot;Bad call to getSenderKey&quot;);</span>
-<span class="nc" id="L211">		System.exit(0);</span>
-<span class="nc" id="L212">		return sender_key;</span>
+<span class="nc" id="L210">		System.exit(0);</span>
+<span class="nc" id="L211">		return sender_key;</span>
 	}
 
 }

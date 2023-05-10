@@ -138,10 +138,10 @@ import org.eclipse.californium.oscore.group.GroupRecipientCtx;
 		}
 
 <span class="fc" id="L140">		System.out.println(&quot;Decrypting incoming &quot; + message.getClass().getSimpleName());</span>
-<span class="fc" id="L141">		System.out.println(&quot;Key &quot; + Utils.toHexString(ctx.getRecipientKey()));</span>
-<span class="fc" id="L142">		System.out.println(&quot;PartialIV &quot; + Utils.toHexString(partialIV));</span>
-<span class="fc" id="L143">		System.out.println(&quot;Nonce &quot; + Utils.toHexString(nonce));</span>
-<span class="fc" id="L144">		System.out.println(&quot;AAD &quot; + Utils.toHexString(aad));</span>
+		// System.out.println(&quot;Key &quot; + Utils.toHexString(ctx.getRecipientKey()));
+		// System.out.println(&quot;PartialIV &quot; + Utils.toHexString(partialIV));
+		// System.out.println(&quot;Nonce &quot; + Utils.toHexString(nonce));
+		// System.out.println(&quot;AAD &quot; + Utils.toHexString(aad));
 
 <span class="fc" id="L146">		byte[] plaintext = null;</span>
 <span class="fc" id="L147">		byte[] key = ctx.getRecipientKey();</span>
@@ -158,11 +158,11 @@ import org.eclipse.californium.oscore.group.GroupRecipientCtx;
 
 <span class="fc bfc" id="L159" title="All 2 branches covered.">			System.out.println(&quot;Decrypting incoming &quot; + message.getClass().getSimpleName() + &quot;, using pairwise mode: &quot;</span>
 					+ !groupModeMessage);
-<span class="fc" id="L161">			System.out.println(&quot;Decrypting incoming &quot; + message.getClass().getSimpleName() + &quot; with AAD &quot;</span>
-<span class="fc" id="L162">					+ Utils.toHexString(aad));</span>
+			// System.out.println(&quot;Decrypting incoming &quot; + message.getClass().getSimpleName() + &quot; with AAD &quot;
+			// 		+ Utils.toHexString(aad));
 
-<span class="fc" id="L164">			System.out.println(&quot;Decrypting incoming &quot; + message.getClass().getSimpleName() + &quot; with nonce &quot;</span>
-<span class="fc" id="L165">					+ Utils.toHexString(nonce));</span>
+			// System.out.println(&quot;Decrypting incoming &quot; + message.getClass().getSimpleName() + &quot; with nonce &quot;
+			// 		+ Utils.toHexString(nonce));
 
 			// If group mode is used prepare the signature checking
 <span class="fc bfc" id="L168" title="All 2 branches covered.">			if (groupModeMessage) {</span>
@@ -383,48 +383,50 @@ import org.eclipse.californium.oscore.group.GroupRecipientCtx;
 <span class="fc" id="L383">			throw new OSException(ErrorDescriptions.COUNTERSIGNATURE_CHECK_FAILED);</span>
 		}
 
-<span class="fc" id="L386">		return countersignatureValid;</span>
+<span class="fc" id="L386">		System.out.println(&quot;Countersignature verified as valid&quot;);</span>
+
+<span class="fc" id="L388">		return countersignatureValid;</span>
 	}
 
 	// TODO: Remove unneeded lines
 	private static CounterSign1 prepareCheckSignature(Encrypt0Message enc, OSCoreCtx ctx, byte[] aad, Message message) {
 
-<span class="fc" id="L392">		CounterSign1 sign = null;</span>
-<span class="fc" id="L393">		GroupRecipientCtx recipientCtx = (GroupRecipientCtx) ctx;</span>
+<span class="fc" id="L394">		CounterSign1 sign = null;</span>
+<span class="fc" id="L395">		GroupRecipientCtx recipientCtx = (GroupRecipientCtx) ctx;</span>
 
 		// First remove the countersignature from the payload
-<span class="fc" id="L396">		byte[] full_payload = null;</span>
+<span class="fc" id="L398">		byte[] full_payload = null;</span>
 		try {
-<span class="fc" id="L398">			full_payload = enc.getEncryptedContent();</span>
+<span class="fc" id="L400">			full_payload = enc.getEncryptedContent();</span>
 
 			// Set new truncated ciphertext
-<span class="fc" id="L401">			int countersignatureLength = recipientCtx.getCountersignatureLen();</span>
-<span class="fc" id="L402">			byte[] countersignatureBytes = Arrays.copyOfRange(full_payload,</span>
+<span class="fc" id="L403">			int countersignatureLength = recipientCtx.getCountersignatureLen();</span>
+<span class="fc" id="L404">			byte[] countersignatureBytes = Arrays.copyOfRange(full_payload,</span>
 					full_payload.length - countersignatureLength, full_payload.length);
-<span class="fc" id="L404">			byte[] ciphertext = Arrays.copyOfRange(full_payload, 0, full_payload.length - countersignatureLength);</span>
-<span class="fc" id="L405">			enc.setEncryptedContent(ciphertext);</span>
+<span class="fc" id="L406">			byte[] ciphertext = Arrays.copyOfRange(full_payload, 0, full_payload.length - countersignatureLength);</span>
+<span class="fc" id="L407">			enc.setEncryptedContent(ciphertext);</span>
 
 			// Now actually prepare to check the countersignature
-<span class="fc" id="L408">			OneKey recipientPublicKey = recipientCtx.getPublicKey();</span>
+<span class="fc" id="L410">			OneKey recipientPublicKey = recipientCtx.getPublicKey();</span>
 			// countersignatureBytes[3] = (byte) 0xff; // Corrupt
 			// countersignature
-<span class="fc" id="L411">			sign = new CounterSign1(countersignatureBytes);</span>
-<span class="fc" id="L412">			sign.setKey(recipientPublicKey);</span>
+<span class="fc" id="L413">			sign = new CounterSign1(countersignatureBytes);</span>
+<span class="fc" id="L414">			sign.setKey(recipientPublicKey);</span>
 
-<span class="fc" id="L414">			CBORObject signAlg = recipientCtx.getAlgSign().AsCBOR();</span>
-<span class="fc" id="L415">			sign.addAttribute(HeaderKeys.Algorithm, signAlg, Attribute.DO_NOT_SEND);</span>
-<span class="fc" id="L416">			byte[] signAad = aad;</span>
+<span class="fc" id="L416">			CBORObject signAlg = recipientCtx.getAlgSign().AsCBOR();</span>
+<span class="fc" id="L417">			sign.addAttribute(HeaderKeys.Algorithm, signAlg, Attribute.DO_NOT_SEND);</span>
+<span class="fc" id="L418">			byte[] signAad = aad;</span>
 
-<span class="fc" id="L418">			sign.setExternal(signAad);</span>
+<span class="fc" id="L420">			sign.setExternal(signAad);</span>
 
-<span class="fc" id="L420">			System.out.println(&quot;Checking signature for incoming &quot; + message.getClass().getSimpleName()</span>
-<span class="fc" id="L421">					+ &quot; with sign AAD &quot; + Utils.toHexString(signAad));</span>
-<span class="nc" id="L422">		} catch (Exception e) {</span>
-<span class="nc" id="L423">			LOGGER.error(&quot;Countersignature verification procedure failed.&quot;);</span>
-<span class="nc" id="L424">			e.printStackTrace();</span>
-<span class="fc" id="L425">		}</span>
+<span class="fc" id="L422">			System.out.println(&quot;Checking signature for incoming &quot; + message.getClass().getSimpleName()</span>
+<span class="fc" id="L423">					+ &quot; with sign AAD &quot; + Utils.toHexString(signAad));</span>
+<span class="nc" id="L424">		} catch (Exception e) {</span>
+<span class="nc" id="L425">			LOGGER.error(&quot;Countersignature verification procedure failed.&quot;);</span>
+<span class="nc" id="L426">			e.printStackTrace();</span>
+<span class="fc" id="L427">		}</span>
 
-<span class="fc" id="L427">		return sign;</span>
+<span class="fc" id="L429">		return sign;</span>
 	}
 
 	private static void decryptSignature(Encrypt0Message enc, CounterSign1 sign, GroupRecipientCtx ctx,
@@ -432,59 +434,59 @@ import org.eclipse.californium.oscore.group.GroupRecipientCtx;
 			byte[] kid, boolean isRequest) {
 
 		// Derive the keystream
-<span class="fc" id="L435">		String digest = &quot;&quot;;</span>
-<span class="pc bpc" id="L436" title="1 of 2 branches missed.">		if (ctx.getKdf().toString().contains(&quot;SHA_256&quot;)) {</span>
-<span class="fc" id="L437">			digest = &quot;SHA256&quot;;</span>
-<span class="nc bnc" id="L438" title="All 2 branches missed.">		} else if (ctx.getKdf().toString().contains(&quot;SHA_512&quot;)) {</span>
-<span class="nc" id="L439">			digest = &quot;SHA512&quot;;</span>
+<span class="fc" id="L437">		String digest = &quot;&quot;;</span>
+<span class="pc bpc" id="L438" title="1 of 2 branches missed.">		if (ctx.getKdf().toString().contains(&quot;SHA_256&quot;)) {</span>
+<span class="fc" id="L439">			digest = &quot;SHA256&quot;;</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">		} else if (ctx.getKdf().toString().contains(&quot;SHA_512&quot;)) {</span>
+<span class="nc" id="L441">			digest = &quot;SHA512&quot;;</span>
 		}
 
-<span class="fc" id="L442">		CBORObject info = CBORObject.NewArray();</span>
-<span class="fc" id="L443">		int keyLength = ctx.getCommonCtx().getCountersignatureLen();</span>
+<span class="fc" id="L444">		CBORObject info = CBORObject.NewArray();</span>
+<span class="fc" id="L445">		int keyLength = ctx.getCommonCtx().getCountersignatureLen();</span>
 
-<span class="fc" id="L445">		info = CBORObject.NewArray();</span>
-<span class="fc" id="L446">		info.Add(kid);</span>
-<span class="fc" id="L447">		info.Add(ctx.getIdContext());</span>
-<span class="fc" id="L448">		info.Add(isRequest);</span>
-<span class="fc" id="L449">		info.Add(keyLength);</span>
+<span class="fc" id="L447">		info = CBORObject.NewArray();</span>
+<span class="fc" id="L448">		info.Add(kid);</span>
+<span class="fc" id="L449">		info.Add(ctx.getIdContext());</span>
+<span class="fc" id="L450">		info.Add(isRequest);</span>
+<span class="fc" id="L451">		info.Add(keyLength);</span>
 
-<span class="fc" id="L451">		byte[] groupEncryptionKey = ctx.getCommonCtx().getGroupEncryptionKey();</span>
-<span class="fc" id="L452">		byte[] keystream = null;</span>
+<span class="fc" id="L453">		byte[] groupEncryptionKey = ctx.getCommonCtx().getGroupEncryptionKey();</span>
+<span class="fc" id="L454">		byte[] keystream = null;</span>
 		try {
-<span class="fc" id="L454">			keystream = OSCoreCtx.deriveKey(groupEncryptionKey, partialIV, keyLength, digest, info.EncodeToBytes());</span>
+<span class="fc" id="L456">			keystream = OSCoreCtx.deriveKey(groupEncryptionKey, partialIV, keyLength, digest, info.EncodeToBytes());</span>
 
-<span class="nc" id="L456">		} catch (CoseException e) {</span>
-<span class="nc" id="L457">			System.err.println(e.getMessage());</span>
-<span class="fc" id="L458">		}</span>
+<span class="nc" id="L458">		} catch (CoseException e) {</span>
+<span class="nc" id="L459">			System.err.println(e.getMessage());</span>
+<span class="fc" id="L460">		}</span>
 
-<span class="fc" id="L460">		System.out.println(&quot;===&quot;);</span>
-<span class="fc" id="L461">		System.out.println(&quot;D Signature keystream: &quot; + Utils.toHexString(keystream));</span>
-<span class="fc" id="L462">		System.out.println(&quot;D groupEncryptionKey: &quot; + Utils.toHexString(groupEncryptionKey));</span>
-<span class="fc" id="L463">		System.out.println(&quot;D partialIV: &quot; + Utils.toHexString(partialIV));</span>
-<span class="fc" id="L464">		System.out.println(&quot;D kid: &quot; + Utils.toHexString(kid));</span>
-<span class="fc" id="L465">		System.out.println(&quot;D IdContext: &quot; + Utils.toHexString(ctx.getIdContext()));</span>
-<span class="fc" id="L466">		System.out.println(&quot;D isRequest: &quot; + isRequest);</span>
-<span class="fc" id="L467">		System.out.println(&quot;===&quot;);</span>
+		// System.out.println(&quot;===&quot;);
+		// System.out.println(&quot;D Signature keystream: &quot; + Utils.toHexString(keystream));
+		// System.out.println(&quot;D groupEncryptionKey: &quot; + Utils.toHexString(groupEncryptionKey));
+		// System.out.println(&quot;D partialIV: &quot; + Utils.toHexString(partialIV));
+		// System.out.println(&quot;D kid: &quot; + Utils.toHexString(kid));
+		// System.out.println(&quot;D IdContext: &quot; + Utils.toHexString(ctx.getIdContext()));
+		// System.out.println(&quot;D isRequest: &quot; + isRequest);
+		// System.out.println(&quot;===&quot;);
 
 		// Now actually decrypt the signature
-<span class="fc" id="L470">		byte[] full_payload = null;</span>
+<span class="fc" id="L472">		byte[] full_payload = null;</span>
 		try {
-<span class="fc" id="L472">			full_payload = enc.getEncryptedContent();</span>
-<span class="nc" id="L473">		} catch (CoseException e) {</span>
-<span class="nc" id="L474">			LOGGER.error(&quot;Countersignature verification procedure failed.&quot;);</span>
-<span class="nc" id="L475">			e.printStackTrace();</span>
-<span class="fc" id="L476">		}</span>
-<span class="fc" id="L477">		byte[] countersignBytes = Arrays.copyOfRange(full_payload, full_payload.length - keyLength,</span>
+<span class="fc" id="L474">			full_payload = enc.getEncryptedContent();</span>
+<span class="nc" id="L475">		} catch (CoseException e) {</span>
+<span class="nc" id="L476">			LOGGER.error(&quot;Countersignature verification procedure failed.&quot;);</span>
+<span class="nc" id="L477">			e.printStackTrace();</span>
+<span class="fc" id="L478">		}</span>
+<span class="fc" id="L479">		byte[] countersignBytes = Arrays.copyOfRange(full_payload, full_payload.length - keyLength,</span>
 				full_payload.length);
-<span class="fc" id="L479">		byte[] ciphertext = Arrays.copyOfRange(full_payload, 0, full_payload.length - keyLength);</span>
+<span class="fc" id="L481">		byte[] ciphertext = Arrays.copyOfRange(full_payload, 0, full_payload.length - keyLength);</span>
 
-<span class="fc" id="L481">		byte[] decryptedCountersign = new byte[keystream.length];</span>
-<span class="fc bfc" id="L482" title="All 2 branches covered.">		for (int i = 0; i &lt; keystream.length; i++) {</span>
-<span class="fc" id="L483">			decryptedCountersign[i] = (byte) (countersignBytes[i] ^ keystream[i]);</span>
+<span class="fc" id="L483">		byte[] decryptedCountersign = new byte[keystream.length];</span>
+<span class="fc bfc" id="L484" title="All 2 branches covered.">		for (int i = 0; i &lt; keystream.length; i++) {</span>
+<span class="fc" id="L485">			decryptedCountersign[i] = (byte) (countersignBytes[i] ^ keystream[i]);</span>
 		}
 
 		// Replace the signature in the Encrypt0 object
-<span class="fc" id="L487">		enc.setEncryptedContent(Bytes.concatenate(ciphertext, decryptedCountersign));</span>
-<span class="fc" id="L488">	}</span>
+<span class="fc" id="L489">		enc.setEncryptedContent(Bytes.concatenate(ciphertext, decryptedCountersign));</span>
+<span class="fc" id="L490">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
