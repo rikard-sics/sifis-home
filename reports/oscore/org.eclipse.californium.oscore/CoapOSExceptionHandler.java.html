@@ -99,24 +99,24 @@ import org.eclipse.californium.core.coap.Response;
 	 * @return the initiated EmptyMessage
 	 */
 	public static EmptyMessage manageError(OSException e, Response response) {
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">		if (e == null) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if (e == null) {</span>
 <span class="nc" id="L103">			LOGGER.error(ErrorDescriptions.EXCEPTION_NULL);</span>
 <span class="nc" id="L104">			throw new NullPointerException(ErrorDescriptions.EXCEPTION_NULL);</span>
 		}
 
-<span class="fc" id="L107">		String errMess = e.getMessage();</span>
+<span class="nc" id="L107">		String errMess = e.getMessage();</span>
 
-<span class="pc bpc" id="L109" title="1 of 2 branches missed.">		if (errMess == null) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		if (errMess == null) {</span>
 <span class="nc" id="L110">			LOGGER.error(ErrorDescriptions.ERROR_MESS_NULL);</span>
 <span class="nc" id="L111">			throw new NullPointerException(ErrorDescriptions.ERROR_MESS_NULL);</span>
 		}
 		
-<span class="pc bpc" id="L114" title="1 of 2 branches missed.">		if (!response.isConfirmable()) {</span>
-<span class="fc" id="L115">			LOGGER.error(&quot;An Empty Message will not be created&quot;);</span>
-<span class="fc" id="L116">			return null;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		if (!response.isConfirmable()) {</span>
+<span class="nc" id="L115">			LOGGER.error(&quot;An Empty Message will not be created&quot;);</span>
+<span class="nc" id="L116">			return null;</span>
 		}
 		
-<span class="nc" id="L119">		LOGGER.info(&quot;Sending empty RST message&quot;);</span>
+<span class="nc" id="L119">		LOGGER.debug(&quot;Sending empty RST message&quot;);</span>
 <span class="nc" id="L120">		return EmptyMessage.newRST(response);</span>
 	}
 }

@@ -48,10 +48,10 @@ import org.slf4j.LoggerFactory;
 	 */
 	public static OSCoreCtx derive(OSCoreCtxDB db, byte[] rid, byte[] contextID) {
 		// Check if we have a public key for this RID
-	
+
 		// First get the Sender Context for this request
 <span class="fc" id="L53">		OSCoreCtx ctx = db.getContextByIDContext(contextID);</span>
-	
+
 		// Abort the procedure for non Group OSCORE sender contexts
 <span class="pc bpc" id="L56" title="1 of 4 branches missed.">		if (ctx == null || ctx instanceof GroupSenderCtx == false) {</span>
 <span class="fc" id="L57">			LOGGER.error(&quot;Dynamic context derivation failed: No context found for ID Context&quot;</span>
@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
 <span class="fc" id="L69">			LOGGER.error(&quot;Dynamic context derivation failed: No public key found for RID &quot; + Utils.toHexString(rid));</span>
 <span class="fc" id="L70">			return null;</span>
 		}
-	
+
 		// Now add the new recipient context
 		try {
 <span class="fc" id="L75">			senderCtx.commonCtx.addRecipientCtx(rid, 32, publicKey);</span>
@@ -78,11 +78,11 @@ import org.slf4j.LoggerFactory;
 <span class="fc" id="L78">		}</span>
 <span class="fc" id="L79">		GroupRecipientCtx recipientCtx = senderCtx.commonCtx.recipientCtxMap.get(new ByteId(rid));</span>
 <span class="fc" id="L80">		db.addContext(recipientCtx);</span>
-		
-		//Derive pairwise keys
+
+		// Derive pairwise keys
 <span class="fc" id="L83">		senderCtx.derivePairwiseKeys();</span>
 <span class="fc" id="L84">		recipientCtx.derivePairwiseKey();</span>
-		
+
 <span class="fc" id="L86">		LOGGER.debug(&quot;Dynamic context derivation finished successfully&quot;);</span>
 
 <span class="fc" id="L88">		return recipientCtx;</span>

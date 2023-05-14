@@ -1,6 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 Cf-OSCORE,org.eclipse.californium.oscore.group,OneKeyDecoder,83,162,15,13,29,41,13,8,3,4
-Cf-OSCORE,org.eclipse.californium.oscore.group,SharedSecretCalculation,44,493,0,12,10,99,2,16,2,10
+Cf-OSCORE,org.eclipse.californium.oscore.group,SharedSecretCalculation,44,572,0,12,10,110,2,16,2,10
 Cf-OSCORE,org.eclipse.californium.oscore.group,GroupSenderCtx,276,119,0,6,59,27,16,14,16,11
 Cf-OSCORE,org.eclipse.californium.oscore.group,GroupDynamicContextDerivation,7,94,1,5,3,21,2,4,1,2
 Cf-OSCORE,org.eclipse.californium.oscore.group,GroupCtx,144,693,18,38,27,157,19,36,3,21
@@ -34,31 +34,31 @@ Cf-OSCORE,org.eclipse.californium.cose,CounterSign1,37,34,4,2,13,10,7,3,4,3
 Cf-OSCORE,org.eclipse.californium.cose,KeyKeys,0,189,0,0,0,28,0,3,0,3
 Cf-OSCORE,org.eclipse.californium.cose,HeaderKeys,0,236,0,0,0,25,0,3,0,3
 Cf-OSCORE,org.eclipse.californium.oscore,Utility,359,0,12,0,110,0,13,0,7,0
-Cf-OSCORE,org.eclipse.californium.oscore,RequestDecryptor,42,165,2,12,12,43,3,7,1,2
+Cf-OSCORE,org.eclipse.californium.oscore,RequestDecryptor,42,162,2,12,12,42,3,7,1,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.1.new Runnable() {...},0,31,0,0,0,4,0,2,0,2
-Cf-OSCORE,org.eclipse.californium.oscore,HashMapCtxDB,185,436,22,52,42,118,18,41,1,21
+Cf-OSCORE,org.eclipse.californium.oscore,HashMapCtxDB,186,435,23,51,43,117,19,40,1,21
 Cf-OSCORE,org.eclipse.californium.oscore,InstallCryptoProviders,68,0,0,0,18,0,6,0,6,0
 Cf-OSCORE,org.eclipse.californium.oscore,ContextRederivation,44,537,7,43,15,162,8,34,1,12
-Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityLayer,133,548,31,65,35,131,30,37,2,17
+Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityLayer,152,529,32,64,40,126,30,37,2,17
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.new MessageObserverAdapter() {...},39,37,2,2,15,7,8,2,6,2
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreEndpointContextInfo.OSCoreEndpointContextOperator,0,11,0,0,0,4,0,2,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.new Runnable() {...},0,20,0,0,0,3,0,2,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,ContextRederivation.PHASE,0,94,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSException,0,4,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCoapStackFactory,14,38,1,5,1,11,1,6,0,4
-Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCtx,364,932,36,61,86,217,37,77,11,54
+Cf-OSCORE,org.eclipse.californium.oscore,OSCoreCtx,311,961,28,65,72,223,31,81,10,55
 Cf-OSCORE,org.eclipse.californium.oscore,ResponseEncryptor,30,107,7,17,5,29,8,7,1,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityLayer.new MessageObserverAdapter() {...},0,47,0,2,0,7,0,3,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreEndpointContextInfo,3,92,0,2,1,22,1,7,1,6
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer,117,254,17,25,30,60,14,14,0,7
-Cf-OSCORE,org.eclipse.californium.oscore,ResponseDecryptor,35,157,4,20,8,43,5,10,1,2
+Cf-OSCORE,org.eclipse.californium.oscore,ResponseDecryptor,35,157,5,19,8,43,6,9,1,2
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreResource,16,26,2,2,5,9,3,2,1,2
 Cf-OSCORE,org.eclipse.californium.oscore,CoapOSException,0,10,0,0,0,4,0,2,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,OSCoreStack,0,53,0,0,0,5,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,RequestEncryptor,26,86,4,10,5,21,5,5,1,2
-Cf-OSCORE,org.eclipse.californium.oscore,CoapOSExceptionHandler,38,73,6,8,11,23,7,4,1,3
+Cf-OSCORE,org.eclipse.californium.oscore,CoapOSExceptionHandler,53,58,9,5,17,17,8,3,2,2
 Cf-OSCORE,org.eclipse.californium.oscore,ByteId,9,4,0,0,1,2,1,1,1,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSSerializer,29,482,9,53,8,118,10,30,1,8
 Cf-OSCORE,org.eclipse.californium.oscore,Encryptor,64,690,9,71,25,166,9,43,1,11
-Cf-OSCORE,org.eclipse.californium.oscore,OptionJuggle,64,627,17,46,15,170,17,32,1,16
-Cf-OSCORE,org.eclipse.californium.oscore,Decryptor,143,702,13,51,42,161,14,29,2,9
+Cf-OSCORE,org.eclipse.californium.oscore,OptionJuggle,64,569,17,46,15,150,17,33,1,17
+Cf-OSCORE,org.eclipse.californium.oscore,Decryptor,141,704,12,52,41,162,13,30,2,9

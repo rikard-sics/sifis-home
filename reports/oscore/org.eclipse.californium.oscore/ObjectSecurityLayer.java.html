@@ -374,13 +374,13 @@ public class ObjectSecurityLayer extends AbstractLayer {
 				
 <span class="fc" id="L375">				response = prepareReceive(ctxDb, response);</span>
 			}
-<span class="fc" id="L377">		} catch (OSException e) {</span>
-<span class="fc" id="L378">			LOGGER.error(&quot;Error while receiving OSCore response: &quot; + e.getMessage());</span>
-<span class="fc" id="L379">			EmptyMessage error = CoapOSExceptionHandler.manageError(e, response);</span>
-<span class="pc bpc" id="L380" title="1 of 2 branches missed.">			if (error != null) {</span>
+<span class="nc" id="L377">		} catch (OSException e) {</span>
+<span class="nc" id="L378">			LOGGER.error(&quot;Error while receiving OSCore response: &quot; + e.getMessage());</span>
+<span class="nc" id="L379">			EmptyMessage error = CoapOSExceptionHandler.manageError(e, response);</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">			if (error != null) {</span>
 <span class="nc" id="L381">				sendEmptyMessage(exchange, error);</span>
 			}
-<span class="fc" id="L383">			return;</span>
+<span class="nc" id="L383">			return;</span>
 <span class="fc" id="L384">		}</span>
 		
 		// Remove token if this is an incoming response to an Observe

@@ -217,8 +217,8 @@ import org.eclipse.californium.oscore.group.GroupRecipientCtx;
 <span class="pc bpc" id="L217" title="1 of 2 branches missed.">		if (partialIV.length &gt; INTEGER_BYTES) {</span>
 <span class="nc" id="L218">			LOGGER.error(&quot;The partial IV is: &quot; + partialIV.length + &quot; long, &quot; + INTEGER_BYTES + &quot; was expected&quot;);</span>
 <span class="nc" id="L219">			throw new OSException(&quot;Partial IV too long&quot;);</span>
-<span class="pc bpc" id="L220" title="1 of 2 branches missed.">		} else if (partialIV.length == INTEGER_BYTES) {</span>
-<span class="nc" id="L221">			return partialIV;</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">		} else if (partialIV.length == INTEGER_BYTES) {</span>
+<span class="fc" id="L221">			return partialIV;</span>
 		}
 <span class="fc" id="L223">		byte[] ret = new byte[INTEGER_BYTES];</span>
 <span class="fc bfc" id="L224" title="All 2 branches covered.">		for (int i = 0; i &lt; partialIV.length; i++) {</span>

@@ -145,11 +145,11 @@ public class HashMapCtxDB implements OSCoreCtxDB {
 <span class="fc bfc" id="L145" title="All 2 branches covered.">		for (Entry&lt;String, OSCoreCtx&gt; entry : uriMap.entrySet()) {</span>
 <span class="fc" id="L146">			OSCoreCtx ctx = entry.getValue();</span>
 
-<span class="fc bfc" id="L148" title="All 2 branches covered.">			if (Arrays.equals(IDContext, ctx.getIdContext())) {</span>
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">			if (Arrays.equals(IDContext, ctx.getIdContext())) {</span>
 <span class="fc" id="L149">				return ctx;</span>
 			}
 
-<span class="fc" id="L152">		}</span>
+<span class="nc" id="L152">		}</span>
 <span class="fc" id="L153">		return null;</span>
 	}
 
