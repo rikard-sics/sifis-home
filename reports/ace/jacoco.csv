@@ -46,8 +46,8 @@ ACE library,se.sics.ace.oscore.rs,AuthzInfoGroupOSCORE,134,457,22,42,31,107,22,1
 ACE library,se.sics.ace.oscore.rs,OscoreAuthzInfoGroupOSCORE,425,584,43,57,96,143,41,15,0,6
 ACE library,se.sics.ace.coap.rs,CoapAuthzInfo,16,63,0,0,5,18,0,3,0,3
 ACE library,se.sics.ace.coap.rs,CoapDeliverer,314,222,23,18,73,65,17,11,2,4
-ACE library,se.sics.ace.coap.client,OSCOREProfileRequests,259,480,34,36,50,119,34,7,1,5
-ACE library,se.sics.ace.coap.client,OSCOREProfileRequestsGroupOSCORE,378,518,52,52,71,130,53,5,2,4
+ACE library,se.sics.ace.coap.client,OSCOREProfileRequests,315,480,40,36,61,119,38,7,2,5
+ACE library,se.sics.ace.coap.client,OSCOREProfileRequestsGroupOSCORE,998,518,120,52,206,130,89,5,4,4
 ACE library,se.sics.ace.coap.client,DTLSProfileRequests,317,466,25,15,64,104,21,7,2,6
 ACE library,se.sics.ace.as,Token,2067,2116,148,180,346,472,107,76,3,11
 ACE library,se.sics.ace.as,PDP.IntrospectAccessLevel,0,34,0,0,0,4,0,1,0,1

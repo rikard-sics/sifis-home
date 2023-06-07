@@ -459,5 +459,35 @@ import se.sics.ace.coap.rs.oscoreProfile.OscoreSecurityContext;
 <span class="fc" id="L459">        client.setEndpoint(clientEndpoint);</span>
 <span class="fc" id="L460">        return client;    </span>
     }
+
+    /**
+     * Generates a Coap client for sending requests to an RS using OSCORE. Note that the OSCORE context for the RS
+     * should already be configured in the OSCoreCtxDb at this point.
+     * 
+     * @param serverAddress the address of the server and resource this client should talk to.
+     * @param srcPort the source port to use
+     * 
+     * @return a CoAP client configured to pass the access token through the psk-identity in the handshake
+     * @throws AceException
+     * @throws OSException
+     * @throws URISyntaxException
+     */
+    public static CoapClient getClient(InetSocketAddress serverAddress, OSCoreCtxDB db, int srcPort)
+            throws AceException, OSException {
+<span class="nc bnc" id="L477" title="All 4 branches missed.">        if (serverAddress == null || serverAddress.getHostString() == null) {</span>
+<span class="nc" id="L478">            throw new IllegalArgumentException(&quot;Client requires a non-null server address&quot;);</span>
+        }
+
+<span class="nc bnc" id="L481" title="All 2 branches missed.">        if (db.getContext(serverAddress.getHostName()) == null) {</span>
+<span class="nc" id="L482">            throw new AceException(&quot;OSCORE context not set for address: &quot; + serverAddress);</span>
+        }
+<span class="nc" id="L484">        CoapEndpoint.Builder builder = new CoapEndpoint.Builder();</span>
+<span class="nc" id="L485">        builder.setCoapStackFactory(new OSCoreCoapStackFactory());</span>
+<span class="nc" id="L486">        builder.setCustomCoapStackArgument(db);</span>
+<span class="nc" id="L487">        Endpoint clientEndpoint = builder.build();</span>
+<span class="nc" id="L488">        CoapClient client = new CoapClient(serverAddress.getHostString());</span>
+<span class="nc" id="L489">        client.setEndpoint(clientEndpoint);</span>
+<span class="nc" id="L490">        return client;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
