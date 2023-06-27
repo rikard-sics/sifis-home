@@ -40,8 +40,8 @@ Cf-OSCORE,org.eclipse.californium.oscore,HashMapCtxDB,186,435,23,51,43,117,19,40
 Cf-OSCORE,org.eclipse.californium.oscore,ContextRederivation,44,537,7,43,15,162,8,34,1,12
 Cf-OSCORE,org.eclipse.californium.oscore,InstallCryptoProviders,68,0,0,0,18,0,6,0,6,0
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityLayer,152,529,32,64,40,126,30,37,2,17
-Cf-OSCORE,org.eclipse.californium.oscore,OSCoreEndpointContextInfo.OSCoreEndpointContextOperator,0,11,0,0,0,4,0,2,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.new MessageObserverAdapter() {...},39,37,2,2,15,7,8,2,6,2
+Cf-OSCORE,org.eclipse.californium.oscore,OSCoreEndpointContextInfo.OSCoreEndpointContextOperator,0,11,0,0,0,4,0,2,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,ObjectSecurityContextLayer.new Runnable() {...},0,20,0,0,0,3,0,2,0,2
 Cf-OSCORE,org.eclipse.californium.oscore,ContextRederivation.PHASE,0,94,0,0,0,2,0,1,0,1
 Cf-OSCORE,org.eclipse.californium.oscore,OSException,0,4,0,0,0,2,0,1,0,1
