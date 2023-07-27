@@ -334,7 +334,7 @@ public class EdhocSession {
 	 */
 	public AppProfile getApplicationProfile() {
 
-<span class="nc" id="L337">		return this.appProfile;</span>
+<span class="fc" id="L337">		return this.appProfile;</span>
 		
 	}
 	
@@ -444,7 +444,7 @@ public class EdhocSession {
 	 * @return  the long-term public key of the other peer
 	 */
 	public OneKey getPeerLongTermPublicKey() {
-<span class="nc" id="L447">		return this.peerLongTermPublicKey;</span>
+<span class="fc" id="L447">		return this.peerLongTermPublicKey;</span>
 	}
 	
 	/**
@@ -452,22 +452,22 @@ public class EdhocSession {
 	 * @param peerKey   the long-term public key of the other peer 
 	 */
 	public void setPeerLongTermPublicKey(OneKey peerKey) {
-<span class="nc" id="L455">		this.peerLongTermPublicKey = peerKey;</span>
-<span class="nc" id="L456">	}</span>
+<span class="fc" id="L455">		this.peerLongTermPublicKey = peerKey;</span>
+<span class="fc" id="L456">	}</span>
 
 	/**
 	 * @return  the ID_CRED of the long-term public key of the other peer
 	 */
 	public CBORObject getPeerIdCred() {
-<span class="nc" id="L462">		return this.peerIdCred;</span>
+<span class="fc" id="L462">		return this.peerIdCred;</span>
 	}
 	
 	/**
 	 * Set the ID_CRED of the long-term public key of the other peer
 	 */
 	public void setPeerIdCred(CBORObject idCred) {
-<span class="nc" id="L469">		this.peerIdCred = idCred;</span>
-<span class="nc" id="L470">	}</span>
+<span class="fc" id="L469">		this.peerIdCred = idCred;</span>
+<span class="fc" id="L470">	}</span>
 
 	/**
 	 * @return  the ephemeral public key of the other peer
@@ -969,17 +969,17 @@ public class EdhocSession {
      */
 	public static int getEphermeralKeyLength(int cipherSuite) {
 
-<span class="nc" id="L972">		int keyLength = 0;</span>
+<span class="fc" id="L972">		int keyLength = 0;</span>
 	    
-<span class="nc bnc" id="L974" title="All 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L974" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_2:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="nc" id="L979">				keyLength = 32;</span>
+<span class="fc" id="L979">				keyLength = 32;</span>
 		}
 	    
-<span class="nc" id="L982">	    return keyLength;</span>
+<span class="fc" id="L982">	    return keyLength;</span>
 		
 	}
 	

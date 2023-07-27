@@ -110,14 +110,14 @@ public class SideProcessor {
     * @param resultContent   The result to store
     */
 	private void addResult(int messageNumber, boolean postValidation, int resultLabel, HashMap&lt;Integer, CBORObject&gt; resultContent) {
-<span class="nc" id="L113">		HashMap&lt;Integer, List&lt;HashMap&lt;Integer, CBORObject&gt;&gt;&gt; myResults = whichResults(messageNumber, postValidation);</span>
+<span class="fc" id="L113">		HashMap&lt;Integer, List&lt;HashMap&lt;Integer, CBORObject&gt;&gt;&gt; myResults = whichResults(messageNumber, postValidation);</span>
 		
-<span class="nc bnc" id="L115" title="All 2 branches missed.">		if (!myResults.containsKey(Integer.valueOf(resultLabel))) {</span>
-<span class="nc" id="L116">			List&lt;HashMap&lt;Integer, CBORObject&gt;&gt; myList = new ArrayList&lt;HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
-<span class="nc" id="L117">			myResults.put(Integer.valueOf(resultLabel), myList);</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">		if (!myResults.containsKey(Integer.valueOf(resultLabel))) {</span>
+<span class="fc" id="L116">			List&lt;HashMap&lt;Integer, CBORObject&gt;&gt; myList = new ArrayList&lt;HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
+<span class="fc" id="L117">			myResults.put(Integer.valueOf(resultLabel), myList);</span>
 		}
-<span class="nc" id="L119">		myResults.get(Integer.valueOf(resultLabel)).add(resultContent);</span>
-<span class="nc" id="L120">	}</span>
+<span class="fc" id="L119">		myResults.get(Integer.valueOf(resultLabel)).add(resultContent);</span>
+<span class="fc" id="L120">	}</span>
 	
 	/**
     * Delete all the results obtained from the side processing
@@ -150,11 +150,11 @@ public class SideProcessor {
     * @param postValidation  True to select the results of EAD processing after EDHOC message validation, or false otherwise
     */
 	public void removeResultSet(int messageNumber, int keyValue, boolean postValidation) {
-<span class="nc" id="L153">		HashMap&lt;Integer, List&lt;HashMap&lt;Integer, CBORObject&gt;&gt;&gt; myResults = whichResults(messageNumber, postValidation);</span>
-<span class="nc bnc" id="L154" title="All 2 branches missed.">		if (myResults.size() == 0)</span>
+<span class="fc" id="L153">		HashMap&lt;Integer, List&lt;HashMap&lt;Integer, CBORObject&gt;&gt;&gt; myResults = whichResults(messageNumber, postValidation);</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">		if (myResults.size() == 0)</span>
 <span class="nc" id="L155">			return;</span>
-<span class="nc" id="L156">		myResults.remove(Integer.valueOf(keyValue));</span>
-<span class="nc" id="L157">	}</span>
+<span class="fc" id="L156">		myResults.remove(Integer.valueOf(keyValue));</span>
+<span class="fc" id="L157">	}</span>
 	
 	/**
     * Store an error result obtained from the side processing
@@ -210,9 +210,9 @@ public class SideProcessor {
 			case Constants.EDHOC_MESSAGE_1:
 <span class="fc" id="L211">				return resMessage1;</span>
 			case Constants.EDHOC_MESSAGE_2:
-<span class="pc bpc" id="L213" title="1 of 2 branches missed.">				return (postValidation == false) ? resMessage2Pre : resMessage2Post;</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">				return (postValidation == false) ? resMessage2Pre : resMessage2Post;</span>
 			case Constants.EDHOC_MESSAGE_3:
-<span class="pc bpc" id="L215" title="1 of 2 branches missed.">				return (postValidation == false) ? resMessage3Pre : resMessage3Post;</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">				return (postValidation == false) ? resMessage3Pre : resMessage3Post;</span>
 			case Constants.EDHOC_MESSAGE_4:
 <span class="fc" id="L217">				return resMessage4;</span>
 		}
@@ -276,22 +276,22 @@ public class SideProcessor {
 	// 2) A CBOR map, as ID_CRED_R
 	public void sideProcessingMessage2PreVerification(CBORObject[] sideProcessorInfo, CBORObject[] ead2) {
 				
-<span class="nc" id="L279">		CBORObject gY = sideProcessorInfo[0];</span>
-<span class="nc" id="L280">		CBORObject connectionIdentifierResponder = sideProcessorInfo[1];</span>
-<span class="nc" id="L281">		CBORObject idCredR = sideProcessorInfo[2];</span>
+<span class="fc" id="L279">		CBORObject gY = sideProcessorInfo[0];</span>
+<span class="fc" id="L280">		CBORObject connectionIdentifierResponder = sideProcessorInfo[1];</span>
+<span class="fc" id="L281">		CBORObject idCredR = sideProcessorInfo[2];</span>
 		
-<span class="nc" id="L283">		CBORObject peerCredentialCBOR = findValidPeerCredential(idCredR, ead2);</span>
+<span class="fc" id="L283">		CBORObject peerCredentialCBOR = findValidPeerCredential(idCredR, ead2);</span>
 		
-<span class="nc bnc" id="L285" title="All 2 branches missed.">		if (peerCredentialCBOR == null) {</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">		if (peerCredentialCBOR == null) {</span>
 <span class="nc" id="L286">			addErrorResult(Constants.EDHOC_MESSAGE_2, false,</span>
 						  &quot;Unable to retrieve a valid peer credential from ID_CRED_R&quot;,
 						  ResponseCode.BAD_REQUEST.value);
 <span class="nc" id="L289">			return;</span>
     	}
 		else {
-<span class="nc" id="L292">			HashMap&lt;Integer, CBORObject&gt; resultContent = new HashMap&lt;Integer, CBORObject&gt;();</span>
-<span class="nc" id="L293">			resultContent.put(Integer.valueOf(Constants.SIDE_PROCESSOR_INNER_CRED_VALUE), peerCredentialCBOR);</span>
-<span class="nc" id="L294">			addResult(Constants.EDHOC_MESSAGE_2, false, Constants.SIDE_PROCESSOR_OUTER_CRED, resultContent);</span>
+<span class="fc" id="L292">			HashMap&lt;Integer, CBORObject&gt; resultContent = new HashMap&lt;Integer, CBORObject&gt;();</span>
+<span class="fc" id="L293">			resultContent.put(Integer.valueOf(Constants.SIDE_PROCESSOR_INNER_CRED_VALUE), peerCredentialCBOR);</span>
+<span class="fc" id="L294">			addResult(Constants.EDHOC_MESSAGE_2, false, Constants.SIDE_PROCESSOR_OUTER_CRED, resultContent);</span>
 		}
 		
 		// Go through the EAD_2 items, if any
@@ -305,7 +305,7 @@ public class SideProcessor {
 		// ...
 		//
 		
-<span class="nc" id="L308">	}</span>
+<span class="fc" id="L308">	}</span>
 
 	/**
 	 * Entry point for processing EAD items from EAD_2 after message verification
@@ -346,20 +346,20 @@ public class SideProcessor {
 	//
 	public void sideProcessingMessage3PreVerification(CBORObject[] sideProcessorInfo, CBORObject[] ead3) {
 		
-<span class="nc" id="L349">		CBORObject idCredI = sideProcessorInfo[0];</span>
+<span class="fc" id="L349">		CBORObject idCredI = sideProcessorInfo[0];</span>
 		
-<span class="nc" id="L351">		CBORObject peerCredentialCBOR = findValidPeerCredential(idCredI, ead3);</span>
+<span class="fc" id="L351">		CBORObject peerCredentialCBOR = findValidPeerCredential(idCredI, ead3);</span>
 		
-<span class="nc bnc" id="L353" title="All 2 branches missed.">		if (peerCredentialCBOR == null) {</span>
+<span class="pc bpc" id="L353" title="1 of 2 branches missed.">		if (peerCredentialCBOR == null) {</span>
 <span class="nc" id="L354">			addErrorResult(Constants.EDHOC_MESSAGE_3, false,</span>
 						  &quot;Unable to retrieve a valid peer credential from ID_CRED_I&quot;,
 						  ResponseCode.BAD_REQUEST.value);
 <span class="nc" id="L357">			return;</span>
     	}
 		else {
-<span class="nc" id="L360">			HashMap&lt;Integer, CBORObject&gt; resultContent = new HashMap&lt;Integer, CBORObject&gt;();</span>
-<span class="nc" id="L361">			resultContent.put(Integer.valueOf(Constants.SIDE_PROCESSOR_INNER_CRED_VALUE), peerCredentialCBOR);</span>
-<span class="nc" id="L362">			addResult(Constants.EDHOC_MESSAGE_3, false, Constants.SIDE_PROCESSOR_OUTER_CRED, resultContent);</span>
+<span class="fc" id="L360">			HashMap&lt;Integer, CBORObject&gt; resultContent = new HashMap&lt;Integer, CBORObject&gt;();</span>
+<span class="fc" id="L361">			resultContent.put(Integer.valueOf(Constants.SIDE_PROCESSOR_INNER_CRED_VALUE), peerCredentialCBOR);</span>
+<span class="fc" id="L362">			addResult(Constants.EDHOC_MESSAGE_3, false, Constants.SIDE_PROCESSOR_OUTER_CRED, resultContent);</span>
 		}
 		
 		// Go through the EAD_3 items, if any
@@ -373,7 +373,7 @@ public class SideProcessor {
 		// ...
 		//
 		
-<span class="nc" id="L376">	}</span>
+<span class="fc" id="L376">	}</span>
 
 	/**
 	 * Entry point for processing EAD items from EAD_3 before message verification
@@ -538,10 +538,10 @@ public class SideProcessor {
  	 *          or null in case a peer's authentication credential to use is not found. 
 	 */
 	private CBORObject findValidPeerCredential(CBORObject idCredX, CBORObject[] ead) {
-<span class="nc" id="L541">		CBORObject peerCredentialCBOR = null;</span>
+<span class="fc" id="L541">		CBORObject peerCredentialCBOR = null;</span>
 		
-<span class="nc bnc" id="L543" title="All 2 branches missed.">		if (peerCredentials.containsKey(idCredX)) {</span>
-<span class="nc" id="L544">	    	peerCredentialCBOR = peerCredentials.get(idCredX);</span>
+<span class="pc bpc" id="L543" title="1 of 2 branches missed.">		if (peerCredentials.containsKey(idCredX)) {</span>
+<span class="fc" id="L544">	    	peerCredentialCBOR = peerCredentials.get(idCredX);</span>
 	    	
 	    	// TODO: Check whether the authentication credential is still valid (for applicable credential types)
 	    	
@@ -553,7 +553,7 @@ public class SideProcessor {
 
 		// TODO: Add support for the alternative trust models
     			
-<span class="nc" id="L556">		return peerCredentialCBOR;</span>
+<span class="fc" id="L556">		return peerCredentialCBOR;</span>
 	}
 
 }
