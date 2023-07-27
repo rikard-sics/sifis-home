@@ -440,7 +440,7 @@ import com.upokecenter.cbor.CBORType;
 					// The Responder supports the selected cipher suite, but it has to reply with an EDHOC Error Message
 					// if it supports a cipher suite more preferred by the Initiator than the selected cipher suite
 					
-<span class="nc" id="L443">					errMsg = new String(&quot;The selected cipher suite is not supported&quot;);</span>
+<span class="nc" id="L443">					errMsg = new String(&quot;A cipher suite more preferred than the selected cipher suite is also supported&quot;);</span>
 <span class="nc" id="L444">					errorCode = Constants.ERR_CODE_WRONG_SELECTED_CIPHER_SUITE;</span>
 <span class="nc" id="L445">					responseCode = ResponseCode.BAD_REQUEST;</span>
 <span class="nc" id="L446">					error = true;</span>
@@ -1296,7 +1296,7 @@ import com.upokecenter.cbor.CBORType;
     	// Compute K_3 and IV_3 to protect the outer COSE object
 <span class="fc" id="L1297">    	byte[] k3 = computeKey(Constants.EDHOC_K_3, session);</span>
 <span class="pc bpc" id="L1298" title="1 of 2 branches missed.">    	if (k3 == null) {</span>
-<span class="nc" id="L1299">        	errMsg = new String(&quot;Error when computing TH3&quot;);</span>
+<span class="nc" id="L1299">        	errMsg = new String(&quot;Error when computing K_3&quot;);</span>
 <span class="nc" id="L1300">        	responseCode = ResponseCode.INTERNAL_SERVER_ERROR;</span>
 <span class="nc" id="L1301">        	Util.purgeSession(session, connectionIdentifierResponder, edhocSessions, usedConnectionIds);</span>
 <span class="nc bnc" id="L1302" title="All 2 branches missed.">			return processError(errorCode, Constants.EDHOC_MESSAGE_3, !isReq, connectionIdentifierInitiator,</span>
@@ -1308,7 +1308,7 @@ import com.upokecenter.cbor.CBORType;
     	
 <span class="fc" id="L1309">    	byte[] iv3 = computeIV(Constants.EDHOC_IV_3, session);</span>
 <span class="pc bpc" id="L1310" title="1 of 2 branches missed.">    	if (iv3 == null) {</span>
-<span class="nc" id="L1311">        	errMsg = new String(&quot;Error when computing IV_3ae&quot;);</span>
+<span class="nc" id="L1311">        	errMsg = new String(&quot;Error when computing IV_3&quot;);</span>
 <span class="nc" id="L1312">        	responseCode = ResponseCode.INTERNAL_SERVER_ERROR;</span>
 <span class="nc" id="L1313">        	Util.purgeSession(session, connectionIdentifierResponder, edhocSessions, usedConnectionIds);</span>
 <span class="nc bnc" id="L1314" title="All 2 branches missed.">			return processError(errorCode, Constants.EDHOC_MESSAGE_3, !isReq, connectionIdentifierInitiator,</span>
