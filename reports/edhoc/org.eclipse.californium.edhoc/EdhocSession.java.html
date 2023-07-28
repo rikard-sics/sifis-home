@@ -282,15 +282,15 @@ public class EdhocSession {
 	 */
 	public void setEphemeralKey() {
 		
-<span class="nc" id="L285">		OneKey ek = null;</span>
-<span class="nc bnc" id="L286" title="All 4 branches missed.">		if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1)</span>
-<span class="nc" id="L287">			ek = Util.generateKeyPair(KeyKeys.OKP_X25519.AsInt32());</span>
+<span class="fc" id="L285">		OneKey ek = null;</span>
+<span class="pc bpc" id="L286" title="3 of 4 branches missed.">		if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1)</span>
+<span class="fc" id="L287">			ek = Util.generateKeyPair(KeyKeys.OKP_X25519.AsInt32());</span>
 <span class="nc bnc" id="L288" title="All 4 branches missed.">		else if (this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || this.selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3)</span>
 <span class="nc" id="L289">			ek = Util.generateKeyPair(KeyKeys.EC2_P256.AsInt32());</span>
 		
-<span class="nc" id="L291">		setEphemeralKey(ek);</span>
+<span class="fc" id="L291">		setEphemeralKey(ek);</span>
 		
-<span class="nc" id="L293">	}</span>
+<span class="fc" id="L293">	}</span>
 
 	
 	/**
@@ -655,23 +655,23 @@ public class EdhocSession {
      * @return  the EDHOC Message 3
      */
 	public byte[] getMessage3() {
-<span class="nc" id="L658">		return this.message3;</span>
+<span class="fc" id="L658">		return this.message3;</span>
 	}
 	
     /**
      * @param msg   The EDHOC message_3 to store, before an EDHOC+OSCORE request
      */
 	public void setMessage3(byte[] msg) {
-<span class="nc" id="L665">		this.message3 = new byte[msg.length];</span>
-<span class="nc" id="L666">		System.arraycopy(msg, 0, this.message3, 0, msg.length);</span>
-<span class="nc" id="L667">	}</span>
+<span class="fc" id="L665">		this.message3 = new byte[msg.length];</span>
+<span class="fc" id="L666">		System.arraycopy(msg, 0, this.message3, 0, msg.length);</span>
+<span class="fc" id="L667">	}</span>
 	
     /**
      *  Clean up the stored EDHOC Message 3
      */
 	public void cleanMessage3() {
-<span class="nc" id="L673">		this.message3 = null;</span>
-<span class="nc" id="L674">	}</span>
+<span class="fc" id="L673">		this.message3 = null;</span>
+<span class="fc" id="L674">	}</span>
 	
 	/**
 	 * @return  the PLAINTEXT_2
@@ -700,7 +700,7 @@ public class EdhocSession {
 <span class="pc bpc" id="L700" title="3 of 6 branches missed.">		if (label &lt; 0 || context.getType() != CBORType.ByteString || len &lt; 0)</span>
 <span class="nc" id="L701">			return null;</span>
 		
-<span class="pc bpc" id="L703" title="3 of 4 branches missed.">		if (this.currentStep != Constants.EDHOC_AFTER_M3 &amp;&amp; this.currentStep != Constants.EDHOC_SENT_M3)</span>
+<span class="pc bpc" id="L703" title="1 of 4 branches missed.">		if (this.currentStep != Constants.EDHOC_AFTER_M3 &amp;&amp; this.currentStep != Constants.EDHOC_SENT_M3)</span>
 <span class="nc" id="L704">			return null;</span>
 	
 <span class="fc" id="L706">		return edhocKDF(this.prk_exporter, label, context, len);</span>
@@ -990,17 +990,17 @@ public class EdhocSession {
      */
 	public static AlgorithmID getAppAEAD(int cipherSuite) {
 
-<span class="nc" id="L993">		AlgorithmID alg = null;</span>
+<span class="fc" id="L993">		AlgorithmID alg = null;</span>
 	    
-<span class="nc bnc" id="L995" title="All 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L995" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_2:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="nc" id="L1000">				alg = AlgorithmID.AES_CCM_16_64_128;</span>
+<span class="fc" id="L1000">				alg = AlgorithmID.AES_CCM_16_64_128;</span>
 		}
 	    
-<span class="nc" id="L1003">	    return alg;</span>
+<span class="fc" id="L1003">	    return alg;</span>
 		
 	}
 	
@@ -1032,17 +1032,17 @@ public class EdhocSession {
      */
 	public static AlgorithmID getAppHkdf(int cipherSuite) {
 
-<span class="nc" id="L1035">		AlgorithmID alg = null;</span>
+<span class="fc" id="L1035">		AlgorithmID alg = null;</span>
 	    
-<span class="nc bnc" id="L1037" title="All 2 branches missed.">		switch (cipherSuite) {</span>
+<span class="pc bpc" id="L1037" title="1 of 2 branches missed.">		switch (cipherSuite) {</span>
 			case Constants.EDHOC_CIPHER_SUITE_0:
 			case Constants.EDHOC_CIPHER_SUITE_1:
 			case Constants.EDHOC_CIPHER_SUITE_2:
 			case Constants.EDHOC_CIPHER_SUITE_3:
-<span class="nc" id="L1042">				alg = AlgorithmID.HKDF_HMAC_SHA_256;</span>
+<span class="fc" id="L1042">				alg = AlgorithmID.HKDF_HMAC_SHA_256;</span>
 		}
 	    
-<span class="nc" id="L1045">	    return alg;</span>
+<span class="fc" id="L1045">	    return alg;</span>
 		
 	}
 	

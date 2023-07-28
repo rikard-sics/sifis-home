@@ -24,13 +24,13 @@ public class EdhocEndpointInfo {
     // The outer map has label SIGNATURE_KEY or ECDH_KEY for distinguishing the two key usages. 
     
     // The asymmetric key pairs of this peer (one per supported curve)
-<span class="nc" id="L27">	private HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs = new HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt;();</span>
+<span class="fc" id="L27">	private HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; keyPairs = new HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt;();</span>
     
     // The identifiers of the authentication credentials of this peer
-<span class="nc" id="L30">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
+<span class="fc" id="L30">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; idCreds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
     
     // The authentication credentials of this peer (one per supported curve)
-<span class="nc" id="L33">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
+<span class="fc" id="L33">	private HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; creds = new HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt;();</span>
 	
 	// Public keys of other peers
 	// 
@@ -99,107 +99,107 @@ public class EdhocEndpointInfo {
 							 Set&lt;CBORObject&gt; usedConnectionIds, List&lt;Integer&gt; supportedCipherSuites,
 							 Set&lt;Integer&gt; supportedEADs, HashMap&lt;Integer, List&lt;CBORObject&gt;&gt; eadProductionInput,
 							 int trustModel, HashMapCtxDB db, String uri, int OSCORE_REPLAY_WINDOW,
-<span class="nc" id="L102">							 int MAX_UNFRAGMENTED_SIZE, HashMap&lt;String, AppProfile&gt; appProfiles) {</span>
+<span class="fc" id="L102">							 int MAX_UNFRAGMENTED_SIZE, HashMap&lt;String, AppProfile&gt; appProfiles) {</span>
 
 		
-<span class="nc" id="L105">		this.keyPairs = keyPairs;</span>
-<span class="nc" id="L106">		this.idCreds = idCreds;</span>
-<span class="nc" id="L107">		this.creds = creds;</span>
+<span class="fc" id="L105">		this.keyPairs = keyPairs;</span>
+<span class="fc" id="L106">		this.idCreds = idCreds;</span>
+<span class="fc" id="L107">		this.creds = creds;</span>
 						
-<span class="nc" id="L109">		this.peerPublicKeys = peerPublicKeys;</span>
-<span class="nc" id="L110">		this.peerCredentials = peerCredentials;</span>
-<span class="nc" id="L111">		this.edhocSessions = edhocSessions;</span>
-<span class="nc" id="L112">		this.usedConnectionIds = usedConnectionIds;</span>
-<span class="nc" id="L113">		this.supportedCipherSuites = supportedCipherSuites;</span>
-<span class="nc" id="L114">		this.supportedEADs = supportedEADs;</span>
-<span class="nc" id="L115">		this.eadProductionInput = eadProductionInput;</span>
-<span class="nc" id="L116">		this.trustModel = trustModel;</span>
-<span class="nc" id="L117">		this.db = db;</span>
-<span class="nc" id="L118">		this.uri = uri;</span>
-<span class="nc" id="L119">		this.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
-<span class="nc" id="L120">		this.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
-<span class="nc" id="L121">		this.appProfiles = appProfiles;</span>
+<span class="fc" id="L109">		this.peerPublicKeys = peerPublicKeys;</span>
+<span class="fc" id="L110">		this.peerCredentials = peerCredentials;</span>
+<span class="fc" id="L111">		this.edhocSessions = edhocSessions;</span>
+<span class="fc" id="L112">		this.usedConnectionIds = usedConnectionIds;</span>
+<span class="fc" id="L113">		this.supportedCipherSuites = supportedCipherSuites;</span>
+<span class="fc" id="L114">		this.supportedEADs = supportedEADs;</span>
+<span class="fc" id="L115">		this.eadProductionInput = eadProductionInput;</span>
+<span class="fc" id="L116">		this.trustModel = trustModel;</span>
+<span class="fc" id="L117">		this.db = db;</span>
+<span class="fc" id="L118">		this.uri = uri;</span>
+<span class="fc" id="L119">		this.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
+<span class="fc" id="L120">		this.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
+<span class="fc" id="L121">		this.appProfiles = appProfiles;</span>
 		
-<span class="nc" id="L123">	}</span>
+<span class="fc" id="L123">	}</span>
 	
 	//Return a reference to the set of EDHOC sessions
 	public HashMap&lt;CBORObject, EdhocSession&gt; getEdhocSessions() {
-<span class="nc" id="L127">		return edhocSessions;</span>
+<span class="fc" id="L127">		return edhocSessions;</span>
 	}
 
 	// Return a reference to the set of Application Profiles
 	public HashMap&lt;String, AppProfile&gt; getAppProfiles() {
-<span class="nc" id="L132">		return appProfiles;</span>
+<span class="fc" id="L132">		return appProfiles;</span>
 	}
 	
 	// Return the identity key pair
 	public HashMap&lt;Integer, HashMap&lt;Integer, OneKey&gt;&gt; getKeyPairs() {
-<span class="nc" id="L137">		return this.keyPairs;</span>
+<span class="fc" id="L137">		return this.keyPairs;</span>
 	}
 	
 	// Return the ID_CRED used by this peer
 	public HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; getIdCreds() {
-<span class="nc" id="L142">		return this.idCreds;</span>
+<span class="fc" id="L142">		return this.idCreds;</span>
 	}
 	
 	// Return the CRED used by this peer
 	public HashMap&lt;Integer, HashMap&lt;Integer, CBORObject&gt;&gt; getCreds() {
-<span class="nc" id="L147">		return this.creds;</span>
+<span class="fc" id="L147">		return this.creds;</span>
 	}
 	
 	// Return the set of peer public keys
 	public HashMap&lt;CBORObject, OneKey&gt; getPeerPublicKeys() {
-<span class="nc" id="L152">		return peerPublicKeys;</span>
+<span class="fc" id="L152">		return peerPublicKeys;</span>
 	}
 	
 	// Return the set of peer credentials
 	public HashMap&lt;CBORObject, CBORObject&gt; getPeerCredentials() {
-<span class="nc" id="L157">		return peerCredentials;</span>
+<span class="fc" id="L157">		return peerCredentials;</span>
 	}
 	
 	// Return the default OSCORE Replay Window size
 	public int getOscoreReplayWindow() {
-<span class="nc" id="L162">		return OSCORE_REPLAY_WINDOW;</span>
+<span class="fc" id="L162">		return OSCORE_REPLAY_WINDOW;</span>
 	}
 	
 	// Return the default MAX_UNFRAGMENTED_SIZE
 		public int getOscoreMaxUnfragmentedSize() {
-<span class="nc" id="L167">			return MAX_UNFRAGMENTED_SIZE;</span>
+<span class="fc" id="L167">			return MAX_UNFRAGMENTED_SIZE;</span>
 		}
 	
 	// Return the database of OSCORE Security Contexts
 	public HashMapCtxDB getOscoreDb() {
-<span class="nc" id="L172">		return db;</span>
+<span class="fc" id="L172">		return db;</span>
 	}
 	
 	// Return the lookup identifier for the Security Context
 	public String getUri() {
-<span class="nc" id="L177">		return uri;</span>
+<span class="fc" id="L177">		return uri;</span>
 	}
 	
 	// Return the set of supported cipher suites
 	public List&lt;Integer&gt; getSupportedCipherSuites() {
-<span class="nc" id="L182">		return supportedCipherSuites;</span>
+<span class="fc" id="L182">		return supportedCipherSuites;</span>
 	}
 		
 	// Return the set of used Connection Identifiers
 	public Set&lt;CBORObject&gt; getUsedConnectionIds() {
-<span class="nc" id="L187">		return usedConnectionIds;</span>
+<span class="fc" id="L187">		return usedConnectionIds;</span>
 	}
 	
 	// Return the set of supported EAD items
 	public Set&lt;Integer&gt; getSupportedEADs() {
-<span class="nc" id="L192">		return supportedEADs;</span>
+<span class="fc" id="L192">		return supportedEADs;</span>
 	}
 	
 	// Return the information to produce EAD items for outgoing messages
 	public HashMap&lt;Integer, List&lt;CBORObject&gt;&gt; getEadProductionInput() {
-<span class="nc" id="L197">		return eadProductionInput;</span>
+<span class="fc" id="L197">		return eadProductionInput;</span>
 	}
 	
 	// Return the trust model used for validating authentication credentials of other peers
 	public int getTrustModel() {
-<span class="nc" id="L202">		return trustModel;</span>
+<span class="fc" id="L202">		return trustModel;</span>
 	}
 	
 }

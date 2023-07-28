@@ -62,15 +62,15 @@ public class EdhocStack extends BaseCoapStack {
 			HashMap&lt;CBORObject, EdhocSession&gt; edhocSessions, HashMap&lt;CBORObject, OneKey&gt; peerPublicKeys,
 			HashMap&lt;CBORObject, CBORObject&gt; peerCredentials, Set&lt;CBORObject&gt; usedConnectionIds,
 			int OSCORE_REPLAY_WINDOW, int MAX_UNFRAGMENTED_SIZE) {
-<span class="nc" id="L65">		super(outbox);</span>
+<span class="fc" id="L65">		super(outbox);</span>
 
-<span class="nc" id="L67">		Layer layers[] = new Layer[] { new ObjectSecurityContextLayer(ctxDb), new ExchangeCleanupLayer(config),</span>
+<span class="fc" id="L67">		Layer layers[] = new Layer[] { new ObjectSecurityContextLayer(ctxDb), new ExchangeCleanupLayer(config),</span>
 				new ObserveLayer(config), new BlockwiseLayer(tag, false, config),
-<span class="nc" id="L69">				CongestionControlLayer.newImplementation(tag, config), new ObjectSecurityLayer(ctxDb),</span>
+<span class="fc" id="L69">				CongestionControlLayer.newImplementation(tag, config), new ObjectSecurityLayer(ctxDb),</span>
 				new EdhocLayer(ctxDb, edhocSessions, peerPublicKeys, peerCredentials,
 						       usedConnectionIds, OSCORE_REPLAY_WINDOW, MAX_UNFRAGMENTED_SIZE) };
-<span class="nc" id="L72">		setLayers(layers);</span>
-<span class="nc" id="L73">	}</span>
+<span class="fc" id="L72">		setLayers(layers);</span>
+<span class="fc" id="L73">	}</span>
 	
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

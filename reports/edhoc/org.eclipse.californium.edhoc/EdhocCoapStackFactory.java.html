@@ -38,9 +38,9 @@ import com.upokecenter.cbor.CBORObject;
  * Coap stack factory creating a {@link EdhocStack} including a
  * {@link ObjectSecurityLayer} and {@link EdhocLayer}.
  */
-<span class="nc" id="L41">public class EdhocCoapStackFactory implements CoapStackFactory {</span>
+<span class="fc" id="L41">public class EdhocCoapStackFactory implements CoapStackFactory {</span>
 
-<span class="nc" id="L43">	private static AtomicBoolean init = new AtomicBoolean();</span>
+<span class="fc" id="L43">	private static AtomicBoolean init = new AtomicBoolean();</span>
 	private static volatile OSCoreCtxDB defaultCtxDb;
 	private static volatile HashMap&lt;CBORObject, EdhocSession&gt; edhocSessions;
 	private static volatile HashMap&lt;CBORObject, OneKey&gt; peerPublicKeys;
@@ -54,14 +54,14 @@ import com.upokecenter.cbor.CBORObject;
 	// This is only for when useAsDefault is not used
 	public CoapStack createCoapStack(String protocol, String tag, Configuration config, Outbox outbox,
 			Object customStackArgument) {
-<span class="nc bnc" id="L57" title="All 2 branches missed.">		if (CoAP.isTcpProtocol(protocol)) {</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">		if (CoAP.isTcpProtocol(protocol)) {</span>
 <span class="nc" id="L58">			throw new IllegalArgumentException(&quot;protocol \&quot;&quot; + protocol + &quot;\&quot; is not supported!&quot;);</span>
 		}
-<span class="nc" id="L60">		OSCoreCtxDB ctxDb = defaultCtxDb;</span>
-<span class="nc bnc" id="L61" title="All 2 branches missed.">		if (customStackArgument != null) {</span>
+<span class="fc" id="L60">		OSCoreCtxDB ctxDb = defaultCtxDb;</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">		if (customStackArgument != null) {</span>
 <span class="nc" id="L62">			ctxDb = (OSCoreCtxDB) customStackArgument;</span>
 		}
-<span class="nc" id="L64">		return new EdhocStack(tag, config, outbox, ctxDb, edhocSessions, peerPublicKeys, peerCredentials,</span>
+<span class="fc" id="L64">		return new EdhocStack(tag, config, outbox, ctxDb, edhocSessions, peerPublicKeys, peerCredentials,</span>
 				              usedConnectionIds, OSCORE_REPLAY_WINDOW, MAX_UNFRAGMENTED_SIZE);
 	}
 
@@ -96,17 +96,17 @@ import com.upokecenter.cbor.CBORObject;
 									Set&lt;CBORObject&gt; usedConnectionIds,
 									int OSCORE_REPLAY_WINDOW,
 									int MAX_UNFRAGMENTED_SIZE) {
-<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (init.compareAndSet(false, true)) {</span>
-<span class="nc" id="L100">			CoapEndpoint.setDefaultCoapStackFactory(new EdhocCoapStackFactory());</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		if (init.compareAndSet(false, true)) {</span>
+<span class="fc" id="L100">			CoapEndpoint.setDefaultCoapStackFactory(new EdhocCoapStackFactory());</span>
 		}
-<span class="nc" id="L102">		EdhocCoapStackFactory.defaultCtxDb = defaultCtxDb;</span>
-<span class="nc" id="L103">		EdhocCoapStackFactory.edhocSessions = edhocSessions;</span>
-<span class="nc" id="L104">		EdhocCoapStackFactory.peerPublicKeys = peerPublicKeys;</span>
-<span class="nc" id="L105">		EdhocCoapStackFactory.peerCredentials = peerCredentials;</span>
-<span class="nc" id="L106">		EdhocCoapStackFactory.usedConnectionIds = usedConnectionIds;</span>
-<span class="nc" id="L107">		EdhocCoapStackFactory.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
-<span class="nc" id="L108">		EdhocCoapStackFactory.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
-<span class="nc" id="L109">	}</span>
+<span class="fc" id="L102">		EdhocCoapStackFactory.defaultCtxDb = defaultCtxDb;</span>
+<span class="fc" id="L103">		EdhocCoapStackFactory.edhocSessions = edhocSessions;</span>
+<span class="fc" id="L104">		EdhocCoapStackFactory.peerPublicKeys = peerPublicKeys;</span>
+<span class="fc" id="L105">		EdhocCoapStackFactory.peerCredentials = peerCredentials;</span>
+<span class="fc" id="L106">		EdhocCoapStackFactory.usedConnectionIds = usedConnectionIds;</span>
+<span class="fc" id="L107">		EdhocCoapStackFactory.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
+<span class="fc" id="L108">		EdhocCoapStackFactory.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
+<span class="fc" id="L109">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>

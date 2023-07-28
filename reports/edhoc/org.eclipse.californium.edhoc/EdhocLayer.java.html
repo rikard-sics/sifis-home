@@ -55,7 +55,7 @@ public class EdhocLayer extends AbstractLayer {
 	/**
 	 * The logger
 	 */
-<span class="nc" id="L58">	private static final Logger LOGGER = LoggerFactory.getLogger(EdhocLayer.class);</span>
+<span class="fc" id="L58">	private static final Logger LOGGER = LoggerFactory.getLogger(EdhocLayer.class);</span>
 	
 	/**
 	 * The OSCORE context database
@@ -83,7 +83,7 @@ public class EdhocLayer extends AbstractLayer {
 	Set&lt;CBORObject&gt; usedConnectionIds;
 	
 	// Lookup identifier to be associated with the OSCORE Security Context
-<span class="nc" id="L86">	private final String uriLocal = &quot;coap://localhost&quot;;</span>
+<span class="fc" id="L86">	private final String uriLocal = &quot;coap://localhost&quot;;</span>
 	
 	// The size of the Replay Window to use in an OSCORE Recipient Context
 	private int OSCORE_REPLAY_WINDOW;
@@ -108,109 +108,109 @@ public class EdhocLayer extends AbstractLayer {
 					  HashMap&lt;CBORObject, CBORObject&gt; peerCredentials,
 			          Set&lt;CBORObject&gt; usedConnectionIds,
 			          int OSCORE_REPLAY_WINDOW,
-<span class="nc" id="L111">			          int MAX_UNFRAGMENTED_SIZE) {</span>
-<span class="nc" id="L112">		this.ctxDb = ctxDb;</span>
-<span class="nc" id="L113">		this.edhocSessions = edhocSessions;</span>
-<span class="nc" id="L114">		this.peerPublicKeys = peerPublicKeys;</span>
-<span class="nc" id="L115">		this.peerCredentials = peerCredentials;</span>
-<span class="nc" id="L116">		this.usedConnectionIds = usedConnectionIds;</span>
-<span class="nc" id="L117">		this.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
-<span class="nc" id="L118">		this.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
+<span class="fc" id="L111">			          int MAX_UNFRAGMENTED_SIZE) {</span>
+<span class="fc" id="L112">		this.ctxDb = ctxDb;</span>
+<span class="fc" id="L113">		this.edhocSessions = edhocSessions;</span>
+<span class="fc" id="L114">		this.peerPublicKeys = peerPublicKeys;</span>
+<span class="fc" id="L115">		this.peerCredentials = peerCredentials;</span>
+<span class="fc" id="L116">		this.usedConnectionIds = usedConnectionIds;</span>
+<span class="fc" id="L117">		this.OSCORE_REPLAY_WINDOW = OSCORE_REPLAY_WINDOW;</span>
+<span class="fc" id="L118">		this.MAX_UNFRAGMENTED_SIZE = MAX_UNFRAGMENTED_SIZE;</span>
 
-<span class="nc" id="L120">		LOGGER.warn(&quot;Initializing EDHOC layer&quot;);</span>
-<span class="nc" id="L121">	}</span>
+<span class="fc" id="L120">		LOGGER.warn(&quot;Initializing EDHOC layer&quot;);</span>
+<span class="fc" id="L121">	}</span>
 
 	@Override
 	public void sendRequest(final Exchange exchange, final Request request) {
 
-<span class="nc" id="L126">		LOGGER.warn(&quot;Sending request through EDHOC layer&quot;);</span>
+<span class="fc" id="L126">		LOGGER.warn(&quot;Sending request through EDHOC layer&quot;);</span>
 
-<span class="nc bnc" id="L128" title="All 4 branches missed.">		if (request.getOptions().hasOscore() &amp;&amp; request.getOptions().hasEdhoc()) {</span>
-<span class="nc" id="L129">			LOGGER.warn(&quot;Combined EDHOC+OSCORE request&quot;);</span>
+<span class="pc bpc" id="L128" title="1 of 4 branches missed.">		if (request.getOptions().hasOscore() &amp;&amp; request.getOptions().hasEdhoc()) {</span>
+<span class="fc" id="L129">			LOGGER.warn(&quot;Combined EDHOC+OSCORE request&quot;);</span>
 			
 			// Retrieve the Security Context used to protect the request
-<span class="nc" id="L132">			OSCoreCtx ctx = getContextForOutgoing(exchange);</span>
+<span class="fc" id="L132">			OSCoreCtx ctx = getContextForOutgoing(exchange);</span>
 			
 			// The connection identifier of this peer is its Recipient ID
-<span class="nc" id="L135">			byte[] recipientId = ctx.getRecipientId();</span>
-<span class="nc" id="L136">			CBORObject connectionIdentifierInitiatorCbor = CBORObject.FromObject(recipientId);</span>
+<span class="fc" id="L135">			byte[] recipientId = ctx.getRecipientId();</span>
+<span class="fc" id="L136">			CBORObject connectionIdentifierInitiatorCbor = CBORObject.FromObject(recipientId);</span>
 			
 			// Retrieve the EDHOC session associated to C_R and storing EDHOC message_3
-<span class="nc" id="L139">			EdhocSession session = this.edhocSessions.get(connectionIdentifierInitiatorCbor);</span>
+<span class="fc" id="L139">			EdhocSession session = this.edhocSessions.get(connectionIdentifierInitiatorCbor);</span>
 			
 			// Consistency checks
-<span class="nc bnc" id="L142" title="All 2 branches missed.">			if (session == null) {</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">			if (session == null) {</span>
 <span class="nc" id="L143">				System.err.println(&quot;Unable to retrieve the EDHOC session when sending an EDHOC+OSCORE request\n&quot;);</span>
 <span class="nc" id="L144">				return;</span>
 			}
 			
-<span class="nc" id="L147">			byte[] connectionIdentifierInitiator = session.getConnectionId(); </span>
-<span class="nc bnc" id="L148" title="All 2 branches missed.">			if (!session.isInitiator() ||</span>
-<span class="nc bnc" id="L149" title="All 2 branches missed.">				 session.getCurrentStep() != Constants.EDHOC_SENT_M3 ||		</span>
-<span class="nc bnc" id="L150" title="All 2 branches missed.">				!Arrays.equals(recipientId, connectionIdentifierInitiator)) {</span>
+<span class="fc" id="L147">			byte[] connectionIdentifierInitiator = session.getConnectionId(); </span>
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">			if (!session.isInitiator() ||</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">				 session.getCurrentStep() != Constants.EDHOC_SENT_M3 ||		</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">				!Arrays.equals(recipientId, connectionIdentifierInitiator)) {</span>
 				
 <span class="nc" id="L152">				System.err.println(&quot;Retrieved inconsistent EDHOC session when sending an EDHOC+OSCORE request&quot;);</span>
 <span class="nc" id="L153">				return;</span>
 			}
 			
 			// Extract EDHOC message_3, from the stored CBOR sequence (C_R, EDHOC message_3)
-<span class="nc" id="L157">			byte[] storedSequence = session.getMessage3();</span>
-<span class="nc" id="L158">			CBORObject[] sequenceElements = CBORObject.DecodeSequenceFromBytes(storedSequence);</span>
-<span class="nc" id="L159">			byte[] edhocMessage3 = sequenceElements[1].EncodeToBytes();</span>
+<span class="fc" id="L157">			byte[] storedSequence = session.getMessage3();</span>
+<span class="fc" id="L158">			CBORObject[] sequenceElements = CBORObject.DecodeSequenceFromBytes(storedSequence);</span>
+<span class="fc" id="L159">			byte[] edhocMessage3 = sequenceElements[1].EncodeToBytes();</span>
 			
 			// Original OSCORE payload from the request
-<span class="nc" id="L162">			byte[] oldOscorePayload = request.getPayload();</span>
+<span class="fc" id="L162">			byte[] oldOscorePayload = request.getPayload();</span>
 			
 			if (debugPrint) {
-<span class="nc" id="L165">				Util.nicePrint(&quot;EDHOC+OSCORE: EDHOC message_3&quot;, edhocMessage3);</span>
-<span class="nc" id="L166">				Util.nicePrint(&quot;EDHOC+OSCORE: Old OSCORE payload&quot;, oldOscorePayload);</span>
+<span class="fc" id="L165">				Util.nicePrint(&quot;EDHOC+OSCORE: EDHOC message_3&quot;, edhocMessage3);</span>
+<span class="fc" id="L166">				Util.nicePrint(&quot;EDHOC+OSCORE: Old OSCORE payload&quot;, oldOscorePayload);</span>
 			}
 			
 			// Build the new OSCORE payload, as composed of two concatenated elements
 			// 1. A CBOR data item, i.e., EDHOC message_3 (of type Byte String)
 			// 2. The original OSCORE payload
 			
-<span class="nc" id="L173">			int newOscorePayloadLength = edhocMessage3.length + oldOscorePayload.length;</span>
+<span class="fc" id="L173">			int newOscorePayloadLength = edhocMessage3.length + oldOscorePayload.length;</span>
 			
 			// Abort if the payload of the EDHOC+OSCORE request exceeds MAX_UNFRAGMENTED_SIZE
-<span class="nc" id="L176">			int maxUnfragmentedSize = ctx.getMaxUnfragmentedSize();</span>
-<span class="nc bnc" id="L177" title="All 2 branches missed.">		    if (newOscorePayloadLength &gt; maxUnfragmentedSize) {</span>
+<span class="fc" id="L176">			int maxUnfragmentedSize = ctx.getMaxUnfragmentedSize();</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">		    if (newOscorePayloadLength &gt; maxUnfragmentedSize) {</span>
 <span class="nc" id="L178">		        throw new IllegalStateException(&quot;The payload of the EDHOC+OSCORE request is exceeding MAX_UNFRAGMENTED_SIZE&quot;);</span>
 		    }
 			
-<span class="nc" id="L181">			byte[] newOscorePayload = new byte[newOscorePayloadLength];</span>
-<span class="nc" id="L182">			System.arraycopy(edhocMessage3, 0, newOscorePayload, 0, edhocMessage3.length);</span>
-<span class="nc" id="L183">			System.arraycopy(oldOscorePayload, 0, newOscorePayload, edhocMessage3.length, oldOscorePayload.length);</span>
+<span class="fc" id="L181">			byte[] newOscorePayload = new byte[newOscorePayloadLength];</span>
+<span class="fc" id="L182">			System.arraycopy(edhocMessage3, 0, newOscorePayload, 0, edhocMessage3.length);</span>
+<span class="fc" id="L183">			System.arraycopy(oldOscorePayload, 0, newOscorePayload, edhocMessage3.length, oldOscorePayload.length);</span>
 			
 			
 			if (debugPrint) {
-<span class="nc" id="L187">				Util.nicePrint(&quot;EDHOC+OSCORE: New OSCORE payload&quot;, newOscorePayload);</span>
+<span class="fc" id="L187">				Util.nicePrint(&quot;EDHOC+OSCORE: New OSCORE payload&quot;, newOscorePayload);</span>
 			}
 			
 			// Set the new OSCORE payload as payload of the EDHOC+OSCORE request
-<span class="nc" id="L191">			request.setPayload(newOscorePayload);</span>
+<span class="fc" id="L191">			request.setPayload(newOscorePayload);</span>
 			
 		}
 		
-<span class="nc" id="L195">		super.sendRequest(exchange, request);</span>
-<span class="nc" id="L196">	}</span>
+<span class="fc" id="L195">		super.sendRequest(exchange, request);</span>
+<span class="fc" id="L196">	}</span>
 
 	@Override
 	public void sendResponse(Exchange exchange, Response response) {
 
-<span class="nc" id="L201">		LOGGER.warn(&quot;Sending response through EDHOC layer&quot;);</span>
+<span class="fc" id="L201">		LOGGER.warn(&quot;Sending response through EDHOC layer&quot;);</span>
 
-<span class="nc" id="L203">		super.sendResponse(exchange, response);</span>
-<span class="nc" id="L204">	}</span>
+<span class="fc" id="L203">		super.sendResponse(exchange, response);</span>
+<span class="fc" id="L204">	}</span>
 
 	@Override
 	public void receiveRequest(Exchange exchange, Request request) {
 
-<span class="nc" id="L209">		LOGGER.warn(&quot;Receiving request through EDHOC layer&quot;);</span>
+<span class="fc" id="L209">		LOGGER.warn(&quot;Receiving request through EDHOC layer&quot;);</span>
 
-<span class="nc bnc" id="L211" title="All 2 branches missed.">		if (request.getOptions().hasEdhoc()) {</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">		if (request.getOptions().hasEdhoc()) {</span>
 			
-<span class="nc bnc" id="L213" title="All 2 branches missed.">			if (!request.getOptions().hasOscore()) {</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">			if (!request.getOptions().hasOscore()) {</span>
 <span class="nc" id="L214">    			String responseString = new String(&quot;Received a request including the EDHOC option but&quot; +</span>
     											   &quot; not including the OSCORE option\n&quot;);
 <span class="nc" id="L216">    			System.err.println(responseString);</span>
@@ -218,7 +218,7 @@ public class EdhocLayer extends AbstractLayer {
 <span class="nc" id="L218">    			return;</span>
 			}
 			
-<span class="nc bnc" id="L221" title="All 2 branches missed.">			if (request.getPayload() == null) {</span>
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">			if (request.getPayload() == null) {</span>
 <span class="nc" id="L222">    			String responseString = new String(&quot;Received a request including the EDHOC option but&quot; +</span>
     										       &quot; not including a payload\n&quot;);
 <span class="nc" id="L224">    			System.err.println(responseString);</span>
@@ -226,23 +226,23 @@ public class EdhocLayer extends AbstractLayer {
 <span class="nc" id="L226">    			return;</span>
 			}
 			
-<span class="nc" id="L229">			LOGGER.warn(&quot;Combined EDHOC+OSCORE request&quot;);</span>
+<span class="fc" id="L229">			LOGGER.warn(&quot;Combined EDHOC+OSCORE request&quot;);</span>
 
-<span class="nc" id="L231">			boolean error = false;</span>
+<span class="fc" id="L231">			boolean error = false;</span>
 			
 			// Retrieve the received payload combining EDHOC message_3 and the real OSCORE payload
-<span class="nc" id="L234">			byte[] oldPayload = request.getPayload();</span>
+<span class="fc" id="L234">			byte[] oldPayload = request.getPayload();</span>
 			
 			if (debugPrint) {
-<span class="nc" id="L237">				Util.nicePrint(&quot;EDHOC+OSCORE: received payload&quot;, oldPayload);</span>
+<span class="fc" id="L237">				Util.nicePrint(&quot;EDHOC+OSCORE: received payload&quot;, oldPayload);</span>
 			}
 			
-<span class="nc" id="L240">			CBORObject edhocMessage3 = null;</span>
-<span class="nc" id="L241">			ByteArrayInputStream myStream = null;</span>
+<span class="fc" id="L240">			CBORObject edhocMessage3 = null;</span>
+<span class="fc" id="L241">			ByteArrayInputStream myStream = null;</span>
 			
-<span class="nc" id="L243">			myStream = new ByteArrayInputStream(oldPayload);</span>
+<span class="fc" id="L243">			myStream = new ByteArrayInputStream(oldPayload);</span>
 			try {
-<span class="nc" id="L245">				edhocMessage3 = CBORObject.Read(myStream);</span>
+<span class="fc" id="L245">				edhocMessage3 = CBORObject.Read(myStream);</span>
 			}
 <span class="nc" id="L247">			catch (CBORException e) {</span>
 <span class="nc" id="L248">				System.err.println(&quot;CBORException: &quot; + e.getMessage());</span>
@@ -251,18 +251,18 @@ public class EdhocLayer extends AbstractLayer {
 <span class="nc" id="L251">			catch (NullPointerException e) {</span>
 <span class="nc" id="L252">				System.err.println(&quot;NullPointerException: &quot; + e.getMessage());</span>
 <span class="nc" id="L253">				error = true;</span>
-<span class="nc" id="L254">			}</span>
+<span class="pc" id="L254">			}</span>
 			
-<span class="nc bnc" id="L256" title="All 4 branches missed.">			if (edhocMessage3 == null || edhocMessage3.getType() != CBORType.ByteString) {</span>
+<span class="pc bpc" id="L256" title="2 of 4 branches missed.">			if (edhocMessage3 == null || edhocMessage3.getType() != CBORType.ByteString) {</span>
 <span class="nc" id="L257">				error = true;</span>
 			}
 			
-<span class="nc" id="L260">			int oscoreCiphertextLen = oldPayload.length - edhocMessage3.EncodeToBytes().length;</span>
-<span class="nc" id="L261">			byte[] newPayload = new byte[oscoreCiphertextLen];</span>
+<span class="fc" id="L260">			int oscoreCiphertextLen = oldPayload.length - edhocMessage3.EncodeToBytes().length;</span>
+<span class="fc" id="L261">			byte[] newPayload = new byte[oscoreCiphertextLen];</span>
 			
-<span class="nc" id="L263">			int readBytes = -1;</span>
+<span class="fc" id="L263">			int readBytes = -1;</span>
 			try {
-<span class="nc" id="L265">				readBytes = myStream.read(newPayload, 0, oscoreCiphertextLen);</span>
+<span class="fc" id="L265">				readBytes = myStream.read(newPayload, 0, oscoreCiphertextLen);</span>
 			}
 <span class="nc" id="L267">			catch (NullPointerException e) {</span>
 <span class="nc" id="L268">				System.err.println(&quot;NullPointerException: &quot; + e.getMessage());</span>
@@ -271,14 +271,14 @@ public class EdhocLayer extends AbstractLayer {
 <span class="nc" id="L271">			catch (IndexOutOfBoundsException e) {</span>
 <span class="nc" id="L272">				System.err.println(&quot;IndexOutOfBoundsException: &quot; + e.getMessage());</span>
 <span class="nc" id="L273">				error = true;</span>
-<span class="nc" id="L274">			}</span>
+<span class="pc" id="L274">			}</span>
 			
-<span class="nc bnc" id="L276" title="All 2 branches missed.">			if (readBytes != oscoreCiphertextLen) {</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">			if (readBytes != oscoreCiphertextLen) {</span>
 <span class="nc" id="L277">				error = true;</span>
 			}
 			
 			// The EDHOC+OSCORE request is malformed
-<span class="nc bnc" id="L281" title="All 2 branches missed.">			if (error == true) {</span>
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">			if (error == true) {</span>
 <span class="nc" id="L282">				String responseString = new String(&quot;Invalid EDHOC+OSCORE request&quot;);</span>
 <span class="nc" id="L283">				System.err.println(responseString);</span>
 <span class="nc" id="L284">				sendErrorResponse(exchange, responseString, ResponseCode.BAD_REQUEST);</span>
@@ -286,36 +286,36 @@ public class EdhocLayer extends AbstractLayer {
 			}
 			
 			// Prepare the actual OSCORE request, by replacing the payload
-<span class="nc" id="L289">			request.setPayload(newPayload);</span>
+<span class="fc" id="L289">			request.setPayload(newPayload);</span>
 			
 			if (debugPrint) {
-<span class="nc" id="L292">				Util.nicePrint(&quot;EDHOC+OSCORE: OSCORE request payload&quot;, newPayload);</span>
+<span class="fc" id="L292">				Util.nicePrint(&quot;EDHOC+OSCORE: OSCORE request payload&quot;, newPayload);</span>
 			}
 			
 			
 			// Rebuild the CBOR sequence (C_R, EDHOC message_3)
 
-<span class="nc" id="L298">		    List&lt;CBORObject&gt; edhocObjectList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L298">		    List&lt;CBORObject&gt; edhocObjectList = new ArrayList&lt;&gt;();</span>
 
 		    // Add C_R, by encoding the 'kid' from the OSCORE option
-<span class="nc" id="L301">			byte[] kid = getKid(request.getOptions().getOscore());		    </span>
-<span class="nc" id="L302">			CBORObject cR = MessageProcessor.encodeIdentifier(kid);</span>
-<span class="nc" id="L303">		    edhocObjectList.add(cR);</span>
+<span class="fc" id="L301">			byte[] kid = getKid(request.getOptions().getOscore());		    </span>
+<span class="fc" id="L302">			CBORObject cR = MessageProcessor.encodeIdentifier(kid);</span>
+<span class="fc" id="L303">		    edhocObjectList.add(cR);</span>
 		    
 		    // Add EDHOC message_3, i.e., the CBOR data item retrieved from the received message
-<span class="nc" id="L306">		    edhocObjectList.add(edhocMessage3);</span>
+<span class="fc" id="L306">		    edhocObjectList.add(edhocMessage3);</span>
 		    
-<span class="nc" id="L308">		    byte[] mySequence = Util.buildCBORSequence(edhocObjectList);</span>
+<span class="fc" id="L308">		    byte[] mySequence = Util.buildCBORSequence(edhocObjectList);</span>
 		    
 			if (debugPrint) {
-<span class="nc" id="L311">				Util.nicePrint(&quot;EDHOC+OSCORE: rebuilt CBOR sequence (C_R, EDHOC message_3)&quot;, mySequence);</span>
+<span class="fc" id="L311">				Util.nicePrint(&quot;EDHOC+OSCORE: rebuilt CBOR sequence (C_R, EDHOC message_3)&quot;, mySequence);</span>
 			}
 			
-<span class="nc" id="L314">			CBORObject kidCbor = CBORObject.FromObject(kid);</span>
-<span class="nc" id="L315">			EdhocSession mySession = edhocSessions.get(kidCbor);</span>
+<span class="fc" id="L314">			CBORObject kidCbor = CBORObject.FromObject(kid);</span>
+<span class="fc" id="L315">			EdhocSession mySession = edhocSessions.get(kidCbor);</span>
 			
 			// Consistency checks
-<span class="nc bnc" id="L318" title="All 2 branches missed.">    		if (mySession == null) {</span>
+<span class="pc bpc" id="L318" title="1 of 2 branches missed.">    		if (mySession == null) {</span>
 <span class="nc" id="L319">    			String responseString = new String(&quot;Unable to retrieve the EDHOC session when&quot;</span>
     					                         + &quot; receiving an EDHOC+OSCORE request\n&quot;);
 <span class="nc" id="L321">				System.err.println(responseString);</span>
@@ -323,18 +323,18 @@ public class EdhocLayer extends AbstractLayer {
 <span class="nc" id="L323">            	return;</span>
     		}
 
-<span class="nc" id="L326">			byte[] connectionIdentifierInitiator = mySession.getPeerConnectionId();</span>
-<span class="nc" id="L327">			byte[] connectionIdentifierResponder = mySession.getConnectionId();</span>
-<span class="nc bnc" id="L328" title="All 2 branches missed.">			if (mySession.isInitiator() ||</span>
-<span class="nc bnc" id="L329" title="All 2 branches missed.">				mySession.getCurrentStep() != Constants.EDHOC_SENT_M2 ||</span>
-<span class="nc bnc" id="L330" title="All 2 branches missed.">				!Arrays.equals(kid, connectionIdentifierResponder)) {</span>
+<span class="fc" id="L326">			byte[] connectionIdentifierInitiator = mySession.getPeerConnectionId();</span>
+<span class="fc" id="L327">			byte[] connectionIdentifierResponder = mySession.getConnectionId();</span>
+<span class="pc bpc" id="L328" title="1 of 2 branches missed.">			if (mySession.isInitiator() ||</span>
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">				mySession.getCurrentStep() != Constants.EDHOC_SENT_M2 ||</span>
+<span class="pc bpc" id="L330" title="1 of 2 branches missed.">				!Arrays.equals(kid, connectionIdentifierResponder)) {</span>
 				
 <span class="nc" id="L332">				System.err.println(&quot;Retrieved inconsistent EDHOC session when receiving an EDHOC+OSCORE request&quot;);</span>
 <span class="nc" id="L333">				return;</span>
 			}
     		   
     		// This EDHOC resource does not support the use of the EDHOC+OSCORE request
-<span class="nc bnc" id="L337" title="All 2 branches missed.">    		if (mySession.getApplicationProfile().getSupportCombinedRequest() == false) {</span>
+<span class="pc bpc" id="L337" title="1 of 2 branches missed.">    		if (mySession.getApplicationProfile().getSupportCombinedRequest() == false) {</span>
 <span class="nc" id="L338">				System.err.println(&quot;This EDHOC resource does not support the use of the EDHOC+OSCORE request\n&quot;);</span>
 <span class="nc" id="L339">    			Util.purgeSession(mySession, connectionIdentifierResponder, edhocSessions, usedConnectionIds);</span>
     			
@@ -350,7 +350,7 @@ public class EdhocLayer extends AbstractLayer {
     		}
 			
     		// The combined request cannot be used if the Responder has to send message_4
-<span class="nc bnc" id="L353" title="All 2 branches missed.">    		if (mySession.getApplicationProfile().getUseMessage4() == true) {</span>
+<span class="pc bpc" id="L353" title="1 of 2 branches missed.">    		if (mySession.getApplicationProfile().getUseMessage4() == true) {</span>
 <span class="nc" id="L354">				System.err.println(&quot;Cannot receive the combined EDHOC+OSCORE request if message_4 is expected\n&quot;);</span>
 <span class="nc" id="L355">    			Util.purgeSession(mySession, connectionIdentifierResponder, edhocSessions, usedConnectionIds);</span>
     			
@@ -367,13 +367,13 @@ public class EdhocLayer extends AbstractLayer {
 			
 		    // Process EDHOC message_3
 		    		    
-<span class="nc" id="L370">		    List&lt;CBORObject&gt; processingResult = new ArrayList&lt;CBORObject&gt;();</span>
-<span class="nc" id="L371">			byte[] nextMessage = new byte[] {};</span>
+<span class="fc" id="L370">		    List&lt;CBORObject&gt; processingResult = new ArrayList&lt;CBORObject&gt;();</span>
+<span class="fc" id="L371">			byte[] nextMessage = new byte[] {};</span>
 		    
-<span class="nc" id="L373">			processingResult = MessageProcessor.readMessage3(mySequence, true, null, edhocSessions, peerPublicKeys,</span>
+<span class="fc" id="L373">			processingResult = MessageProcessor.readMessage3(mySequence, true, null, edhocSessions, peerPublicKeys,</span>
                     										 peerCredentials, usedConnectionIds);
 
-<span class="nc bnc" id="L376" title="All 4 branches missed.">			if (processingResult.get(0) == null || processingResult.get(0).getType() != CBORType.ByteString) {</span>
+<span class="pc bpc" id="L376" title="2 of 4 branches missed.">			if (processingResult.get(0) == null || processingResult.get(0).getType() != CBORType.ByteString) {</span>
 <span class="nc" id="L377">				String responseString = new String(&quot;Internal error when processing EDHOC Message 3&quot;);</span>
 <span class="nc" id="L378">				System.err.println(responseString);				</span>
 <span class="nc" id="L379">				sendErrorResponse(exchange, responseString, ResponseCode.INTERNAL_SERVER_ERROR);</span>
@@ -382,21 +382,21 @@ public class EdhocLayer extends AbstractLayer {
 			
 			// A non-zero length response payload would be an EDHOC Error Message
 			
-<span class="nc" id="L385">			nextMessage = processingResult.get(0).GetByteString();</span>
+<span class="fc" id="L385">			nextMessage = processingResult.get(0).GetByteString();</span>
 			
 			// The protocol has successfully completed
-<span class="nc bnc" id="L388" title="All 2 branches missed.">			if (nextMessage.length == 0) {</span>
+<span class="pc bpc" id="L388" title="1 of 2 branches missed.">			if (nextMessage.length == 0) {</span>
 
-<span class="nc" id="L390">				cR = processingResult.get(1);</span>
-<span class="nc" id="L391">				mySession = edhocSessions.get(cR);</span>
+<span class="fc" id="L390">				cR = processingResult.get(1);</span>
+<span class="fc" id="L391">				mySession = edhocSessions.get(cR);</span>
 				
-<span class="nc bnc" id="L393" title="All 2 branches missed.">				if (mySession == null) {</span>
+<span class="pc bpc" id="L393" title="1 of 2 branches missed.">				if (mySession == null) {</span>
 <span class="nc" id="L394">					System.err.println(&quot;Inconsistent state before sending EDHOC Message 3&quot;);</span>
 <span class="nc" id="L395">					String responseString = new String(&quot;Inconsistent state before sending EDHOC Message 3&quot;);</span>
 <span class="nc" id="L396">					sendErrorResponse(exchange, responseString, ResponseCode.INTERNAL_SERVER_ERROR);</span>
 <span class="nc" id="L397">					return;</span>
 				}
-<span class="nc bnc" id="L399" title="All 2 branches missed.">				if (mySession.getCurrentStep() != Constants.EDHOC_AFTER_M3) {</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">				if (mySession.getCurrentStep() != Constants.EDHOC_AFTER_M3) {</span>
 <span class="nc" id="L400">					System.err.println(&quot;Inconsistent state after sending EDHOC Message 3&quot;);							</span>
 <span class="nc" id="L401">					Util.purgeSession(mySession, connectionIdentifierResponder, edhocSessions, usedConnectionIds);</span>
 <span class="nc" id="L402">					String responseString = new String(&quot;Inconsistent state before sending EDHOC Message 3&quot;);</span>
@@ -405,53 +405,53 @@ public class EdhocLayer extends AbstractLayer {
 				}
 				
 				/* Invoke the EDHOC-Exporter to produce OSCORE input material */
-<span class="nc" id="L408">				byte[] masterSecret = EdhocSession.getMasterSecretOSCORE(mySession);</span>
-<span class="nc" id="L409">				byte[] masterSalt = EdhocSession.getMasterSaltOSCORE(mySession);</span>
+<span class="fc" id="L408">				byte[] masterSecret = EdhocSession.getMasterSecretOSCORE(mySession);</span>
+<span class="fc" id="L409">				byte[] masterSalt = EdhocSession.getMasterSaltOSCORE(mySession);</span>
 				if (debugPrint) {
-<span class="nc" id="L411">					Util.nicePrint(&quot;OSCORE Master Secret&quot;, masterSecret);</span>
-<span class="nc" id="L412">					Util.nicePrint(&quot;OSCORE Master Salt&quot;, masterSalt);</span>
+<span class="fc" id="L411">					Util.nicePrint(&quot;OSCORE Master Secret&quot;, masterSecret);</span>
+<span class="fc" id="L412">					Util.nicePrint(&quot;OSCORE Master Salt&quot;, masterSalt);</span>
 				}
 				
 				/* Setup the OSCORE Security Context */
 				
 				// The Sender ID of this peer is the EDHOC connection identifier of the other peer
-<span class="nc" id="L418">				byte[] senderId = connectionIdentifierInitiator;</span>
+<span class="fc" id="L418">				byte[] senderId = connectionIdentifierInitiator;</span>
 				
 				// The Recipient ID of this peer is the EDHOC connection identifier of this peer
-<span class="nc" id="L421">				byte[] recipientId = connectionIdentifierResponder;</span>
+<span class="fc" id="L421">				byte[] recipientId = connectionIdentifierResponder;</span>
 				
-<span class="nc" id="L423">				int selectedCipherSuite = mySession.getSelectedCipherSuite();</span>
-<span class="nc" id="L424">				AlgorithmID alg = EdhocSession.getAppAEAD(selectedCipherSuite);</span>
-<span class="nc" id="L425">				AlgorithmID hkdf = EdhocSession.getAppHkdf(selectedCipherSuite);</span>
+<span class="fc" id="L423">				int selectedCipherSuite = mySession.getSelectedCipherSuite();</span>
+<span class="fc" id="L424">				AlgorithmID alg = EdhocSession.getAppAEAD(selectedCipherSuite);</span>
+<span class="fc" id="L425">				AlgorithmID hkdf = EdhocSession.getAppHkdf(selectedCipherSuite);</span>
 				
-<span class="nc" id="L427">				OSCoreCtx ctx = null;</span>
+<span class="fc" id="L427">				OSCoreCtx ctx = null;</span>
 				try {
-<span class="nc" id="L429">					ctx = new OSCoreCtx(masterSecret, false, alg, senderId, </span>
-<span class="nc" id="L430">					recipientId, hkdf, OSCORE_REPLAY_WINDOW, masterSalt, null, MAX_UNFRAGMENTED_SIZE);					</span>
+<span class="fc" id="L429">					ctx = new OSCoreCtx(masterSecret, false, alg, senderId, </span>
+<span class="fc" id="L430">					recipientId, hkdf, OSCORE_REPLAY_WINDOW, masterSalt, null, MAX_UNFRAGMENTED_SIZE);					</span>
 <span class="nc" id="L431">				} catch (OSException e) {							</span>
 <span class="nc" id="L432">					Util.purgeSession(mySession, connectionIdentifierResponder, edhocSessions, usedConnectionIds);</span>
 <span class="nc" id="L433">					String responseString = new String(&quot;Error when deriving the OSCORE Security Context&quot;);</span>
 <span class="nc" id="L434">					System.err.println(responseString + &quot; &quot; + e.getMessage());</span>
 <span class="nc" id="L435">					sendErrorResponse(exchange, responseString, ResponseCode.INTERNAL_SERVER_ERROR);</span>
 <span class="nc" id="L436">					return;</span>
-<span class="nc" id="L437">				}</span>
+<span class="fc" id="L437">				}</span>
 				
 				try {
-<span class="nc" id="L440">					ctxDb.addContext(uriLocal, ctx);</span>
+<span class="fc" id="L440">					ctxDb.addContext(uriLocal, ctx);</span>
 <span class="nc" id="L441">				} catch (OSException e) {							</span>
 <span class="nc" id="L442">					Util.purgeSession(mySession, connectionIdentifierResponder, edhocSessions, usedConnectionIds);</span>
 <span class="nc" id="L443">					String responseString = new String(&quot;Error when adding the OSCORE Security Context to the context database&quot;);</span>
 <span class="nc" id="L444">					System.err.println(responseString + &quot; &quot; + e.getMessage());</span>
 <span class="nc" id="L445">					sendErrorResponse(exchange, responseString, ResponseCode.INTERNAL_SERVER_ERROR);</span>
 <span class="nc" id="L446">					return;</span>
-<span class="nc" id="L447">				}			        			        </span>
+<span class="fc" id="L447">				}			        			        </span>
 				
 				// Remove the EDHOC option
-<span class="nc" id="L450">				request.getOptions().setEdhoc(false);</span>
+<span class="fc" id="L450">				request.getOptions().setEdhoc(false);</span>
 				
 				// The next step is to pass the OSCORE request to the next layer for processing
 			
-<span class="nc" id="L454">			}</span>
+<span class="fc" id="L454">			}</span>
 			// An EDHOC error message has to be returned in response to EDHOC message_3
 			// The session has been possibly purged while attempting to process message_3
 			else {
@@ -464,16 +464,16 @@ public class EdhocLayer extends AbstractLayer {
 					    
 		}
 		
-<span class="nc" id="L467">		super.receiveRequest(exchange, request);</span>
-<span class="nc" id="L468">	}</span>
+<span class="fc" id="L467">		super.receiveRequest(exchange, request);</span>
+<span class="fc" id="L468">	}</span>
 
 	@Override
 	public void receiveResponse(Exchange exchange, Response response) {
 
-<span class="nc" id="L473">		LOGGER.warn(&quot;Receiving response through EDHOC layer&quot;);</span>
+<span class="fc" id="L473">		LOGGER.warn(&quot;Receiving response through EDHOC layer&quot;);</span>
 
-<span class="nc" id="L475">		super.receiveResponse(exchange, response);</span>
-<span class="nc" id="L476">	}</span>
+<span class="fc" id="L475">		super.receiveResponse(exchange, response);</span>
+<span class="fc" id="L476">	}</span>
 
 	@Override
 	public void sendEmptyMessage(Exchange exchange, EmptyMessage message) {
@@ -494,12 +494,12 @@ public class EdhocLayer extends AbstractLayer {
 	 */
 	private OSCoreCtx getContextForOutgoing(Exchange e) {
 		
-<span class="nc" id="L497">		String uri = e.getRequest().getURI();</span>
-<span class="nc bnc" id="L498" title="All 2 branches missed.">		if (uri == null) {</span>
+<span class="fc" id="L497">		String uri = e.getRequest().getURI();</span>
+<span class="pc bpc" id="L498" title="1 of 2 branches missed.">		if (uri == null) {</span>
 <span class="nc" id="L499">			return null;</span>
 		} else {
 			try {
-<span class="nc" id="L502">				return ctxDb.getContext(uri);</span>
+<span class="fc" id="L502">				return ctxDb.getContext(uri);</span>
 <span class="nc" id="L503">			} catch (OSException exception) {</span>
 <span class="nc" id="L504">				System.err.println(&quot;Error when retrieving the OSCORE Security Context &quot; + exception.getMessage());</span>
 <span class="nc" id="L505">				return null;</span>
@@ -514,34 +514,34 @@ public class EdhocLayer extends AbstractLayer {
 	 * @return the KID value
 	 */
 	static byte[] getKid(byte[] oscoreOption) {
-<span class="nc bnc" id="L517" title="All 2 branches missed.">		if (oscoreOption.length == 0) {</span>
+<span class="pc bpc" id="L517" title="1 of 2 branches missed.">		if (oscoreOption.length == 0) {</span>
 <span class="nc" id="L518">			return null;</span>
 		}
 
 		// Parse the flag byte
-<span class="nc" id="L522">		byte flagByte = oscoreOption[0];</span>
-<span class="nc" id="L523">		int n = flagByte &amp; 0x07;</span>
-<span class="nc" id="L524">		int k = flagByte &amp; 0x08;</span>
-<span class="nc" id="L525">		int h = flagByte &amp; 0x10;</span>
+<span class="fc" id="L522">		byte flagByte = oscoreOption[0];</span>
+<span class="fc" id="L523">		int n = flagByte &amp; 0x07;</span>
+<span class="fc" id="L524">		int k = flagByte &amp; 0x08;</span>
+<span class="fc" id="L525">		int h = flagByte &amp; 0x10;</span>
 
-<span class="nc" id="L527">		byte[] kid = null;</span>
-<span class="nc" id="L528">		int index = 1;</span>
+<span class="fc" id="L527">		byte[] kid = null;</span>
+<span class="fc" id="L528">		int index = 1;</span>
 
 		// Partial IV
-<span class="nc" id="L531">		index += n;</span>
+<span class="fc" id="L531">		index += n;</span>
 
 		// KID Context
-<span class="nc bnc" id="L534" title="All 2 branches missed.">		if (h != 0) {</span>
+<span class="pc bpc" id="L534" title="1 of 2 branches missed.">		if (h != 0) {</span>
 <span class="nc" id="L535">			int s = oscoreOption[index];</span>
 <span class="nc" id="L536">			index += s + 1;</span>
 		}
 
 		// KID
-<span class="nc bnc" id="L540" title="All 2 branches missed.">		if (k != 0) {</span>
-<span class="nc" id="L541">			kid = Arrays.copyOfRange(oscoreOption, index, oscoreOption.length);</span>
+<span class="pc bpc" id="L540" title="1 of 2 branches missed.">		if (k != 0) {</span>
+<span class="fc" id="L541">			kid = Arrays.copyOfRange(oscoreOption, index, oscoreOption.length);</span>
 		}
 
-<span class="nc" id="L544">		return kid;</span>
+<span class="fc" id="L544">		return kid;</span>
 	}	
 	
 	/*

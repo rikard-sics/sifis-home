@@ -193,8 +193,8 @@ import com.upokecenter.cbor.CBORType;
 	public static boolean isErrorMessage(CBORObject[] myObjects, boolean isReq) {
 		
 		// A CoAP message including an EDHOC error message is a CBOR sequence of at least two elements
-<span class="pc bpc" id="L196" title="1 of 2 branches missed.">		if (myObjects.length &lt; 2)</span>
-<span class="nc" id="L197">			return false;</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">		if (myObjects.length &lt; 2)</span>
+<span class="fc" id="L197">			return false;</span>
 		
 <span class="fc bfc" id="L199" title="All 2 branches covered.">		if (isReq == true) {</span>
 			// If in a request, this starts with C_X different than 'true' (0xf5),
@@ -1243,8 +1243,8 @@ import com.upokecenter.cbor.CBORType;
 		}
 		
 <span class="pc bpc" id="L1245" title="1 of 2 branches missed.">		if (session != null) {</span>
-<span class="pc bpc" id="L1246" title="1 of 2 branches missed.">			if (session.getPeerConnectionId() != null)</span>
-<span class="nc" id="L1247">				connectionIdentifierInitiator = session.getPeerConnectionId();</span>
+<span class="fc bfc" id="L1246" title="All 2 branches covered.">			if (session.getPeerConnectionId() != null)</span>
+<span class="fc" id="L1247">				connectionIdentifierInitiator = session.getPeerConnectionId();</span>
 		}
 		
 		
@@ -2111,8 +2111,8 @@ import com.upokecenter.cbor.CBORType;
 <span class="fc" id="L2111">    	session.setAuthenticationCredential();</span>
     	
     	// Set the ephemeral keys of the Initiator to use in this session
-<span class="pc bpc" id="L2114" title="1 of 2 branches missed.">    	if (session.getEphemeralKey() == null)</span>
-<span class="nc" id="L2115">    		session.setEphemeralKey();</span>
+<span class="fc bfc" id="L2114" title="All 2 branches covered.">    	if (session.getEphemeralKey() == null)</span>
+<span class="fc" id="L2115">    		session.setEphemeralKey();</span>
     	
     	CBORObject suitesI;
 <span class="fc bfc" id="L2118" title="All 2 branches covered.">    	if (selectedSuite == preferredSuite) {</span>
@@ -2251,8 +2251,8 @@ import com.upokecenter.cbor.CBORType;
 		}
 		
     	// Set the ephemeral keys of the Responder to use in this session
-<span class="pc bpc" id="L2254" title="1 of 2 branches missed.">    	if (session.getEphemeralKey() == null)</span>
-<span class="nc" id="L2255">    		session.setEphemeralKey();</span>
+<span class="fc bfc" id="L2254" title="All 2 branches covered.">    	if (session.getEphemeralKey() == null)</span>
+<span class="fc" id="L2255">    		session.setEphemeralKey();</span>
 		
 		// G_Y as a CBOR byte string
 <span class="fc" id="L2258">		int selectedSuite = session.getSelectedCipherSuite();</span>
@@ -3181,18 +3181,18 @@ import com.upokecenter.cbor.CBORType;
 			  									        Set&lt;CBORObject&gt; usedConnectionIds,
 			  									        AppProfile appProfile, int trustModel, HashMapCtxDB db) {
 		
-<span class="nc" id="L3184">		byte[] connectionId = null;</span>
-<span class="nc bnc" id="L3185" title="All 2 branches missed.">		HashMapCtxDB oscoreDB = (appProfile.getUsedForOSCORE() == true) ? db : null;</span>
+<span class="fc" id="L3184">		byte[] connectionId = null;</span>
+<span class="pc bpc" id="L3185" title="1 of 2 branches missed.">		HashMapCtxDB oscoreDB = (appProfile.getUsedForOSCORE() == true) ? db : null;</span>
 		
-<span class="nc" id="L3187">		connectionId = Util.getConnectionId(usedConnectionIds, oscoreDB, null);</span>
+<span class="fc" id="L3187">		connectionId = Util.getConnectionId(usedConnectionIds, oscoreDB, null);</span>
 		// Forced for testing
 		// connectionId = new byte[] {(byte) 0x1c};
 		
-<span class="nc" id="L3191">        EdhocSession mySession = new EdhocSession(true, true, method, connectionId, keyPairs, idCreds, creds,</span>
+<span class="fc" id="L3191">        EdhocSession mySession = new EdhocSession(true, true, method, connectionId, keyPairs, idCreds, creds,</span>
         										  supportedCipherSuites, peerSupportedCipherSuites, supportedEADs,
         										  appProfile, trustModel, oscoreDB);
     
-<span class="nc" id="L3195">		return mySession;</span>
+<span class="fc" id="L3195">		return mySession;</span>
 		
 	}
 	
@@ -3219,82 +3219,82 @@ import com.upokecenter.cbor.CBORType;
 			  									        Set&lt;CBORObject&gt; usedConnectionIds,
 			  									        AppProfile appProfile, int trustModel, HashMapCtxDB db) {
 		
-<span class="nc" id="L3222">		CBORObject[] objectListMessage1 = CBORObject.DecodeSequenceFromBytes(message1);</span>
-<span class="nc" id="L3223">		int index = -1;</span>
+<span class="fc" id="L3222">		CBORObject[] objectListMessage1 = CBORObject.DecodeSequenceFromBytes(message1);</span>
+<span class="fc" id="L3223">		int index = -1;</span>
 		
 		// Retrieve elements from EDHOC Message 1
 		
 	    // If the received message is a request (i.e. the CoAP client is the initiator), the first element
 	    // before the actual message_1 is the CBOR simple value 'true', i.e. the byte 0xf5, and it must be skipped
-<span class="nc bnc" id="L3229" title="All 2 branches missed.">	    if (isReq == true) {</span>
-<span class="nc" id="L3230">	        index++;</span>
+<span class="pc bpc" id="L3229" title="1 of 2 branches missed.">	    if (isReq == true) {</span>
+<span class="fc" id="L3230">	        index++;</span>
 	    }
 		
 		// METHOD
-<span class="nc" id="L3234">	    index++;</span>
-<span class="nc" id="L3235">		int method = objectListMessage1[index].AsInt32();</span>
+<span class="fc" id="L3234">	    index++;</span>
+<span class="fc" id="L3235">		int method = objectListMessage1[index].AsInt32();</span>
 		
 		// Selected cipher suites from SUITES_I
-<span class="nc" id="L3238">		index++;</span>
-<span class="nc" id="L3239">		int selectedCipherSuite = -1;</span>
-<span class="nc bnc" id="L3240" title="All 2 branches missed.">		if (objectListMessage1[index].getType() == CBORType.Integer)</span>
-<span class="nc" id="L3241">			selectedCipherSuite = objectListMessage1[index].AsInt32();</span>
+<span class="fc" id="L3238">		index++;</span>
+<span class="fc" id="L3239">		int selectedCipherSuite = -1;</span>
+<span class="pc bpc" id="L3240" title="1 of 2 branches missed.">		if (objectListMessage1[index].getType() == CBORType.Integer)</span>
+<span class="fc" id="L3241">			selectedCipherSuite = objectListMessage1[index].AsInt32();</span>
 <span class="nc bnc" id="L3242" title="All 2 branches missed.">		else if (objectListMessage1[index].getType() == CBORType.Array)</span>
 <span class="nc" id="L3243">			selectedCipherSuite = objectListMessage1[index].get(0).AsInt32();</span>
 		
 		// G_X
-<span class="nc" id="L3246">		index++;</span>
-<span class="nc" id="L3247">		byte[] gX = objectListMessage1[index].GetByteString();</span>
+<span class="fc" id="L3246">		index++;</span>
+<span class="fc" id="L3247">		byte[] gX = objectListMessage1[index].GetByteString();</span>
 		
 		// C_I
-<span class="nc" id="L3250">		index++;</span>
+<span class="fc" id="L3250">		index++;</span>
 		// Previous checks have ensured that C_I has a valid encoding 
-<span class="nc" id="L3252">		CBORObject cI = objectListMessage1[index];</span>
-<span class="nc" id="L3253">		byte[] connectionIdentifierInitiator = decodeIdentifier(cI);</span>
+<span class="fc" id="L3252">		CBORObject cI = objectListMessage1[index];</span>
+<span class="fc" id="L3253">		byte[] connectionIdentifierInitiator = decodeIdentifier(cI);</span>
 		
 		// Create a new EDHOC session
 
-<span class="nc" id="L3257">		byte[] connectionIdentifierResponder = null;</span>
+<span class="fc" id="L3257">		byte[] connectionIdentifierResponder = null;</span>
 		
-<span class="nc bnc" id="L3259" title="All 2 branches missed.">		HashMapCtxDB oscoreDB = (appProfile.getUsedForOSCORE() == true) ? db : null;</span>
+<span class="pc bpc" id="L3259" title="1 of 2 branches missed.">		HashMapCtxDB oscoreDB = (appProfile.getUsedForOSCORE() == true) ? db : null;</span>
 		
-<span class="nc" id="L3261">		connectionIdentifierResponder = Util.getConnectionId(usedConnectionIds, oscoreDB, connectionIdentifierInitiator);</span>
+<span class="fc" id="L3261">		connectionIdentifierResponder = Util.getConnectionId(usedConnectionIds, oscoreDB, connectionIdentifierInitiator);</span>
 		// Forced for testing
 		// connectionIdentifierResponder = new byte[] {(byte) 0x01};
 		
-<span class="nc" id="L3265">		List&lt;Integer&gt; peerSupportedCipherSuites = new ArrayList&lt;Integer&gt;();</span>
-<span class="nc" id="L3266">		EdhocSession mySession = new EdhocSession(false, isReq, method, connectionIdentifierResponder, keyPairs,</span>
+<span class="fc" id="L3265">		List&lt;Integer&gt; peerSupportedCipherSuites = new ArrayList&lt;Integer&gt;();</span>
+<span class="fc" id="L3266">		EdhocSession mySession = new EdhocSession(false, isReq, method, connectionIdentifierResponder, keyPairs,</span>
 												  idCreds, creds, supportedCipherSuites, peerSupportedCipherSuites,
 												  supportedEADs, appProfile, trustModel, oscoreDB);
 		
 		// Set the selected cipher suite
-<span class="nc" id="L3271">		mySession.setSelectedCipherSuite(selectedCipherSuite);</span>
+<span class="fc" id="L3271">		mySession.setSelectedCipherSuite(selectedCipherSuite);</span>
 		
 		// Set the asymmetric key pair, CRED and ID_CRED of the Responder to use in this session
-<span class="nc" id="L3274">		mySession.setAuthenticationCredential();</span>
+<span class="fc" id="L3274">		mySession.setAuthenticationCredential();</span>
 		
 		// Set the Connection Identifier of the peer
-<span class="nc" id="L3277">		mySession.setPeerConnectionId(connectionIdentifierInitiator);</span>
+<span class="fc" id="L3277">		mySession.setPeerConnectionId(connectionIdentifierInitiator);</span>
 		
 		// Set the ephemeral public key of the Initiator
-<span class="nc" id="L3280">		OneKey peerEphemeralKey = null;</span>
+<span class="fc" id="L3280">		OneKey peerEphemeralKey = null;</span>
 		
-<span class="nc bnc" id="L3282" title="All 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
-<span class="nc" id="L3283">			peerEphemeralKey = SharedSecretCalculation.buildCurve25519OneKey(null, gX);</span>
+<span class="pc bpc" id="L3282" title="3 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
+<span class="fc" id="L3283">			peerEphemeralKey = SharedSecretCalculation.buildCurve25519OneKey(null, gX);</span>
 		}
-<span class="nc bnc" id="L3285" title="All 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3) {</span>
+<span class="pc bpc" id="L3285" title="2 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3) {</span>
 <span class="nc" id="L3286">			peerEphemeralKey = SharedSecretCalculation.buildEcdsa256OneKey(null, gX, null);</span>
 		}
-<span class="nc" id="L3288">		mySession.setPeerEphemeralPublicKey(peerEphemeralKey);</span>
+<span class="fc" id="L3288">		mySession.setPeerEphemeralPublicKey(peerEphemeralKey);</span>
 				
 		// Compute and store the hash of EDHOC Message 1
 		// If it came as a CoAP request, the first received byte 0xf5 must be skipped
-<span class="nc bnc" id="L3292" title="All 2 branches missed.">		int offset = (isReq == true) ? 1 : 0;</span>
-<span class="nc" id="L3293">		byte[] hashInput = new byte[message1.length - offset];</span>
-<span class="nc" id="L3294">		System.arraycopy(message1, offset, hashInput, 0, hashInput.length);</span>
-<span class="nc" id="L3295">		mySession.setHashMessage1(hashInput);</span>
+<span class="pc bpc" id="L3292" title="1 of 2 branches missed.">		int offset = (isReq == true) ? 1 : 0;</span>
+<span class="fc" id="L3293">		byte[] hashInput = new byte[message1.length - offset];</span>
+<span class="fc" id="L3294">		System.arraycopy(message1, offset, hashInput, 0, hashInput.length);</span>
+<span class="fc" id="L3295">		mySession.setHashMessage1(hashInput);</span>
 		
-<span class="nc" id="L3297">		return mySession;</span>
+<span class="fc" id="L3297">		return mySession;</span>
 		
 	}
 	
@@ -4419,15 +4419,15 @@ import com.upokecenter.cbor.CBORType;
 	
 <span class="fc" id="L4420">		CBORObject identifierCBOR = null;</span>
 		
-<span class="pc bpc" id="L4422" title="2 of 4 branches missed.">		if (identifier != null &amp;&amp; identifier.length != 1) {</span>
+<span class="pc bpc" id="L4422" title="1 of 4 branches missed.">		if (identifier != null &amp;&amp; identifier.length != 1) {</span>
 			// Encode the EDHOC connection identifier as a CBOR byte string
-<span class="nc" id="L4424">			identifierCBOR = CBORObject.FromObject(identifier);</span>
+<span class="fc" id="L4424">			identifierCBOR = CBORObject.FromObject(identifier);</span>
 		}
 
-<span class="pc bpc" id="L4427" title="2 of 4 branches missed.">		if (identifier != null &amp;&amp; identifier.length == 1) {</span>
+<span class="pc bpc" id="L4427" title="1 of 4 branches missed.">		if (identifier != null &amp;&amp; identifier.length == 1) {</span>
 <span class="fc" id="L4428">			int byteValue = Util.bytesToInt(identifier);</span>
 					
-<span class="pc bpc" id="L4430" title="3 of 8 branches missed.">			if ((byteValue &gt;= 0 &amp;&amp; byteValue &lt;= 23) || (byteValue &gt;= 32 &amp;&amp; byteValue &lt;= 55)) {</span>
+<span class="pc bpc" id="L4430" title="2 of 8 branches missed.">			if ((byteValue &gt;= 0 &amp;&amp; byteValue &lt;= 23) || (byteValue &gt;= 32 &amp;&amp; byteValue &lt;= 55)) {</span>
 				// The EDHOC connection identifier is in the range 0x00-0x17 or in the range 0x20-0x37.
 				// That is, it happens to be the serialization of a CBOR integer with numeric value -24..23
 				
