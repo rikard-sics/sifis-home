@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Util.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Cf-EDHOC</a> &gt; <a href="index.source.html" class="el_package">org.eclipse.californium.edhoc</a> &gt; <span class="el_source">Util.java</span></div><h1>Util.java</h1><pre class="source lang-java linenums">/*******************************************************************************
- * Copyright (c) 2020 RISE and others.
+ * Copyright (c) 2023 RISE and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -234,16 +234,16 @@ import java.security.Security;
 	 * @param key the key
 	 * @return the algorithm used
 	 */
-	private static AlgorithmID determineKeyAlgorithm(OneKey key) {
+	static AlgorithmID determineKeyAlgorithm(OneKey key) {
 
-<span class="nc bnc" id="L239" title="All 2 branches missed.">		if (key.get(KeyKeys.OKP_Curve) == KeyKeys.OKP_Ed25519) {</span>
-<span class="nc" id="L240">			return AlgorithmID.EDDSA;</span>
-<span class="nc bnc" id="L241" title="All 2 branches missed.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P256) {</span>
-<span class="nc" id="L242">			return AlgorithmID.ECDSA_256;</span>
-<span class="nc bnc" id="L243" title="All 2 branches missed.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P384) {</span>
-<span class="nc" id="L244">			return AlgorithmID.ECDSA_384;</span>
-<span class="nc bnc" id="L245" title="All 2 branches missed.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P521) {</span>
-<span class="nc" id="L246">			return AlgorithmID.ECDSA_512;</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">		if (key.get(KeyKeys.OKP_Curve) == KeyKeys.OKP_Ed25519) {</span>
+<span class="fc" id="L240">			return AlgorithmID.EDDSA;</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P256) {</span>
+<span class="fc" id="L242">			return AlgorithmID.ECDSA_256;</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P384) {</span>
+<span class="fc" id="L244">			return AlgorithmID.ECDSA_384;</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">		} else if (key.get(KeyKeys.EC2_Curve) == KeyKeys.EC2_P521) {</span>
+<span class="fc" id="L246">			return AlgorithmID.ECDSA_512;</span>
 		} else {
 <span class="nc" id="L248">			return null;</span>
 		}
@@ -491,14 +491,14 @@ import java.security.Security;
     public static byte[] intToBytes(final int num) {
 
     	// Big-endian
-<span class="pc bpc" id="L494" title="1 of 2 branches missed.">    	if (num &lt; 0)</span>
-<span class="nc" id="L495">    		return null;</span>
-<span class="pc bpc" id="L496" title="1 of 2 branches missed.">        else if (num &lt; 256) {</span>
+<span class="fc bfc" id="L494" title="All 2 branches covered.">    	if (num &lt; 0)</span>
+<span class="fc" id="L495">    		return null;</span>
+<span class="fc bfc" id="L496" title="All 2 branches covered.">        else if (num &lt; 256) {</span>
 <span class="fc" id="L497">            return new byte[] { (byte) (num) };</span>
-<span class="nc bnc" id="L498" title="All 2 branches missed.">        } else if (num &lt; 65536) {</span>
-<span class="nc" id="L499">            return new byte[] { (byte) (num &gt;&gt;&gt; 8), (byte) num };</span>
-<span class="nc bnc" id="L500" title="All 2 branches missed.">        } else if (num &lt; 16777216) {</span>
-<span class="nc" id="L501">            return new byte[] { (byte) (num &gt;&gt;&gt; 16), (byte) (num &gt;&gt;&gt; 8), (byte) num };</span>
+<span class="fc bfc" id="L498" title="All 2 branches covered.">        } else if (num &lt; 65536) {</span>
+<span class="fc" id="L499">            return new byte[] { (byte) (num &gt;&gt;&gt; 8), (byte) num };</span>
+<span class="pc bpc" id="L500" title="1 of 2 branches missed.">        } else if (num &lt; 16777216) {</span>
+<span class="fc" id="L501">            return new byte[] { (byte) (num &gt;&gt;&gt; 16), (byte) (num &gt;&gt;&gt; 8), (byte) num };</span>
         } else { // up to 2,147,483,647
 <span class="nc" id="L503">            return new byte[]{ (byte) (num &gt;&gt;&gt; 24), (byte) (num &gt;&gt;&gt; 16), (byte) (num &gt;&gt;&gt; 8), (byte) num };</span>
         }
@@ -781,33 +781,33 @@ import java.security.Security;
      */
     public static void releaseConnectionId (byte[] connectionId, Set&lt;CBORObject&gt; usedConnectionIds, OSCoreCtxDB db) {
     	
-<span class="nc bnc" id="L784" title="All 2 branches missed.">    	if (connectionId == null)</span>
+<span class="pc bpc" id="L784" title="1 of 2 branches missed.">    	if (connectionId == null)</span>
 <span class="nc" id="L785">    		return;</span>
     	
-<span class="nc" id="L787">    	synchronized (usedConnectionIds) {</span>
-<span class="nc" id="L788">    		CBORObject connectionIdCbor = CBORObject.FromObject(connectionId); </span>
-<span class="nc" id="L789">    		usedConnectionIds.remove(connectionIdCbor);</span>
-<span class="nc" id="L790">    	}</span>
+<span class="fc" id="L787">    	synchronized (usedConnectionIds) {</span>
+<span class="fc" id="L788">    		CBORObject connectionIdCbor = CBORObject.FromObject(connectionId); </span>
+<span class="fc" id="L789">    		usedConnectionIds.remove(connectionIdCbor);</span>
+<span class="fc" id="L790">    	}</span>
     	
-<span class="nc bnc" id="L792" title="All 2 branches missed.">    	if (db != null) {</span>
+<span class="pc bpc" id="L792" title="1 of 2 branches missed.">    	if (db != null) {</span>
         	// EDHOC is used for keying OSCORE. The EDHOC connection identifier is the OSCORE Recipient ID.
     		
-<span class="nc" id="L795">    		synchronized (db) {</span>
-<span class="nc" id="L796">	    		OSCoreCtx ctx = null;</span>
+<span class="fc" id="L795">    		synchronized (db) {</span>
+<span class="fc" id="L796">	    		OSCoreCtx ctx = null;</span>
 				try {
-<span class="nc" id="L798">					ctx = db.getContext(connectionId, null);</span>
+<span class="fc" id="L798">					ctx = db.getContext(connectionId, null);</span>
 <span class="nc" id="L799">				} catch (CoapOSException e) {</span>
 <span class="nc" id="L800">					System.err.println(&quot;Found multiple OSCORE Security Contexts with the same Recipient ID &quot; +</span>
 <span class="nc" id="L801">									   StringUtil.byteArray2HexString(connectionId) + &quot;\n&quot; + e.getMessage());</span>
-<span class="nc" id="L802">				}</span>
-<span class="nc bnc" id="L803" title="All 2 branches missed.">	    		if (ctx != null) {</span>
-<span class="nc" id="L804">	    			db.removeContext(ctx);</span>
+<span class="fc" id="L802">				}</span>
+<span class="pc bpc" id="L803" title="1 of 2 branches missed.">	    		if (ctx != null) {</span>
+<span class="fc" id="L804">	    			db.removeContext(ctx);</span>
 	    		}
-<span class="nc" id="L806">    		}</span>
+<span class="fc" id="L806">    		}</span>
     			
     	}
     	
-<span class="nc" id="L810">    }</span>
+<span class="fc" id="L810">    }</span>
     
 	/**
 	 * Remove an EDHOC session from the list of active sessions; release the used Connection Identifier; invalidate the session
@@ -1172,11 +1172,11 @@ import java.security.Security;
 	public static boolean checkSignatureKeyAgainstCipherSuite(OneKey key, int selectedCipherSuite) {
 			
 		
-<span class="pc bpc" id="L1175" title="3 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
+<span class="fc bfc" id="L1175" title="All 4 branches covered.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
 			
-<span class="pc bpc" id="L1177" title="1 of 2 branches missed.">				if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_OKP) {</span>
-<span class="nc" id="L1178">					System.err.println(&quot;Invalid key type - Expected key type: OKP&quot;);</span>
-<span class="nc" id="L1179">					return false;</span>
+<span class="fc bfc" id="L1177" title="All 2 branches covered.">				if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_OKP) {</span>
+<span class="fc" id="L1178">					System.err.println(&quot;Invalid key type - Expected key type: OKP&quot;);</span>
+<span class="fc" id="L1179">					return false;</span>
 				}
 				
 <span class="pc bpc" id="L1182" title="1 of 2 branches missed.">			if (key.get(KeyKeys.OKP_Curve) != KeyKeys.OKP_Ed25519) {</span>
@@ -1185,14 +1185,14 @@ import java.security.Security;
 			}
 			
 		}
-<span class="pc bpc" id="L1188" title="2 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3) {</span>
+<span class="pc bpc" id="L1188" title="1 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_2 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_3) {</span>
 				
-<span class="nc bnc" id="L1190" title="All 2 branches missed.">			if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_EC2) {</span>
+<span class="pc bpc" id="L1190" title="1 of 2 branches missed.">			if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_EC2) {</span>
 <span class="nc" id="L1191">				System.err.println(&quot;Invalid key type - Expected key type: EC2&quot;);</span>
 <span class="nc" id="L1192">				return false;</span>
 			}
 				
-<span class="nc bnc" id="L1195" title="All 2 branches missed.">			if (key.get(KeyKeys.EC2_Curve) != KeyKeys.EC2_P256) {</span>
+<span class="pc bpc" id="L1195" title="1 of 2 branches missed.">			if (key.get(KeyKeys.EC2_Curve) != KeyKeys.EC2_P256) {</span>
 <span class="nc" id="L1196">				System.err.println(&quot;Invalid EC2 curve - Expected curve: P-256&quot;);</span>
 <span class="nc" id="L1197">				return false;</span>
 			}
@@ -1212,16 +1212,16 @@ import java.security.Security;
      */
 	public static boolean checkDiffieHellmanKeyAgainstCipherSuite(OneKey key, int selectedCipherSuite) {
 			
-<span class="pc bpc" id="L1215" title="2 of 4 branches missed.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
+<span class="fc bfc" id="L1215" title="All 4 branches covered.">		if (selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_0 || selectedCipherSuite == Constants.EDHOC_CIPHER_SUITE_1) {</span>
 		    
-<span class="nc bnc" id="L1217" title="All 2 branches missed.">			if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_OKP) {</span>
-<span class="nc" id="L1218">				System.err.println(&quot;Invalid key type - Expected key type: OKP&quot;);</span>
-<span class="nc" id="L1219">				return false;</span>
+<span class="fc bfc" id="L1217" title="All 2 branches covered.">			if (key.get(KeyKeys.KeyType) != KeyKeys.KeyType_OKP) {</span>
+<span class="fc" id="L1218">				System.err.println(&quot;Invalid key type - Expected key type: OKP&quot;);</span>
+<span class="fc" id="L1219">				return false;</span>
 			}
 				
-<span class="nc bnc" id="L1222" title="All 2 branches missed.">			if (key.get(KeyKeys.OKP_Curve) != KeyKeys.OKP_X25519) {</span>
-<span class="nc" id="L1223">				System.err.println(&quot;Invalid OKP curve - Expected curve: Ed25519&quot;);</span>
-<span class="nc" id="L1224">				return false;</span>
+<span class="pc bpc" id="L1222" title="1 of 2 branches missed.">			if (key.get(KeyKeys.OKP_Curve) != KeyKeys.OKP_X25519) {</span>
+<span class="fc" id="L1223">				System.err.println(&quot;Invalid OKP curve - Expected curve: Ed25519&quot;);</span>
+<span class="fc" id="L1224">				return false;</span>
 			}
 			
 		}
@@ -1252,41 +1252,48 @@ import java.security.Security;
      */
 	public static boolean isDeterministicCborInteger (CBORObject obj) {
 		
-<span class="nc bnc" id="L1255" title="All 2 branches missed.">		if (obj.getType() != CBORType.Integer)</span>
+<span class="pc bpc" id="L1255" title="1 of 2 branches missed.">		if (obj.getType() != CBORType.Integer)</span>
 <span class="nc" id="L1256">			return false;</span>
 		
-<span class="nc" id="L1258">		byte[] objBytes = obj.EncodeToBytes();</span>
+<span class="fc" id="L1258">		byte[] objBytes = obj.EncodeToBytes();</span>
 		
-<span class="nc bnc" id="L1260" title="All 6 branches missed.">		switch (objBytes.length) {</span>
+<span class="pc bpc" id="L1260" title="2 of 6 branches missed.">		switch (objBytes.length) {</span>
 			case 1:
-<span class="nc" id="L1262">				return true;</span>
+<span class="fc" id="L1262">				return true;</span>
 			case 2:
-<span class="nc bnc" id="L1264" title="All 4 branches missed.">				if (obj.AsInt32() &gt;= -24 || obj.AsInt32() &lt;= 23)</span>
+<span class="pc bpc" id="L1264" title="2 of 4 branches missed.">				if (obj.AsInt32() &gt;= -24 &amp;&amp; obj.AsInt32() &lt;= 23)</span>
 <span class="nc" id="L1265">					return false;</span>
+				else
+<span class="fc" id="L1267">					return true;</span>
 			case 3:
-<span class="nc bnc" id="L1267" title="All 4 branches missed.">				if (obj.AsInt32() &gt;= -256 || obj.AsInt32() &lt;= 255)</span>
-<span class="nc" id="L1268">					return false;</span>
+<span class="pc bpc" id="L1269" title="2 of 4 branches missed.">				if (obj.AsInt32() &gt;= -256 &amp;&amp; obj.AsInt32() &lt;= 255)</span>
+<span class="nc" id="L1270">					return false;</span>
+				else
+<span class="fc" id="L1272">					return true;</span>
 			case 5:
-<span class="nc bnc" id="L1270" title="All 4 branches missed.">				if (obj.AsInt32() &gt;= -65536 || obj.AsInt32() &lt;= 65535)</span>
-<span class="nc" id="L1271">					return false;</span>
+<span class="pc bpc" id="L1274" title="2 of 4 branches missed.">				if (obj.AsInt32() &gt;= -65536 &amp;&amp; obj.AsInt32() &lt;= 65535)</span>
+<span class="nc" id="L1275">					return false;</span>
+				else
+<span class="fc" id="L1277">					return true;</span>
 			case 9:
-<span class="nc bnc" id="L1273" title="All 4 branches missed.">				if (obj.AsInt64Value() &gt;= -4294967296L || obj.AsInt64Value() &lt;= 4294967295L)</span>
-<span class="nc" id="L1274">					return false;</span>
+<span class="nc bnc" id="L1279" title="All 4 branches missed.">				if (obj.AsInt64Value() &gt;= -4294967296L &amp;&amp; obj.AsInt64Value() &lt;= 4294967295L)</span>
+<span class="nc" id="L1280">					return false;</span>
+				else
+<span class="nc" id="L1282">					return true;</span>
 			default:
-<span class="nc" id="L1276">				return false;</span>
+<span class="nc" id="L1284">				return false;</span>
 		}
 		
 	}
-	
-       /**
+
+      /**
         * Install EdDSA crypto provider
         */
        public static void installCryptoProvider() {
-<span class="nc" id="L1285">               Provider EdDSA = new EdDSASecurityProvider();</span>
+<span class="nc" id="L1293">               Provider EdDSA = new EdDSASecurityProvider();</span>
                // Insert EdDSA security provider
-<span class="nc" id="L1287">               Security.insertProviderAt(EdDSA, 1);</span>
-<span class="nc" id="L1288">       }</span>
-
+<span class="nc" id="L1295">               Security.insertProviderAt(EdDSA, 1);</span>
+<span class="nc" id="L1296">       }	</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.6.202009150832</span></div></body></html>
