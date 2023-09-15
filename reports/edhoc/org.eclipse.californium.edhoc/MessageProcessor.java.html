@@ -1937,9 +1937,9 @@ import com.upokecenter.cbor.CBORType;
 	public static CBORObject[] readErrorMessage(byte[] sequence, byte[] connectionIdentifier,
 												HashMap&lt;CBORObject, EdhocSession&gt; edhocSessions) {
 		
-<span class="pc bpc" id="L1940" title="2 of 4 branches missed.">		if (edhocSessions == null || sequence == null) {</span>
-<span class="nc" id="L1941">			System.err.println(&quot;Error when processing EDHOC Error Message&quot;);</span>
-<span class="nc" id="L1942">			return null;</span>
+<span class="pc bpc" id="L1940" title="1 of 4 branches missed.">		if (edhocSessions == null || sequence == null) {</span>
+<span class="fc" id="L1941">			System.err.println(&quot;Error when processing EDHOC Error Message&quot;);</span>
+<span class="fc" id="L1942">			return null;</span>
 		}
 		
 <span class="fc" id="L1945">		int index = 0;</span>
@@ -1953,44 +1953,44 @@ import com.upokecenter.cbor.CBORType;
 <span class="nc" id="L1953">			return null;</span>
 <span class="fc" id="L1954">		}</span>
 		
-<span class="pc bpc" id="L1956" title="2 of 4 branches missed.">		if (objectList.length == 0 || objectList.length &gt; 3) {</span>
-<span class="nc" id="L1957">			System.err.println(&quot;Error when processing EDHOC Error Message - Zero or too many elements&quot;);</span>
-<span class="nc" id="L1958">			return null;</span>
+<span class="pc bpc" id="L1956" title="1 of 4 branches missed.">		if (objectList.length == 0 || objectList.length &gt; 3) {</span>
+<span class="fc" id="L1957">			System.err.println(&quot;Error when processing EDHOC Error Message - Zero or too many elements&quot;);</span>
+<span class="fc" id="L1958">			return null;</span>
 		}
 
 		// The connection identifier of the recipient is provided by the method caller
-<span class="pc bpc" id="L1962" title="1 of 2 branches missed.">		if (connectionIdentifier != null) {</span>
+<span class="fc bfc" id="L1962" title="All 2 branches covered.">		if (connectionIdentifier != null) {</span>
 <span class="fc" id="L1963">			CBORObject connectionIdentifierCbor = CBORObject.FromObject(connectionIdentifier);</span>
 <span class="fc" id="L1964">			mySession = edhocSessions.get(connectionIdentifierCbor);</span>
 <span class="fc" id="L1965">		}</span>
 		// The connection identifier is expected as first element in the EDHOC Error Message
 		else {
-<span class="nc bnc" id="L1968" title="All 4 branches missed.">			if (objectList[index].getType() == CBORType.ByteString || objectList[index].getType() == CBORType.Integer) {</span>
-<span class="nc" id="L1969">				byte[] retrievedConnectionIdentifier = decodeIdentifier(objectList[index]);</span>
-<span class="nc bnc" id="L1970" title="All 2 branches missed.">				if (retrievedConnectionIdentifier != null) {</span>
-<span class="nc" id="L1971">					CBORObject connectionIdentifierCbor = CBORObject.FromObject(retrievedConnectionIdentifier);</span>
-<span class="nc" id="L1972">					mySession = edhocSessions.get(connectionIdentifierCbor);</span>
-<span class="nc" id="L1973">					index++;		</span>
+<span class="pc bpc" id="L1968" title="1 of 4 branches missed.">			if (objectList[index].getType() == CBORType.ByteString || objectList[index].getType() == CBORType.Integer) {</span>
+<span class="fc" id="L1969">				byte[] retrievedConnectionIdentifier = decodeIdentifier(objectList[index]);</span>
+<span class="pc bpc" id="L1970" title="1 of 2 branches missed.">				if (retrievedConnectionIdentifier != null) {</span>
+<span class="fc" id="L1971">					CBORObject connectionIdentifierCbor = CBORObject.FromObject(retrievedConnectionIdentifier);</span>
+<span class="fc" id="L1972">					mySession = edhocSessions.get(connectionIdentifierCbor);</span>
+<span class="fc" id="L1973">					index++;		</span>
 				}
-<span class="nc" id="L1975">			}</span>
+<span class="fc" id="L1975">			}</span>
 			else {
-<span class="nc" id="L1977">				System.err.println(&quot;Error when processing EDHOC Error Message - Invalid format of C_X&quot;);</span>
-<span class="nc" id="L1978">				return null;</span>
+<span class="fc" id="L1977">				System.err.println(&quot;Error when processing EDHOC Error Message - Invalid format of C_X&quot;);</span>
+<span class="fc" id="L1978">				return null;</span>
 			}
 			
 		}
 		
 		// No session for this Connection Identifier
-<span class="pc bpc" id="L1984" title="1 of 2 branches missed.">		if (mySession == null) {</span>
-<span class="nc" id="L1985">			System.err.println(&quot;Error when processing EDHOC Error Message - Impossible to retrieve a session from C_X&quot;);</span>
-<span class="nc" id="L1986">			return null;</span>
+<span class="fc bfc" id="L1984" title="All 2 branches covered.">		if (mySession == null) {</span>
+<span class="fc" id="L1985">			System.err.println(&quot;Error when processing EDHOC Error Message - Impossible to retrieve a session from C_X&quot;);</span>
+<span class="fc" id="L1986">			return null;</span>
 		}
 		
 <span class="fc" id="L1989">		boolean initiator = mySession.isInitiator();</span>
 		
-<span class="pc bpc" id="L1991" title="1 of 2 branches missed.">		if (objectList[index].getType() != CBORType.Integer) {</span>
-<span class="nc" id="L1992">			System.err.println(&quot;Error when processing EDHOC Error Message - Invalid format of ERR_CODE&quot;);</span>
-<span class="nc" id="L1993">			return null;</span>
+<span class="fc bfc" id="L1991" title="All 2 branches covered.">		if (objectList[index].getType() != CBORType.Integer) {</span>
+<span class="fc" id="L1992">			System.err.println(&quot;Error when processing EDHOC Error Message - Invalid format of ERR_CODE&quot;);</span>
+<span class="fc" id="L1993">			return null;</span>
 		}
 		
 		// Retrieve ERR_CODE
@@ -1998,30 +1998,30 @@ import com.upokecenter.cbor.CBORType;
 <span class="fc" id="L1998">		index++;</span>
 		
 		// Check that the rest of the message is consistent
-<span class="pc bpc" id="L2001" title="1 of 2 branches missed.">		if (objectList.length == index){</span>
-<span class="nc" id="L2002">			System.err.println(&quot;Error when processing EDHOC Error Message - ERR_INFO expected but not included&quot;);</span>
-<span class="nc" id="L2003">			return null;</span>
+<span class="fc bfc" id="L2001" title="All 2 branches covered.">		if (objectList.length == index){</span>
+<span class="fc" id="L2002">			System.err.println(&quot;Error when processing EDHOC Error Message - ERR_INFO expected but not included&quot;);</span>
+<span class="fc" id="L2003">			return null;</span>
 		}
-<span class="pc bpc" id="L2005" title="1 of 2 branches missed.">		if (objectList.length &gt; (index + 1)){</span>
-<span class="nc" id="L2006">			System.err.println(&quot;Error when processing EDHOC Error Message - Unexpected parameters following ERR_INFO&quot;);</span>
-<span class="nc" id="L2007">			return null;</span>
+<span class="fc bfc" id="L2005" title="All 2 branches covered.">		if (objectList.length &gt; (index + 1)){</span>
+<span class="fc" id="L2006">			System.err.println(&quot;Error when processing EDHOC Error Message - Unexpected parameters following ERR_INFO&quot;);</span>
+<span class="fc" id="L2007">			return null;</span>
 		}
-<span class="pc bpc" id="L2009" title="1 of 2 branches missed.">		if (errorCode == Constants.ERR_CODE_SUCCESS) {</span>
+<span class="fc bfc" id="L2009" title="All 2 branches covered.">		if (errorCode == Constants.ERR_CODE_SUCCESS) {</span>
 			// This is not admitted
-<span class="nc" id="L2011">			System.out.println(&quot;Received EDHOC error message with ERR_CODE 0&quot;);</span>
-<span class="nc" id="L2012">			return null;</span>
+<span class="fc" id="L2011">			System.err.println(&quot;Received EDHOC error message with ERR_CODE 0&quot;);</span>
+<span class="fc" id="L2012">			return null;</span>
 		}
 <span class="fc bfc" id="L2014" title="All 2 branches covered.">		else if (errorCode == Constants.ERR_CODE_UNSPECIFIED_ERROR) {</span>
-<span class="pc bpc" id="L2015" title="1 of 2 branches missed.">			if (objectList[index].getType() != CBORType.TextString) {</span>
-<span class="nc" id="L2016">				System.err.println(&quot;Error when processing EDHOC Error Message - Invalid format of ERR_INFO&quot;);</span>
-<span class="nc" id="L2017">				return null;</span>
+<span class="fc bfc" id="L2015" title="All 2 branches covered.">			if (objectList[index].getType() != CBORType.TextString) {</span>
+<span class="fc" id="L2016">				System.err.println(&quot;Error when processing EDHOC Error Message - Invalid format of ERR_INFO&quot;);</span>
+<span class="fc" id="L2017">				return null;</span>
 			}
 		}
-<span class="pc bpc" id="L2020" title="1 of 2 branches missed.">		else if (errorCode == Constants.ERR_CODE_WRONG_SELECTED_CIPHER_SUITE) {</span>
-<span class="pc bpc" id="L2021" title="2 of 4 branches missed.">			if (initiator == true &amp;&amp; mySession.getCurrentStep() == Constants.EDHOC_SENT_M1) {</span>
-<span class="pc bpc" id="L2022" title="1 of 4 branches missed.">				if (objectList[index].getType() != CBORType.Array &amp;&amp; objectList[index].getType() != CBORType.Integer) {</span>
-<span class="nc" id="L2023">					System.err.println(&quot;Error when processing EDHOC Error Message - Invalid format for SUITES_R&quot;);</span>
-<span class="nc" id="L2024">					return null;</span>
+<span class="fc bfc" id="L2020" title="All 2 branches covered.">		else if (errorCode == Constants.ERR_CODE_WRONG_SELECTED_CIPHER_SUITE) {</span>
+<span class="pc bpc" id="L2021" title="1 of 4 branches missed.">			if (initiator == true &amp;&amp; mySession.getCurrentStep() == Constants.EDHOC_SENT_M1) {</span>
+<span class="fc bfc" id="L2022" title="All 4 branches covered.">				if (objectList[index].getType() != CBORType.Array &amp;&amp; objectList[index].getType() != CBORType.Integer) {</span>
+<span class="fc" id="L2023">					System.err.println(&quot;Error when processing EDHOC Error Message - Invalid format for SUITES_R&quot;);</span>
+<span class="fc" id="L2024">					return null;</span>
 				}
 <span class="fc bfc" id="L2026" title="All 2 branches covered.">				if (objectList[index].getType() == CBORType.Array) {</span>
 <span class="fc bfc" id="L2027" title="All 2 branches covered.">					for (int i = 0; i &lt; objectList[index].size(); i++) {</span>
@@ -2034,17 +2034,17 @@ import com.upokecenter.cbor.CBORType;
 				}
 			}
 			else {
-<span class="nc" id="L2037">				System.err.println(&quot;Unexpected EDHOC Error Message with Error Code &quot; +</span>
+<span class="fc" id="L2037">				System.err.println(&quot;Unexpected EDHOC Error Message with Error Code &quot; +</span>
 								    Constants.ERR_CODE_WRONG_SELECTED_CIPHER_SUITE +
 								    &quot; (Wrong selected cipher suite)&quot;);
-<span class="nc" id="L2040">				return null;</span>
+<span class="fc" id="L2040">				return null;</span>
 			}
 			
 		}
 		else {
 			// Unknown error code
-<span class="nc" id="L2046">			System.err.println(&quot;Unknown error code in EDHOC Error Message: &quot; + errorCode);</span>
-<span class="nc" id="L2047">			return null;</span>
+<span class="fc" id="L2046">			System.err.println(&quot;Unknown error code in EDHOC Error Message: &quot; + errorCode);</span>
+<span class="fc" id="L2047">			return null;</span>
 		}
 		
 <span class="fc" id="L2050">		return objectList;</span>
@@ -3699,47 +3699,46 @@ import com.upokecenter.cbor.CBORType;
 	            	*/
 	            	
             	}
+<span class="fc" id="L3702">            	dhSecret = SharedSecretCalculation.generateSharedSecret(privateKey, publicKey);</span>
             	
-<span class="fc" id="L3703">            	dhSecret = SharedSecretCalculation.generateSharedSecret(privateKey, publicKey);</span>
-            	
-<span class="pc bpc" id="L3705" title="1 of 2 branches missed.">                if (dhSecret == null) {</span>
-<span class="nc" id="L3706">            		System.err.println(&quot;Error when computing the Diffie-Hellman Secret&quot;);</span>
-<span class="nc" id="L3707">            		return null;</span>
+<span class="pc bpc" id="L3704" title="1 of 2 branches missed.">                if (dhSecret == null) {</span>
+<span class="nc" id="L3705">            		System.err.println(&quot;Error when computing the Diffie-Hellman Secret&quot;);</span>
+<span class="nc" id="L3706">            		return null;</span>
                 }
             	
             	if (debugPrint) {
-<span class="fc" id="L3711">            		Util.nicePrint(&quot;G_IY&quot;, dhSecret);</span>
+<span class="fc" id="L3710">            		Util.nicePrint(&quot;G_IY&quot;, dhSecret);</span>
             	}
             	
-<span class="fc" id="L3714">            	String hashAlgorithm = EdhocSession.getEdhocHashAlg(session.getSelectedCipherSuite());</span>
+<span class="fc" id="L3713">            	String hashAlgorithm = EdhocSession.getEdhocHashAlg(session.getSelectedCipherSuite());</span>
 
             	// Compute SALT_4e3m
-<span class="fc" id="L3717">            	byte[] salt4e3m = computeSALT4e3m(session, prk3e2m);</span>
-<span class="pc bpc" id="L3718" title="1 of 2 branches missed.">            	if (salt4e3m == null) {</span>
-<span class="nc" id="L3719">            		System.err.println(&quot;Error when computing SALT_4e3m&quot;);</span>
-<span class="nc" id="L3720">            		return null;</span>
+<span class="fc" id="L3716">            	byte[] salt4e3m = computeSALT4e3m(session, prk3e2m);</span>
+<span class="pc bpc" id="L3717" title="1 of 2 branches missed.">            	if (salt4e3m == null) {</span>
+<span class="nc" id="L3718">            		System.err.println(&quot;Error when computing SALT_4e3m&quot;);</span>
+<span class="nc" id="L3719">            		return null;</span>
             	}
             	else if (debugPrint) {
-<span class="fc" id="L3723">            		Util.nicePrint(&quot;SALT_4e3m&quot;, salt4e3m);</span>
+<span class="fc" id="L3722">            		Util.nicePrint(&quot;SALT_4e3m&quot;, salt4e3m);</span>
             	}
             	
             	try {
-<span class="pc bpc" id="L3727" title="5 of 6 branches missed.">            		if (hashAlgorithm.equals(&quot;SHA-256&quot;) || hashAlgorithm.equals(&quot;SHA-384&quot;) || hashAlgorithm.equals(&quot;SHA-512&quot;)) {</span>
-<span class="fc" id="L3728">            			prk4e3m = Hkdf.extract(salt4e3m, dhSecret);</span>
+<span class="pc bpc" id="L3726" title="5 of 6 branches missed.">            		if (hashAlgorithm.equals(&quot;SHA-256&quot;) || hashAlgorithm.equals(&quot;SHA-384&quot;) || hashAlgorithm.equals(&quot;SHA-512&quot;)) {</span>
+<span class="fc" id="L3727">            			prk4e3m = Hkdf.extract(salt4e3m, dhSecret);</span>
             		}
-<span class="nc" id="L3730">				} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L3731">					System.err.println(&quot;Error when generating PRK_4e3m\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3732">					return null;</span>
-<span class="nc" id="L3733">				} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L3734">					System.err.println(&quot;Error when generating PRK_4e3m\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3735">					return null;</span>
+<span class="nc" id="L3729">				} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L3730">					System.err.println(&quot;Error when generating PRK_4e3m\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3731">					return null;</span>
+<span class="nc" id="L3732">				} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L3733">					System.err.println(&quot;Error when generating PRK_4e3m\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3734">					return null;</span>
 				}
             	finally {
-<span class="fc" id="L3738">            		dhSecret = null;</span>
+<span class="fc" id="L3737">            		dhSecret = null;</span>
             	}
     	}
         
-<span class="fc" id="L3742">        return prk4e3m;</span>
+<span class="fc" id="L3741">        return prk4e3m;</span>
         
 	}
 
@@ -3751,22 +3750,22 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computePRKout(EdhocSession session, byte[] prk4e3m) {
 		
-<span class="fc" id="L3754">		byte[] prkOut = null;</span>
-<span class="fc" id="L3755">		int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L3756">		int length = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
-<span class="fc" id="L3757">		CBORObject context = CBORObject.FromObject(session.getTH4());</span>
+<span class="fc" id="L3753">		byte[] prkOut = null;</span>
+<span class="fc" id="L3754">		int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L3755">		int length = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
+<span class="fc" id="L3756">		CBORObject context = CBORObject.FromObject(session.getTH4());</span>
 		
 		try {
-<span class="fc" id="L3760">			prkOut = session.edhocKDF(prk4e3m, Constants.KDF_LABEL_PRK_OUT, context, length);</span>
-<span class="nc" id="L3761">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L3762">			System.err.println(&quot;Error when generating PRK_out\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3763">			return null;</span>
-<span class="nc" id="L3764">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L3765">			System.err.println(&quot;Error when generating PRK_out\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3766">			return null;</span>
-<span class="fc" id="L3767">		}</span>
+<span class="fc" id="L3759">			prkOut = session.edhocKDF(prk4e3m, Constants.KDF_LABEL_PRK_OUT, context, length);</span>
+<span class="nc" id="L3760">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L3761">			System.err.println(&quot;Error when generating PRK_out\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3762">			return null;</span>
+<span class="nc" id="L3763">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L3764">			System.err.println(&quot;Error when generating PRK_out\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3765">			return null;</span>
+<span class="fc" id="L3766">		}</span>
 
-<span class="fc" id="L3769">		return prkOut;</span>
+<span class="fc" id="L3768">		return prkOut;</span>
 		
 	}
 
@@ -3778,22 +3777,22 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computePRKexporter(EdhocSession session, byte[] prkOut) {
 		
-<span class="fc" id="L3781">		byte[] prkExporter = null;</span>
-<span class="fc" id="L3782">		int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L3783">		int length = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
-<span class="fc" id="L3784">	    CBORObject context = CBORObject.FromObject(new byte[0]);</span>
+<span class="fc" id="L3780">		byte[] prkExporter = null;</span>
+<span class="fc" id="L3781">		int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L3782">		int length = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
+<span class="fc" id="L3783">	    CBORObject context = CBORObject.FromObject(new byte[0]);</span>
 	    
 		try {
-<span class="fc" id="L3787">			prkExporter = session.edhocKDF(prkOut, Constants.KDF_LABEL_PRK_EXPORTER, context, length);</span>
-<span class="nc" id="L3788">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L3789">			System.err.println(&quot;Error when generating PRK_exporter\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3790">			return null;</span>
-<span class="nc" id="L3791">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L3792">			System.err.println(&quot;Error when generating PRK_exporter\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3793">			return null;</span>
-<span class="fc" id="L3794">		}</span>
+<span class="fc" id="L3786">			prkExporter = session.edhocKDF(prkOut, Constants.KDF_LABEL_PRK_EXPORTER, context, length);</span>
+<span class="nc" id="L3787">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L3788">			System.err.println(&quot;Error when generating PRK_exporter\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3789">			return null;</span>
+<span class="nc" id="L3790">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L3791">			System.err.println(&quot;Error when generating PRK_exporter\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3792">			return null;</span>
+<span class="fc" id="L3793">		}</span>
 
-<span class="fc" id="L3796">		return prkExporter;</span>
+<span class="fc" id="L3795">		return prkExporter;</span>
 		
 	}
 
@@ -3805,22 +3804,22 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computeSALT3e2m(EdhocSession session, byte[] prk2e) {
 		
-<span class="fc" id="L3808">		byte[] salt3e2m = null;</span>
-<span class="fc" id="L3809">		int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L3810">		int length = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
-<span class="fc" id="L3811">		CBORObject context = CBORObject.FromObject(session.getTH2());</span>
+<span class="fc" id="L3807">		byte[] salt3e2m = null;</span>
+<span class="fc" id="L3808">		int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L3809">		int length = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
+<span class="fc" id="L3810">		CBORObject context = CBORObject.FromObject(session.getTH2());</span>
 		
 		try {
-<span class="fc" id="L3814">			salt3e2m = session.edhocKDF(prk2e, Constants.KDF_LABEL_SALT_3E2M, context, length);</span>
-<span class="nc" id="L3815">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L3816">			System.err.println(&quot;Error when generating SALT_3e2m\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3817">			return null;</span>
-<span class="nc" id="L3818">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L3819">			System.err.println(&quot;Error when generating SALT_3e2m\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3820">			return null;</span>
-<span class="fc" id="L3821">		}</span>
+<span class="fc" id="L3813">			salt3e2m = session.edhocKDF(prk2e, Constants.KDF_LABEL_SALT_3E2M, context, length);</span>
+<span class="nc" id="L3814">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L3815">			System.err.println(&quot;Error when generating SALT_3e2m\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3816">			return null;</span>
+<span class="nc" id="L3817">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L3818">			System.err.println(&quot;Error when generating SALT_3e2m\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3819">			return null;</span>
+<span class="fc" id="L3820">		}</span>
 
-<span class="fc" id="L3823">		return salt3e2m;</span>
+<span class="fc" id="L3822">		return salt3e2m;</span>
 		
 	}
 	
@@ -3832,22 +3831,22 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computeSALT4e3m(EdhocSession session, byte[] prk3e2m) {
 		
-<span class="fc" id="L3835">		byte[] salt4e3m = null;</span>
-<span class="fc" id="L3836">		int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L3837">		int length = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
-<span class="fc" id="L3838">		CBORObject context = CBORObject.FromObject(session.getTH3());</span>
+<span class="fc" id="L3834">		byte[] salt4e3m = null;</span>
+<span class="fc" id="L3835">		int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L3836">		int length = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
+<span class="fc" id="L3837">		CBORObject context = CBORObject.FromObject(session.getTH3());</span>
 		
 		try {
-<span class="fc" id="L3841">			salt4e3m = session.edhocKDF(prk3e2m, Constants.KDF_LABEL_SALT_4E3M, context, length);</span>
-<span class="nc" id="L3842">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L3843">			System.err.println(&quot;Error when generating SALT_4e3m\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3844">			return null;</span>
-<span class="nc" id="L3845">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L3846">			System.err.println(&quot;Error when generating SALT_4e3m\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3847">			return null;</span>
-<span class="fc" id="L3848">		}</span>
+<span class="fc" id="L3840">			salt4e3m = session.edhocKDF(prk3e2m, Constants.KDF_LABEL_SALT_4E3M, context, length);</span>
+<span class="nc" id="L3841">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L3842">			System.err.println(&quot;Error when generating SALT_4e3m\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3843">			return null;</span>
+<span class="nc" id="L3844">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L3845">			System.err.println(&quot;Error when generating SALT_4e3m\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3846">			return null;</span>
+<span class="fc" id="L3847">		}</span>
 
-<span class="fc" id="L3850">		return salt4e3m;</span>
+<span class="fc" id="L3849">		return salt4e3m;</span>
 		
 	}
 	
@@ -3860,34 +3859,34 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computeExternalData(byte[] th, byte[] cred, CBORObject[] ead) {
 		
-<span class="pc bpc" id="L3863" title="2 of 4 branches missed.">		if (th == null || cred == null)</span>
-<span class="nc" id="L3864">			return null;</span>
+<span class="pc bpc" id="L3862" title="2 of 4 branches missed.">		if (th == null || cred == null)</span>
+<span class="nc" id="L3863">			return null;</span>
 		
-<span class="fc" id="L3866">		List&lt;CBORObject&gt; externalDataList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L3865">		List&lt;CBORObject&gt; externalDataList = new ArrayList&lt;&gt;();</span>
 		
         // TH2 / TH3 is the first element of the CBOR Sequence
-<span class="fc" id="L3869">        byte[] thSerializedCBOR = CBORObject.FromObject(th).EncodeToBytes();</span>
-<span class="fc" id="L3870">        externalDataList.add(CBORObject.FromObject(thSerializedCBOR));</span>
+<span class="fc" id="L3868">        byte[] thSerializedCBOR = CBORObject.FromObject(th).EncodeToBytes();</span>
+<span class="fc" id="L3869">        externalDataList.add(CBORObject.FromObject(thSerializedCBOR));</span>
         
         // CRED_R / CRED_I is the second element of the CBOR Sequence
-<span class="fc" id="L3873">        byte[] credSerializedCBOR = cred;</span>
-<span class="fc" id="L3874">        externalDataList.add(CBORObject.FromObject(credSerializedCBOR));</span>
+<span class="fc" id="L3872">        byte[] credSerializedCBOR = cred;</span>
+<span class="fc" id="L3873">        externalDataList.add(CBORObject.FromObject(credSerializedCBOR));</span>
         
         // EAD_2 / EAD_3 is the third element of the CBOR Sequence (if provided)
-<span class="pc bpc" id="L3877" title="3 of 4 branches missed.">        if (ead != null &amp;&amp; ead.length != 0) {</span>
-<span class="nc" id="L3878">        	byte[] eadSequence = null;</span>
-<span class="nc" id="L3879">        	List&lt;CBORObject&gt; objectList = new ArrayList&lt;CBORObject&gt;();</span>
+<span class="pc bpc" id="L3876" title="3 of 4 branches missed.">        if (ead != null &amp;&amp; ead.length != 0) {</span>
+<span class="nc" id="L3877">        	byte[] eadSequence = null;</span>
+<span class="nc" id="L3878">        	List&lt;CBORObject&gt; objectList = new ArrayList&lt;CBORObject&gt;();</span>
         	
-<span class="nc bnc" id="L3881" title="All 2 branches missed.">	    	for (int i = 0; i &lt; ead.length; i++) {</span>
-<span class="nc" id="L3882">		    	objectList.add(ead[i]);</span>
+<span class="nc bnc" id="L3880" title="All 2 branches missed.">	    	for (int i = 0; i &lt; ead.length; i++) {</span>
+<span class="nc" id="L3881">		    	objectList.add(ead[i]);</span>
 		    }
 	    	// Rebuild how EAD was in the EDHOC message
-<span class="nc" id="L3885">		    eadSequence = Util.buildCBORSequence(objectList);</span>
+<span class="nc" id="L3884">		    eadSequence = Util.buildCBORSequence(objectList);</span>
     		    	
-<span class="nc" id="L3887">            externalDataList.add(CBORObject.FromObject(eadSequence)); </span>
+<span class="nc" id="L3886">            externalDataList.add(CBORObject.FromObject(eadSequence)); </span>
         }
 		
-<span class="fc" id="L3890">		return Util.concatenateByteArrays(externalDataList);</span>
+<span class="fc" id="L3889">		return Util.concatenateByteArrays(externalDataList);</span>
 		
 	}
 
@@ -3906,42 +3905,42 @@ import com.upokecenter.cbor.CBORType;
 		
 		// Build the CBOR sequence to use for 'context': ( ID_CRED_R, TH_2, CRED_R, ? EAD_2 )
 		// The actual 'context' is a CBOR byte string with value the serialization of the CBOR sequence
-<span class="fc" id="L3909">        List&lt;CBORObject&gt; objectList = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L3910">    	objectList.add(idCredR);</span>
-<span class="fc" id="L3911">    	objectList.add(CBORObject.FromObject(th2));</span>
-<span class="fc" id="L3912">    	objectList.add(CBORObject.DecodeFromBytes(credR));</span>
+<span class="fc" id="L3908">        List&lt;CBORObject&gt; objectList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L3909">    	objectList.add(idCredR);</span>
+<span class="fc" id="L3910">    	objectList.add(CBORObject.FromObject(th2));</span>
+<span class="fc" id="L3911">    	objectList.add(CBORObject.DecodeFromBytes(credR));</span>
     	
-<span class="pc bpc" id="L3914" title="3 of 4 branches missed.">    	if (ead2 != null &amp;&amp; ead2.length != 0) {</span>
-<span class="nc bnc" id="L3915" title="All 2 branches missed.">	    	for (int i = 0; i &lt; ead2.length; i++)</span>
-<span class="nc" id="L3916">	    		objectList.add(ead2[i]);</span>
+<span class="pc bpc" id="L3913" title="3 of 4 branches missed.">    	if (ead2 != null &amp;&amp; ead2.length != 0) {</span>
+<span class="nc bnc" id="L3914" title="All 2 branches missed.">	    	for (int i = 0; i &lt; ead2.length; i++)</span>
+<span class="nc" id="L3915">	    		objectList.add(ead2[i]);</span>
     	}
-<span class="fc" id="L3918">    	byte[] contextSequence = Util.buildCBORSequence(objectList);</span>
-<span class="fc" id="L3919">    	CBORObject context = CBORObject.FromObject(contextSequence);</span>
+<span class="fc" id="L3917">    	byte[] contextSequence = Util.buildCBORSequence(objectList);</span>
+<span class="fc" id="L3918">    	CBORObject context = CBORObject.FromObject(contextSequence);</span>
     	
-<span class="fc" id="L3921">    	int macLength = 0;</span>
-<span class="fc" id="L3922">    	int method = session.getMethod();</span>
-<span class="fc" id="L3923">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="pc bpc" id="L3924" title="1 of 4 branches missed.">    	if (method == 0 || method == 2) {</span>
-<span class="fc" id="L3925">    		macLength = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
+<span class="fc" id="L3920">    	int macLength = 0;</span>
+<span class="fc" id="L3921">    	int method = session.getMethod();</span>
+<span class="fc" id="L3922">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="pc bpc" id="L3923" title="1 of 4 branches missed.">    	if (method == 0 || method == 2) {</span>
+<span class="fc" id="L3924">    		macLength = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
     	}
-<span class="pc bpc" id="L3927" title="1 of 4 branches missed.">    	if (method == 1 || method == 3) {</span>
-<span class="fc" id="L3928">    		macLength = EdhocSession.getTagLengthEdhocAEAD(selectedCipherSuite);</span>
+<span class="pc bpc" id="L3926" title="1 of 4 branches missed.">    	if (method == 1 || method == 3) {</span>
+<span class="fc" id="L3927">    		macLength = EdhocSession.getTagLengthEdhocAEAD(selectedCipherSuite);</span>
     	}
     	
-<span class="fc" id="L3931">    	byte[] mac2 = null;</span>
+<span class="fc" id="L3930">    	byte[] mac2 = null;</span>
     	
     	try {
-<span class="fc" id="L3934">			mac2 = session.edhocKDF(prk3e2m, Constants.KDF_LABEL_MAC_2, context, macLength);</span>
-<span class="nc" id="L3935">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L3936">			System.err.println(&quot;Error when computing MAC_2\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3937">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L3938">			System.err.println(&quot;Error when computing MAC_2\n&quot; + e.getMessage());</span>
-<span class="pc" id="L3939">		}</span>
+<span class="fc" id="L3933">			mac2 = session.edhocKDF(prk3e2m, Constants.KDF_LABEL_MAC_2, context, macLength);</span>
+<span class="nc" id="L3934">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L3935">			System.err.println(&quot;Error when computing MAC_2\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3936">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L3937">			System.err.println(&quot;Error when computing MAC_2\n&quot; + e.getMessage());</span>
+<span class="pc" id="L3938">		}</span>
         if (debugPrint) {
-<span class="fc" id="L3941">        	Util.nicePrint(&quot;context_2&quot;, contextSequence);</span>
+<span class="fc" id="L3940">        	Util.nicePrint(&quot;context_2&quot;, contextSequence);</span>
         }
 		
-<span class="fc" id="L3944">		return mac2;</span>
+<span class="fc" id="L3943">		return mac2;</span>
 		
 	}
 
@@ -3959,42 +3958,42 @@ import com.upokecenter.cbor.CBORType;
 				
 		// Build the CBOR sequence for 'context': ( ID_CRED_I, TH_3, CRED_I, ? EAD_3 )
 		// The actual 'context' is a CBOR byte string with value the serialization of the CBOR sequence
-<span class="fc" id="L3962">        List&lt;CBORObject&gt; objectList = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L3963">    	objectList.add(idCredI);</span>
-<span class="fc" id="L3964">    	objectList.add(CBORObject.FromObject(th3));</span>
-<span class="fc" id="L3965">    	objectList.add(CBORObject.DecodeFromBytes(credI));</span>
+<span class="fc" id="L3961">        List&lt;CBORObject&gt; objectList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L3962">    	objectList.add(idCredI);</span>
+<span class="fc" id="L3963">    	objectList.add(CBORObject.FromObject(th3));</span>
+<span class="fc" id="L3964">    	objectList.add(CBORObject.DecodeFromBytes(credI));</span>
     	
-<span class="pc bpc" id="L3967" title="3 of 4 branches missed.">    	if (ead3 != null &amp;&amp; ead3.length != 0) {</span>
-<span class="nc bnc" id="L3968" title="All 2 branches missed.">	    	for (int i = 0; i &lt; ead3.length; i++)</span>
-<span class="nc" id="L3969">	    		objectList.add(ead3[i]);</span>
+<span class="pc bpc" id="L3966" title="3 of 4 branches missed.">    	if (ead3 != null &amp;&amp; ead3.length != 0) {</span>
+<span class="nc bnc" id="L3967" title="All 2 branches missed.">	    	for (int i = 0; i &lt; ead3.length; i++)</span>
+<span class="nc" id="L3968">	    		objectList.add(ead3[i]);</span>
     	}
-<span class="fc" id="L3971">    	byte[] contextSequence = Util.buildCBORSequence(objectList);</span>
-<span class="fc" id="L3972">    	CBORObject context = CBORObject.FromObject(contextSequence);</span>
+<span class="fc" id="L3970">    	byte[] contextSequence = Util.buildCBORSequence(objectList);</span>
+<span class="fc" id="L3971">    	CBORObject context = CBORObject.FromObject(contextSequence);</span>
     	
-<span class="fc" id="L3974">    	int macLength = 0;</span>
-<span class="fc" id="L3975">    	int method = session.getMethod();</span>
-<span class="fc" id="L3976">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="pc bpc" id="L3977" title="1 of 4 branches missed.">    	if (method == 0 || method == 1) {</span>
-<span class="fc" id="L3978">    		macLength = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
+<span class="fc" id="L3973">    	int macLength = 0;</span>
+<span class="fc" id="L3974">    	int method = session.getMethod();</span>
+<span class="fc" id="L3975">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="pc bpc" id="L3976" title="1 of 4 branches missed.">    	if (method == 0 || method == 1) {</span>
+<span class="fc" id="L3977">    		macLength = EdhocSession.getEdhocHashAlgOutputSize(selectedCipherSuite);</span>
     	}
-<span class="pc bpc" id="L3980" title="1 of 4 branches missed.">    	if (method == 2 || method == 3) {</span>
-<span class="fc" id="L3981">    		macLength = EdhocSession.getTagLengthEdhocAEAD(selectedCipherSuite);</span>
+<span class="pc bpc" id="L3979" title="1 of 4 branches missed.">    	if (method == 2 || method == 3) {</span>
+<span class="fc" id="L3980">    		macLength = EdhocSession.getTagLengthEdhocAEAD(selectedCipherSuite);</span>
     	}
     	
-<span class="fc" id="L3984">    	byte[] mac3 = null;</span>
+<span class="fc" id="L3983">    	byte[] mac3 = null;</span>
     	
     	try {
-<span class="fc" id="L3987">			mac3 = session.edhocKDF(prk4e3m, Constants.KDF_LABEL_MAC_3, context, macLength);</span>
-<span class="nc" id="L3988">		} catch (InvalidKeyException e) {</span>
-<span class="nc" id="L3989">			System.err.println(&quot;Error when computing MAC_3\n&quot; + e.getMessage());</span>
-<span class="nc" id="L3990">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L3991">			System.err.println(&quot;Error when computing MAC_3\n&quot; + e.getMessage());</span>
-<span class="pc" id="L3992">		}</span>
+<span class="fc" id="L3986">			mac3 = session.edhocKDF(prk4e3m, Constants.KDF_LABEL_MAC_3, context, macLength);</span>
+<span class="nc" id="L3987">		} catch (InvalidKeyException e) {</span>
+<span class="nc" id="L3988">			System.err.println(&quot;Error when computing MAC_3\n&quot; + e.getMessage());</span>
+<span class="nc" id="L3989">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L3990">			System.err.println(&quot;Error when computing MAC_3\n&quot; + e.getMessage());</span>
+<span class="pc" id="L3991">		}</span>
         if (debugPrint) {
-<span class="fc" id="L3994">        	Util.nicePrint(&quot;context_3&quot;, contextSequence);</span>
+<span class="fc" id="L3993">        	Util.nicePrint(&quot;context_3&quot;, contextSequence);</span>
         }
 		
-<span class="fc" id="L3997">		return mac3;</span>
+<span class="fc" id="L3996">		return mac3;</span>
 		
 	}
 	
@@ -4012,22 +4011,22 @@ import com.upokecenter.cbor.CBORType;
 			                                byte[] plaintext, byte[] k3ae, byte[] iv3ae) {
 		
     	
-<span class="fc" id="L4015">    	byte[] ciphertext3 = null;</span>
+<span class="fc" id="L4014">    	byte[] ciphertext3 = null;</span>
     	
-<span class="fc" id="L4017">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L4018">    	AlgorithmID alg = EdhocSession.getEdhocAEADAlg(selectedCipherSuite);</span>
+<span class="fc" id="L4016">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4017">    	AlgorithmID alg = EdhocSession.getEdhocAEADAlg(selectedCipherSuite);</span>
     	
     	// Prepare the empty content for the COSE protected header
-<span class="fc" id="L4021">    	CBORObject emptyMap = CBORObject.NewMap();</span>
+<span class="fc" id="L4020">    	CBORObject emptyMap = CBORObject.NewMap();</span>
     	
     	try {
-<span class="fc" id="L4024">    		ciphertext3 = Util.encrypt(emptyMap, externalData, plaintext, alg, iv3ae, k3ae);</span>
-<span class="nc" id="L4025">		} catch (CoseException e) {</span>
-<span class="nc" id="L4026">			System.err.println(&quot;Error when computing CIPHERTEXT_3\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4027">			return null;</span>
-<span class="fc" id="L4028">		}</span>
+<span class="fc" id="L4023">    		ciphertext3 = Util.encrypt(emptyMap, externalData, plaintext, alg, iv3ae, k3ae);</span>
+<span class="nc" id="L4024">		} catch (CoseException e) {</span>
+<span class="nc" id="L4025">			System.err.println(&quot;Error when computing CIPHERTEXT_3\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4026">			return null;</span>
+<span class="fc" id="L4027">		}</span>
 		
-<span class="fc" id="L4030">		return ciphertext3;</span>
+<span class="fc" id="L4029">		return ciphertext3;</span>
 		
 	}
 	
@@ -4045,22 +4044,22 @@ import com.upokecenter.cbor.CBORType;
 			                         		byte[] plaintext, byte[] k4m, byte[] iv4m) {
 		
 		
-<span class="fc" id="L4048">    	byte[] ciphertext4 = null;</span>
+<span class="fc" id="L4047">    	byte[] ciphertext4 = null;</span>
     	
-<span class="fc" id="L4050">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L4051">    	AlgorithmID alg = EdhocSession.getEdhocAEADAlg(selectedCipherSuite);</span>
+<span class="fc" id="L4049">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4050">    	AlgorithmID alg = EdhocSession.getEdhocAEADAlg(selectedCipherSuite);</span>
     	
     	// Prepare the empty content for the COSE protected header
-<span class="fc" id="L4054">    	CBORObject emptyMap = CBORObject.NewMap();</span>
+<span class="fc" id="L4053">    	CBORObject emptyMap = CBORObject.NewMap();</span>
     	
     	try {
-<span class="fc" id="L4057">			ciphertext4 = Util.encrypt(emptyMap, externalData, plaintext, alg, iv4m, k4m);</span>
-<span class="nc" id="L4058">		} catch (CoseException e) {</span>
-<span class="nc" id="L4059">			System.err.println(&quot;Error when computing CIPHERTEXT_4\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4060">			return null;</span>
-<span class="fc" id="L4061">		}</span>
+<span class="fc" id="L4056">			ciphertext4 = Util.encrypt(emptyMap, externalData, plaintext, alg, iv4m, k4m);</span>
+<span class="nc" id="L4057">		} catch (CoseException e) {</span>
+<span class="nc" id="L4058">			System.err.println(&quot;Error when computing CIPHERTEXT_4\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4059">			return null;</span>
+<span class="fc" id="L4060">		}</span>
 		
-<span class="fc" id="L4063">		return ciphertext4;</span>
+<span class="fc" id="L4062">		return ciphertext4;</span>
 		
 	}
 	
@@ -4077,22 +4076,22 @@ import com.upokecenter.cbor.CBORType;
 	public static byte[] decryptCiphertext3(EdhocSession session, byte[] externalData,
 			                                byte[] ciphertext, byte[] k3ae, byte[] iv3ae) {
 		
-<span class="fc" id="L4080">    	byte[] plaintext = null;</span>
+<span class="fc" id="L4079">    	byte[] plaintext = null;</span>
     	
-<span class="fc" id="L4082">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L4083">    	AlgorithmID alg = EdhocSession.getEdhocAEADAlg(selectedCipherSuite);</span>
+<span class="fc" id="L4081">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4082">    	AlgorithmID alg = EdhocSession.getEdhocAEADAlg(selectedCipherSuite);</span>
     	
     	// Prepare the empty content for the COSE protected header
-<span class="fc" id="L4086">    	CBORObject emptyMap = CBORObject.NewMap();</span>
+<span class="fc" id="L4085">    	CBORObject emptyMap = CBORObject.NewMap();</span>
     	
     	try {
-<span class="fc" id="L4089">    		plaintext = Util.decrypt(emptyMap, externalData, ciphertext, alg, iv3ae, k3ae);</span>
-<span class="nc" id="L4090">		} catch (CoseException e) {</span>
-<span class="nc" id="L4091">			System.err.println(&quot;Error when decrypting CIPHERTEXT_3\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4092">			return null;</span>
-<span class="fc" id="L4093">		}</span>
+<span class="fc" id="L4088">    		plaintext = Util.decrypt(emptyMap, externalData, ciphertext, alg, iv3ae, k3ae);</span>
+<span class="nc" id="L4089">		} catch (CoseException e) {</span>
+<span class="nc" id="L4090">			System.err.println(&quot;Error when decrypting CIPHERTEXT_3\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4091">			return null;</span>
+<span class="fc" id="L4092">		}</span>
 		
-<span class="fc" id="L4095">		return plaintext;</span>
+<span class="fc" id="L4094">		return plaintext;</span>
 		
 	}
 	
@@ -4109,22 +4108,22 @@ import com.upokecenter.cbor.CBORType;
 	public static byte[] decryptCiphertext4(EdhocSession session, byte[] externalData,
 			                                byte[] ciphertext, byte[] k4ae, byte[] iv4ae) {
 		
-<span class="fc" id="L4112">    	byte[] plaintext = null;</span>
+<span class="fc" id="L4111">    	byte[] plaintext = null;</span>
     	
-<span class="fc" id="L4114">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L4115">    	AlgorithmID alg = EdhocSession.getEdhocAEADAlg(selectedCipherSuite);</span>
+<span class="fc" id="L4113">    	int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4114">    	AlgorithmID alg = EdhocSession.getEdhocAEADAlg(selectedCipherSuite);</span>
     	
     	// Prepare the empty content for the COSE protected header
-<span class="fc" id="L4118">    	CBORObject emptyMap = CBORObject.NewMap();</span>
+<span class="fc" id="L4117">    	CBORObject emptyMap = CBORObject.NewMap();</span>
     	
     	try {
-<span class="fc" id="L4121">    		plaintext = Util.decrypt(emptyMap, externalData, ciphertext, alg, iv4ae, k4ae);</span>
-<span class="nc" id="L4122">		} catch (CoseException e) {</span>
-<span class="nc" id="L4123">			System.err.println(&quot;Error when decrypting CIPHERTEXT_4\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4124">			return null;</span>
-<span class="fc" id="L4125">		}</span>
+<span class="fc" id="L4120">    		plaintext = Util.decrypt(emptyMap, externalData, ciphertext, alg, iv4ae, k4ae);</span>
+<span class="nc" id="L4121">		} catch (CoseException e) {</span>
+<span class="nc" id="L4122">			System.err.println(&quot;Error when decrypting CIPHERTEXT_4\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4123">			return null;</span>
+<span class="fc" id="L4124">		}</span>
 		
-<span class="fc" id="L4127">		return plaintext;</span>
+<span class="fc" id="L4126">		return plaintext;</span>
 		
 	}
 
@@ -4138,39 +4137,39 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computeSignatureOrMac2(EdhocSession session, byte[] mac2, byte[] externalData) {
 		
-<span class="fc" id="L4141">		byte[] signatureOrMac2 = null;</span>
-<span class="fc" id="L4142">    	int authenticationMethod = session.getMethod();</span>
+<span class="fc" id="L4140">		byte[] signatureOrMac2 = null;</span>
+<span class="fc" id="L4141">    	int authenticationMethod = session.getMethod();</span>
     	
-<span class="pc bpc" id="L4144" title="1 of 4 branches missed.">    	if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_1 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_3) {</span>
+<span class="pc bpc" id="L4143" title="1 of 4 branches missed.">    	if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_1 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_3) {</span>
     		// The responder does not use signatures as authentication method, then Signature_or_MAC_2 is equal to MAC_2
-<span class="fc" id="L4146">    		signatureOrMac2 = new byte[mac2.length];</span>
-<span class="fc" id="L4147">    		System.arraycopy(mac2, 0, signatureOrMac2, 0, mac2.length);</span>
+<span class="fc" id="L4145">    		signatureOrMac2 = new byte[mac2.length];</span>
+<span class="fc" id="L4146">    		System.arraycopy(mac2, 0, signatureOrMac2, 0, mac2.length);</span>
     	}
-<span class="pc bpc" id="L4149" title="3 of 4 branches missed.">    	else if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_0 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_2) {</span>
+<span class="pc bpc" id="L4148" title="3 of 4 branches missed.">    	else if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_0 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_2) {</span>
     		// The responder uses signatures as authentication method, then Signature_or_MAC_2 has to be computed
     		try {
-<span class="fc" id="L4152">    			OneKey identityKey = session.getKeyPair();</span>
-<span class="fc" id="L4153">    			int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4151">    			OneKey identityKey = session.getKeyPair();</span>
+<span class="fc" id="L4152">    			int selectedCipherSuite = session.getSelectedCipherSuite();</span>
     			
     			// Consistency check of key type and curve against the selected cipher suite
-<span class="pc bpc" id="L4156" title="1 of 2 branches missed.">    			if (Util.checkSignatureKeyAgainstCipherSuite(identityKey, selectedCipherSuite) == false) {</span>
-<span class="nc" id="L4157">    				System.err.println(&quot;Error when signing MAC_2 to produce Signature_or_MAC_2\n&quot;);</span>
-<span class="nc" id="L4158">    				return null;</span>
+<span class="pc bpc" id="L4155" title="1 of 2 branches missed.">    			if (Util.checkSignatureKeyAgainstCipherSuite(identityKey, selectedCipherSuite) == false) {</span>
+<span class="nc" id="L4156">    				System.err.println(&quot;Error when signing MAC_2 to produce Signature_or_MAC_2\n&quot;);</span>
+<span class="nc" id="L4157">    				return null;</span>
     			}
 
     			if (debugPrint) {
-<span class="fc" id="L4162">		    		Util.nicePrint(&quot;External Data for signing MAC_2 to produce Signature_or_MAC_2&quot;, externalData);</span>
+<span class="fc" id="L4161">		    		Util.nicePrint(&quot;External Data for signing MAC_2 to produce Signature_or_MAC_2&quot;, externalData);</span>
 		    	}
     			
-<span class="fc" id="L4165">				signatureOrMac2 = Util.computeSignature(session.getIdCred(), externalData, mac2, identityKey);</span>
+<span class="fc" id="L4164">				signatureOrMac2 = Util.computeSignature(session.getIdCred(), externalData, mac2, identityKey);</span>
 				
-<span class="nc" id="L4167">			} catch (CoseException e) {</span>
-<span class="nc" id="L4168">				System.err.println(&quot;Error when signing MAC_2 to produce Signature_or_MAC_2\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4169">				return null;</span>
-<span class="fc" id="L4170">			}</span>
+<span class="nc" id="L4166">			} catch (CoseException e) {</span>
+<span class="nc" id="L4167">				System.err.println(&quot;Error when signing MAC_2 to produce Signature_or_MAC_2\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4168">				return null;</span>
+<span class="fc" id="L4169">			}</span>
     	}
 		
-<span class="fc" id="L4173">    	return signatureOrMac2;</span>
+<span class="fc" id="L4172">    	return signatureOrMac2;</span>
     	
 	}
 	
@@ -4184,39 +4183,39 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computeSignatureOrMac3(EdhocSession session, byte[] mac3, byte[] externalData) {
 		
-<span class="fc" id="L4187">		byte[] signatureOrMac3 = null;</span>
-<span class="fc" id="L4188">    	int authenticationMethod = session.getMethod();</span>
+<span class="fc" id="L4186">		byte[] signatureOrMac3 = null;</span>
+<span class="fc" id="L4187">    	int authenticationMethod = session.getMethod();</span>
     	
-<span class="pc bpc" id="L4190" title="1 of 4 branches missed.">    	if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_2 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_3) {</span>
+<span class="pc bpc" id="L4189" title="1 of 4 branches missed.">    	if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_2 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_3) {</span>
     		// The initiator does not use signatures as authentication method, then Signature_or_MAC_3 is equal to MAC_3
-<span class="fc" id="L4192">    		signatureOrMac3 = new byte[mac3.length];</span>
-<span class="fc" id="L4193">    		System.arraycopy(mac3, 0, signatureOrMac3, 0, mac3.length);</span>
+<span class="fc" id="L4191">    		signatureOrMac3 = new byte[mac3.length];</span>
+<span class="fc" id="L4192">    		System.arraycopy(mac3, 0, signatureOrMac3, 0, mac3.length);</span>
     	}
-<span class="pc bpc" id="L4195" title="3 of 4 branches missed.">    	else if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_0 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_1) {</span>
+<span class="pc bpc" id="L4194" title="3 of 4 branches missed.">    	else if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_0 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_1) {</span>
     		// The initiator uses signatures as authentication method, then Signature_or_MAC_3 has to be computed
     		try {
-<span class="fc" id="L4198">    			OneKey identityKey = session.getKeyPair();</span>
-<span class="fc" id="L4199">    			int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4197">    			OneKey identityKey = session.getKeyPair();</span>
+<span class="fc" id="L4198">    			int selectedCipherSuite = session.getSelectedCipherSuite();</span>
     			
     			// Consistency check of key type and curve against the selected cipher suite
-<span class="pc bpc" id="L4202" title="1 of 2 branches missed.">    			if (Util.checkSignatureKeyAgainstCipherSuite(identityKey, selectedCipherSuite) == false) {</span>
-<span class="nc" id="L4203">    				System.err.println(&quot;Error when signing MAC_3 to produce Signature_or_MAC_3\n&quot;);</span>
-<span class="nc" id="L4204">    				return null;</span>
+<span class="pc bpc" id="L4201" title="1 of 2 branches missed.">    			if (Util.checkSignatureKeyAgainstCipherSuite(identityKey, selectedCipherSuite) == false) {</span>
+<span class="nc" id="L4202">    				System.err.println(&quot;Error when signing MAC_3 to produce Signature_or_MAC_3\n&quot;);</span>
+<span class="nc" id="L4203">    				return null;</span>
     			}
     			
     			if (debugPrint) {
-<span class="fc" id="L4208">    			    Util.nicePrint(&quot;External Data for signing MAC_3 to produce Signature_or_MAC_3&quot;, externalData);</span>
+<span class="fc" id="L4207">    			    Util.nicePrint(&quot;External Data for signing MAC_3 to produce Signature_or_MAC_3&quot;, externalData);</span>
     			}
     			
-<span class="fc" id="L4211">				signatureOrMac3 = Util.computeSignature(session.getIdCred(), externalData, mac3, identityKey);</span>
+<span class="fc" id="L4210">				signatureOrMac3 = Util.computeSignature(session.getIdCred(), externalData, mac3, identityKey);</span>
 				
-<span class="nc" id="L4213">			} catch (CoseException e) {</span>
-<span class="nc" id="L4214">				System.err.println(&quot;Error when signing MAC_3 to produce Signature_or_MAC_3\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4215">				return null;</span>
-<span class="fc" id="L4216">			}</span>
+<span class="nc" id="L4212">			} catch (CoseException e) {</span>
+<span class="nc" id="L4213">				System.err.println(&quot;Error when signing MAC_3 to produce Signature_or_MAC_3\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4214">				return null;</span>
+<span class="fc" id="L4215">			}</span>
     	}
 		
-<span class="fc" id="L4219">    	return signatureOrMac3;</span>
+<span class="fc" id="L4218">    	return signatureOrMac3;</span>
     	
 	}
 	
@@ -4231,34 +4230,34 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static boolean verifySignatureOrMac2(EdhocSession session, byte[] signatureOrMac2, byte[] externalData, byte[] mac2) {
 		
-<span class="fc" id="L4234">		int authenticationMethod = session.getMethod();</span>
+<span class="fc" id="L4233">		int authenticationMethod = session.getMethod();</span>
 		
-<span class="pc bpc" id="L4236" title="1 of 4 branches missed.">    	if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_1 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_3) {</span>
+<span class="pc bpc" id="L4235" title="1 of 4 branches missed.">    	if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_1 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_3) {</span>
     		// The responder does not use signatures as authentication method, then Signature_or_MAC_2 has to be equal to MAC_2
-<span class="fc" id="L4238">    		return Arrays.equals(signatureOrMac2, mac2);</span>
+<span class="fc" id="L4237">    		return Arrays.equals(signatureOrMac2, mac2);</span>
     	}
-<span class="pc bpc" id="L4240" title="3 of 4 branches missed.">    	else if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_0 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_2) {</span>
+<span class="pc bpc" id="L4239" title="3 of 4 branches missed.">    	else if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_0 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_2) {</span>
     		// The responder uses signatures as authentication method, then Signature_or_MAC_2 is a signature to verify
     		
-<span class="fc" id="L4243">    		OneKey peerIdentityKey = session.getPeerLongTermPublicKey();</span>
-<span class="fc" id="L4244">			int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4242">    		OneKey peerIdentityKey = session.getPeerLongTermPublicKey();</span>
+<span class="fc" id="L4243">			int selectedCipherSuite = session.getSelectedCipherSuite();</span>
 			
 			// Consistency check of key type and curve against the selected cipher suite
-<span class="pc bpc" id="L4247" title="1 of 2 branches missed.">			if (Util.checkSignatureKeyAgainstCipherSuite(peerIdentityKey, selectedCipherSuite) == false) {</span>
-<span class="nc" id="L4248">				System.err.println(&quot;Error when verifying the signature of Signature_or_MAC_2\n&quot;);</span>
-<span class="nc" id="L4249">				return false;</span>
+<span class="pc bpc" id="L4246" title="1 of 2 branches missed.">			if (Util.checkSignatureKeyAgainstCipherSuite(peerIdentityKey, selectedCipherSuite) == false) {</span>
+<span class="nc" id="L4247">				System.err.println(&quot;Error when verifying the signature of Signature_or_MAC_2\n&quot;);</span>
+<span class="nc" id="L4248">				return false;</span>
 			}
     		
 			try {
-<span class="fc" id="L4253">				return Util.verifySignature(signatureOrMac2, session.getPeerIdCred(),</span>
+<span class="fc" id="L4252">				return Util.verifySignature(signatureOrMac2, session.getPeerIdCred(),</span>
 						                    externalData, mac2, peerIdentityKey);
-<span class="nc" id="L4255">			} catch (CoseException e) {</span>
-<span class="nc" id="L4256">				System.err.println(&quot;Error when verifying the signature of Signature_or_MAC_2\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4257">				return false;</span>
+<span class="nc" id="L4254">			} catch (CoseException e) {</span>
+<span class="nc" id="L4255">				System.err.println(&quot;Error when verifying the signature of Signature_or_MAC_2\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4256">				return false;</span>
 			}
 		}
 		
-<span class="nc" id="L4261">		return false;</span>
+<span class="nc" id="L4260">		return false;</span>
 		
 	}
 	
@@ -4273,34 +4272,34 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static boolean verifySignatureOrMac3(EdhocSession session, byte[] signatureOrMac3, byte[] externalData, byte[] mac3) {
 		
-<span class="fc" id="L4276">		int authenticationMethod = session.getMethod();</span>
+<span class="fc" id="L4275">		int authenticationMethod = session.getMethod();</span>
 		
-<span class="pc bpc" id="L4278" title="1 of 4 branches missed.">    	if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_2 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_3) {</span>
+<span class="pc bpc" id="L4277" title="1 of 4 branches missed.">    	if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_2 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_3) {</span>
     		// The initiator does not use signatures as authentication method, then Signature_or_MAC_3 has to be equal to MAC_3
-<span class="fc" id="L4280">    		return Arrays.equals(signatureOrMac3, mac3);</span>
+<span class="fc" id="L4279">    		return Arrays.equals(signatureOrMac3, mac3);</span>
     	}
-<span class="pc bpc" id="L4282" title="3 of 4 branches missed.">    	else if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_0 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_1) {</span>
+<span class="pc bpc" id="L4281" title="3 of 4 branches missed.">    	else if (authenticationMethod == Constants.EDHOC_AUTH_METHOD_0 || authenticationMethod == Constants.EDHOC_AUTH_METHOD_1) {</span>
     		// The initiator uses signatures as authentication method, then Signature_or_MAC_3 is a signature to verify
 
-<span class="fc" id="L4285">    		OneKey peerIdentityKey = session.getPeerLongTermPublicKey();</span>
-<span class="fc" id="L4286">			int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4284">    		OneKey peerIdentityKey = session.getPeerLongTermPublicKey();</span>
+<span class="fc" id="L4285">			int selectedCipherSuite = session.getSelectedCipherSuite();</span>
 			
 			// Consistency check of key type and curve against the selected cipher suite
-<span class="pc bpc" id="L4289" title="1 of 2 branches missed.">			if (Util.checkSignatureKeyAgainstCipherSuite(peerIdentityKey, selectedCipherSuite) == false) {</span>
-<span class="nc" id="L4290">				System.err.println(&quot;Error when verifying the signature of Signature_or_MAC_3\n&quot;);</span>
-<span class="nc" id="L4291">				return false;</span>
+<span class="pc bpc" id="L4288" title="1 of 2 branches missed.">			if (Util.checkSignatureKeyAgainstCipherSuite(peerIdentityKey, selectedCipherSuite) == false) {</span>
+<span class="nc" id="L4289">				System.err.println(&quot;Error when verifying the signature of Signature_or_MAC_3\n&quot;);</span>
+<span class="nc" id="L4290">				return false;</span>
 			}
     		
 			try {
-<span class="fc" id="L4295">				return Util.verifySignature(signatureOrMac3, session.getPeerIdCred(),</span>
+<span class="fc" id="L4294">				return Util.verifySignature(signatureOrMac3, session.getPeerIdCred(),</span>
 						                    externalData, mac3, peerIdentityKey);
-<span class="nc" id="L4297">			} catch (CoseException e) {</span>
-<span class="nc" id="L4298">				System.err.println(&quot;Error when verifying the signature of Signature_or_MAC_3\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4299">				return false;</span>
+<span class="nc" id="L4296">			} catch (CoseException e) {</span>
+<span class="nc" id="L4297">				System.err.println(&quot;Error when verifying the signature of Signature_or_MAC_3\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4298">				return false;</span>
 			}
 		}
 		
-<span class="nc" id="L4303">		return false;</span>
+<span class="nc" id="L4302">		return false;</span>
 		
 	}
 
@@ -4313,24 +4312,24 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computeTH2(EdhocSession session, byte[] gY, byte[] hashMessage1) {
 	
-<span class="fc" id="L4316">        byte[] th2 = null;</span>
+<span class="fc" id="L4315">        byte[] th2 = null;</span>
         
-<span class="fc" id="L4318">        int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L4319">        String hashAlgorithm = EdhocSession.getEdhocHashAlg(selectedCipherSuite);</span>
+<span class="fc" id="L4317">        int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4318">        String hashAlgorithm = EdhocSession.getEdhocHashAlg(selectedCipherSuite);</span>
 
-<span class="fc" id="L4321">        byte[] hashInput = new byte[gY.length + hashMessage1.length];</span>
-<span class="fc" id="L4322">        System.arraycopy(gY, 0, hashInput, 0, gY.length);</span>
-<span class="fc" id="L4323">        System.arraycopy(hashMessage1, 0, hashInput, gY.length, hashMessage1.length);</span>
-<span class="fc" id="L4324">		Util.nicePrint(&quot;Input to calculate TH_2&quot;, hashInput);</span>
+<span class="fc" id="L4320">        byte[] hashInput = new byte[gY.length + hashMessage1.length];</span>
+<span class="fc" id="L4321">        System.arraycopy(gY, 0, hashInput, 0, gY.length);</span>
+<span class="fc" id="L4322">        System.arraycopy(hashMessage1, 0, hashInput, gY.length, hashMessage1.length);</span>
+<span class="fc" id="L4323">		Util.nicePrint(&quot;Input to calculate TH_2&quot;, hashInput);</span>
         try {
-<span class="fc" id="L4326">			th2 = Util.computeHash(hashInput, hashAlgorithm);</span>
-<span class="nc" id="L4327">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L4328">			System.err.println(&quot;Invalid hash algorithm when computing TH2\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4329">			return null;</span>
+<span class="fc" id="L4325">			th2 = Util.computeHash(hashInput, hashAlgorithm);</span>
+<span class="nc" id="L4326">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L4327">			System.err.println(&quot;Invalid hash algorithm when computing TH2\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4328">			return null;</span>
 			
-<span class="fc" id="L4331">		}</span>
+<span class="fc" id="L4330">		}</span>
 		
-<span class="fc" id="L4333">		return th2;</span>
+<span class="fc" id="L4332">		return th2;</span>
 		
 	}
 
@@ -4344,31 +4343,31 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computeTH3(EdhocSession session, byte[] th2, byte[] plaintext2, byte[] credR) {
 	
-<span class="fc" id="L4347">        byte[] th3 = null;</span>
-<span class="fc" id="L4348">        int inputLength = th2.length + plaintext2.length + credR.length;</span>
+<span class="fc" id="L4346">        byte[] th3 = null;</span>
+<span class="fc" id="L4347">        int inputLength = th2.length + plaintext2.length + credR.length;</span>
         
-<span class="fc" id="L4350">        int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L4351">        String hashAlgorithm = EdhocSession.getEdhocHashAlg(selectedCipherSuite);</span>
+<span class="fc" id="L4349">        int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4350">        String hashAlgorithm = EdhocSession.getEdhocHashAlg(selectedCipherSuite);</span>
         
-<span class="fc" id="L4353">        int offset = 0;</span>
-<span class="fc" id="L4354">        byte[] hashInput = new byte[inputLength];</span>
-<span class="fc" id="L4355">        System.arraycopy(th2, 0, hashInput, offset, th2.length);</span>
-<span class="fc" id="L4356">        offset += th2.length;</span>
-<span class="fc" id="L4357">        System.arraycopy(plaintext2, 0, hashInput, offset, plaintext2.length);</span>
+<span class="fc" id="L4352">        int offset = 0;</span>
+<span class="fc" id="L4353">        byte[] hashInput = new byte[inputLength];</span>
+<span class="fc" id="L4354">        System.arraycopy(th2, 0, hashInput, offset, th2.length);</span>
+<span class="fc" id="L4355">        offset += th2.length;</span>
+<span class="fc" id="L4356">        System.arraycopy(plaintext2, 0, hashInput, offset, plaintext2.length);</span>
         
-<span class="fc" id="L4359">        offset += plaintext2.length;</span>
-<span class="fc" id="L4360">        System.arraycopy(credR, 0, hashInput, offset, credR.length);</span>
+<span class="fc" id="L4358">        offset += plaintext2.length;</span>
+<span class="fc" id="L4359">        System.arraycopy(credR, 0, hashInput, offset, credR.length);</span>
         
-<span class="fc" id="L4362">		Util.nicePrint(&quot;Input to calculate TH_3&quot;, hashInput);</span>
+<span class="fc" id="L4361">		Util.nicePrint(&quot;Input to calculate TH_3&quot;, hashInput);</span>
         try {
-<span class="fc" id="L4364">			th3 = Util.computeHash(hashInput, hashAlgorithm);</span>
-<span class="nc" id="L4365">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L4366">			System.err.println(&quot;Invalid hash algorithm when computing TH3\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4367">			return null;</span>
+<span class="fc" id="L4363">			th3 = Util.computeHash(hashInput, hashAlgorithm);</span>
+<span class="nc" id="L4364">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L4365">			System.err.println(&quot;Invalid hash algorithm when computing TH3\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4366">			return null;</span>
 			
-<span class="fc" id="L4369">		}</span>
+<span class="fc" id="L4368">		}</span>
 		
-<span class="fc" id="L4371">		return th3;</span>
+<span class="fc" id="L4370">		return th3;</span>
 		
 	}
 
@@ -4382,31 +4381,31 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] computeTH4(EdhocSession session, byte[] th3, byte[] plaintext3, byte[] credI) {
 	
-<span class="fc" id="L4385">        byte[] th4 = null;</span>
-<span class="fc" id="L4386">        int inputLength = th3.length + plaintext3.length + credI.length;</span>
+<span class="fc" id="L4384">        byte[] th4 = null;</span>
+<span class="fc" id="L4385">        int inputLength = th3.length + plaintext3.length + credI.length;</span>
         
-<span class="fc" id="L4388">        int selectedCipherSuite = session.getSelectedCipherSuite();</span>
-<span class="fc" id="L4389">        String hashAlgorithm = EdhocSession.getEdhocHashAlg(selectedCipherSuite);</span>
+<span class="fc" id="L4387">        int selectedCipherSuite = session.getSelectedCipherSuite();</span>
+<span class="fc" id="L4388">        String hashAlgorithm = EdhocSession.getEdhocHashAlg(selectedCipherSuite);</span>
         
-<span class="fc" id="L4391">        int offset = 0;</span>
-<span class="fc" id="L4392">        byte[] hashInput = new byte[inputLength];</span>
-<span class="fc" id="L4393">        System.arraycopy(th3, 0, hashInput, offset, th3.length);</span>
-<span class="fc" id="L4394">        offset += th3.length;</span>
-<span class="fc" id="L4395">        System.arraycopy(plaintext3, 0, hashInput, offset, plaintext3.length);</span>
+<span class="fc" id="L4390">        int offset = 0;</span>
+<span class="fc" id="L4391">        byte[] hashInput = new byte[inputLength];</span>
+<span class="fc" id="L4392">        System.arraycopy(th3, 0, hashInput, offset, th3.length);</span>
+<span class="fc" id="L4393">        offset += th3.length;</span>
+<span class="fc" id="L4394">        System.arraycopy(plaintext3, 0, hashInput, offset, plaintext3.length);</span>
         
-<span class="fc" id="L4397">        offset += plaintext3.length;</span>
-<span class="fc" id="L4398">        System.arraycopy(credI, 0, hashInput, offset, credI.length);</span>
+<span class="fc" id="L4396">        offset += plaintext3.length;</span>
+<span class="fc" id="L4397">        System.arraycopy(credI, 0, hashInput, offset, credI.length);</span>
         
-<span class="fc" id="L4400">		Util.nicePrint(&quot;Input to calculate TH_4&quot;, hashInput);</span>
+<span class="fc" id="L4399">		Util.nicePrint(&quot;Input to calculate TH_4&quot;, hashInput);</span>
         try {
-<span class="fc" id="L4402">        	th4 = Util.computeHash(hashInput, hashAlgorithm);</span>
-<span class="nc" id="L4403">		} catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L4404">			System.err.println(&quot;Invalid hash algorithm when computing TH4\n&quot; + e.getMessage());</span>
-<span class="nc" id="L4405">			return null;</span>
+<span class="fc" id="L4401">        	th4 = Util.computeHash(hashInput, hashAlgorithm);</span>
+<span class="nc" id="L4402">		} catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L4403">			System.err.println(&quot;Invalid hash algorithm when computing TH4\n&quot; + e.getMessage());</span>
+<span class="nc" id="L4404">			return null;</span>
 			
-<span class="fc" id="L4407">		}</span>
+<span class="fc" id="L4406">		}</span>
 		
-<span class="fc" id="L4409">		return th4;</span>
+<span class="fc" id="L4408">		return th4;</span>
 		
 	}
 	
@@ -4417,30 +4416,30 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static CBORObject encodeIdentifier(byte[] identifier) {
 	
-<span class="fc" id="L4420">		CBORObject identifierCBOR = null;</span>
+<span class="fc" id="L4419">		CBORObject identifierCBOR = null;</span>
 		
-<span class="pc bpc" id="L4422" title="1 of 4 branches missed.">		if (identifier != null &amp;&amp; identifier.length != 1) {</span>
+<span class="pc bpc" id="L4421" title="1 of 4 branches missed.">		if (identifier != null &amp;&amp; identifier.length != 1) {</span>
 			// Encode the EDHOC connection identifier as a CBOR byte string
-<span class="fc" id="L4424">			identifierCBOR = CBORObject.FromObject(identifier);</span>
+<span class="fc" id="L4423">			identifierCBOR = CBORObject.FromObject(identifier);</span>
 		}
 
-<span class="pc bpc" id="L4427" title="1 of 4 branches missed.">		if (identifier != null &amp;&amp; identifier.length == 1) {</span>
-<span class="fc" id="L4428">			int byteValue = Util.bytesToInt(identifier);</span>
+<span class="pc bpc" id="L4426" title="1 of 4 branches missed.">		if (identifier != null &amp;&amp; identifier.length == 1) {</span>
+<span class="fc" id="L4427">			int byteValue = Util.bytesToInt(identifier);</span>
 					
-<span class="pc bpc" id="L4430" title="2 of 8 branches missed.">			if ((byteValue &gt;= 0 &amp;&amp; byteValue &lt;= 23) || (byteValue &gt;= 32 &amp;&amp; byteValue &lt;= 55)) {</span>
+<span class="pc bpc" id="L4429" title="2 of 8 branches missed.">			if ((byteValue &gt;= 0 &amp;&amp; byteValue &lt;= 23) || (byteValue &gt;= 32 &amp;&amp; byteValue &lt;= 55)) {</span>
 				// The EDHOC connection identifier is in the range 0x00-0x17 or in the range 0x20-0x37.
 				// That is, it happens to be the serialization of a CBOR integer with numeric value -24..23
 				
 				// Encode the EDHOC connection identifier as a CBOR integer
-<span class="fc" id="L4435">				identifierCBOR = CBORObject.DecodeFromBytes(identifier);</span>
+<span class="fc" id="L4434">				identifierCBOR = CBORObject.DecodeFromBytes(identifier);</span>
 			}
 			else {
 				// Encode the EDHOC connection identifier as a CBOR byte string
-<span class="fc" id="L4439">				identifierCBOR = CBORObject.FromObject(identifier);</span>
+<span class="fc" id="L4438">				identifierCBOR = CBORObject.FromObject(identifier);</span>
 			}
 		}
 		
-<span class="fc" id="L4443">		return identifierCBOR;</span>
+<span class="fc" id="L4442">		return identifierCBOR;</span>
 		
 	}
 
@@ -4451,30 +4450,30 @@ import com.upokecenter.cbor.CBORType;
      */
 	public static byte[] decodeIdentifier(CBORObject identifierCbor) {
 	
-<span class="fc" id="L4454">		byte[] identifier = null;</span>
+<span class="fc" id="L4453">		byte[] identifier = null;</span>
 			
-<span class="pc bpc" id="L4456" title="1 of 4 branches missed.">		if (identifierCbor != null &amp;&amp; identifierCbor.getType() == CBORType.ByteString) {</span>
-<span class="fc" id="L4457">			identifier = identifierCbor.GetByteString();</span>
+<span class="pc bpc" id="L4455" title="1 of 4 branches missed.">		if (identifierCbor != null &amp;&amp; identifierCbor.getType() == CBORType.ByteString) {</span>
+<span class="fc" id="L4456">			identifier = identifierCbor.GetByteString();</span>
 			
 			// Consistency check
-<span class="fc bfc" id="L4460" title="All 2 branches covered.">			if (identifier.length == 1) {</span>
-<span class="fc" id="L4461">				int byteValue = Util.bytesToInt(identifier);</span>
-<span class="pc bpc" id="L4462" title="5 of 8 branches missed.">				if ((byteValue &gt;= 0 &amp;&amp; byteValue &lt;= 23) || (byteValue &gt;= 32 &amp;&amp; byteValue &lt;= 55))</span>
+<span class="fc bfc" id="L4459" title="All 2 branches covered.">			if (identifier.length == 1) {</span>
+<span class="fc" id="L4460">				int byteValue = Util.bytesToInt(identifier);</span>
+<span class="pc bpc" id="L4461" title="5 of 8 branches missed.">				if ((byteValue &gt;= 0 &amp;&amp; byteValue &lt;= 23) || (byteValue &gt;= 32 &amp;&amp; byteValue &lt;= 55))</span>
 					// This EDHOC connection identifier should have been encoded as a CBOR integer
-<span class="nc" id="L4464">					identifier = null;</span>
-<span class="fc" id="L4465">			}			</span>
+<span class="nc" id="L4463">					identifier = null;</span>
+<span class="fc" id="L4464">			}			</span>
 		}
-<span class="pc bpc" id="L4467" title="2 of 4 branches missed.">		else if (identifierCbor != null &amp;&amp; identifierCbor.getType() == CBORType.Integer) {</span>
-<span class="fc" id="L4468">			identifier = identifierCbor.EncodeToBytes();</span>
+<span class="pc bpc" id="L4466" title="2 of 4 branches missed.">		else if (identifierCbor != null &amp;&amp; identifierCbor.getType() == CBORType.Integer) {</span>
+<span class="fc" id="L4467">			identifier = identifierCbor.EncodeToBytes();</span>
 			
-<span class="pc bpc" id="L4470" title="1 of 2 branches missed.">			if (identifier.length != 1) {</span>
+<span class="pc bpc" id="L4469" title="1 of 2 branches missed.">			if (identifier.length != 1) {</span>
 				// This EDHOC connection identifier is not valid or was not encoded according to deterministic CBOR
-<span class="nc" id="L4472">				identifier = null;</span>
+<span class="nc" id="L4471">				identifier = null;</span>
 			}
 			
 		}
 
-<span class="fc" id="L4477">		return identifier;</span>
+<span class="fc" id="L4476">		return identifier;</span>
 		
 	}
 	
@@ -4488,77 +4487,77 @@ import com.upokecenter.cbor.CBORType;
      * @param msnNum      The integer X = (1, 2, 3, 4), consistent with the specifically received EDHOC message_X.
      * @param supportedEADs   The list of EAD items supported by this peer.
      * @return  In case of success, it returns the subset of the EAD field to be passed to the application for further processing.
-     *          In case of error, it returns an array including two elements: i) a CBOR text string, whose value provides a description
-     *          of the error to be used in the EDHOC error message to return; ii) a CBOR integer, with value the response code to use
-     *          if the EDHOC error message is a response.
+     *          In case of error, it returns an array including one element as a CBOR text string, whose value provides a description
+     *          of the error to be used in the EDHOC error message to return.
      */
-	private static CBORObject[] preParseEAD(CBORObject[] objectList, int baseIndex, int msgNum, Set&lt;Integer&gt; supportedEADs) {
+	static CBORObject[] preParseEAD(CBORObject[] objectList, int baseIndex, int msgNum, Set&lt;Integer&gt; supportedEADs) {
 		
-<span class="nc" id="L4497">		int length = objectList.length - baseIndex;</span>
-<span class="nc" id="L4498">		CBORObject[] aux = new CBORObject[length];</span>
-<span class="nc" id="L4499">		CBORObject[] ret = null;</span>
-<span class="nc" id="L4500">		int count = 0;</span>
+<span class="fc" id="L4495">		int length = objectList.length - baseIndex;</span>
+<span class="fc" id="L4496">		CBORObject[] aux = new CBORObject[length];</span>
+<span class="fc" id="L4497">		CBORObject[] ret = null;</span>
+<span class="fc" id="L4498">		int count = 0;</span>
 		
-<span class="nc" id="L4502">		boolean error = false;</span>
-<span class="nc" id="L4503">		String errMsg = new String(&quot;&quot;);</span>
+<span class="fc" id="L4500">		boolean error = false;</span>
+<span class="fc" id="L4501">		String errMsg = new String(&quot;&quot;);</span>
 		
 		// The actual goal of each step is to go through one *EAD item*.
 		// At each step, the element with index 'i' must be an ead_label.
 		// For EAD items that are supported or non-critical, the corresponding ead_value (if present) is
 		// handled during the same step, so that the next step will consider the next EAD item, if any.
-<span class="nc bnc" id="L4509" title="All 2 branches missed.">		for (int i = baseIndex; i &lt; objectList.length; i++) {</span>
+<span class="fc bfc" id="L4507" title="All 2 branches covered.">		for (int i = baseIndex; i &lt; objectList.length; i++) {</span>
 			
-<span class="nc" id="L4511">			CBORObject myObject = objectList[i];</span>
+<span class="fc" id="L4509">			CBORObject myObject = objectList[i];</span>
 			
-<span class="nc bnc" id="L4513" title="All 2 branches missed.">			if (myObject.getType() != CBORType.Integer) {</span>
+<span class="pc bpc" id="L4511" title="1 of 2 branches missed.">			if (myObject.getType() != CBORType.Integer) {</span>
 				 // Each EAD item must start with a CBOR integer encoding the ead_label
-<span class="nc" id="L4515">				 errMsg = new String(&quot;Malformed or invalid EAD_&quot; + msgNum);</span>
-<span class="nc" id="L4516">		         error = true;</span>
-<span class="nc" id="L4517">		         break;</span>
+<span class="nc" id="L4513">				 errMsg = new String(&quot;Malformed or invalid EAD_&quot; + msgNum);</span>
+<span class="nc" id="L4514">		         error = true;</span>
+<span class="nc" id="L4515">		         break;</span>
 			}
-<span class="nc bnc" id="L4519" title="All 2 branches missed.">        	if (i+1 &lt; objectList.length &amp;&amp;</span>
-<span class="nc bnc" id="L4520" title="All 2 branches missed.">        		objectList[i+1].getType() != CBORType.Integer &amp;&amp;</span>
-<span class="nc bnc" id="L4521" title="All 2 branches missed.">        		objectList[i+1].getType() != CBORType.ByteString) {</span>
+<span class="pc bpc" id="L4517" title="1 of 2 branches missed.">        	if (i+1 &lt; objectList.length &amp;&amp;</span>
+<span class="fc bfc" id="L4518" title="All 2 branches covered.">        		objectList[i+1].getType() != CBORType.Integer &amp;&amp;</span>
+<span class="pc bpc" id="L4519" title="1 of 2 branches missed.">        		objectList[i+1].getType() != CBORType.ByteString) {</span>
     			 // The immediately following item in the CBOR sequence (if any) must be a CBOR integer or a CBOR byte string
-<span class="nc" id="L4523">				 errMsg = new String(&quot;Malformed or invalid EAD_&quot; + msgNum);</span>
-<span class="nc" id="L4524">		         error = true;</span>
-<span class="nc" id="L4525">		         break;</span>
+<span class="nc" id="L4521">				 errMsg = new String(&quot;Malformed or invalid EAD_&quot; + msgNum);</span>
+<span class="nc" id="L4522">		         error = true;</span>
+<span class="nc" id="L4523">		         break;</span>
         	}
 
-<span class="nc" id="L4528">            int eadLabel = myObject.AsInt32();</span>
+<span class="fc" id="L4526">            int eadLabel = myObject.AsInt32();</span>
             
-<span class="nc bnc" id="L4530" title="All 2 branches missed.">            if (eadLabel == Constants.EAD_LABEL_PADDING) {</span>
+<span class="fc bfc" id="L4528" title="All 2 branches covered.">            if (eadLabel == Constants.EAD_LABEL_PADDING) {</span>
             	// This is the padding EAD item and it is not passed to the application for further processing
             	
             	if (debugPrint) {
-<span class="nc" id="L4534">            		System.out.println(&quot;ead_label: &quot; + eadLabel);</span>
+<span class="fc" id="L4532">            		System.out.println(&quot;ead_label: &quot; + eadLabel);</span>
             	}
             	
-<span class="nc bnc" id="L4537" title="All 4 branches missed.">            	if (i+1 &lt; objectList.length &amp;&amp; objectList[i+1].getType() == CBORType.ByteString) {</span>
+<span class="pc bpc" id="L4535" title="2 of 4 branches missed.">            	if (i+1 &lt; objectList.length &amp;&amp; objectList[i+1].getType() == CBORType.ByteString) {</span>
             		if (debugPrint) {
-<span class="nc" id="L4539">            			Util.nicePrint(&quot;ead_value&quot;, objectList[i+1].GetByteString());</span>
+<span class="nc" id="L4537">            			Util.nicePrint(&quot;ead_value&quot;, objectList[i+1].GetByteString());</span>
             		}
             		
 	            	// Skip the corresponding ead_value, if present
-<span class="nc" id="L4543">            		i++;</span>
+<span class="nc" id="L4541">            		i++;</span>
             	}
             	continue;
             }
             
-<span class="nc" id="L4548">            boolean supported = supportedEADs.contains(Integer.valueOf(eadLabel));</span>
+<span class="fc bfc" id="L4546" title="All 2 branches covered.">            int eadLabelUnsigned = (eadLabel &lt; 0) ? (-eadLabel) : eadLabel;</span>
+<span class="fc" id="L4547">            boolean supported = supportedEADs.contains(Integer.valueOf(eadLabelUnsigned));</span>
 
-<span class="nc bnc" id="L4550" title="All 2 branches missed.">            if (!supported) {</span>
-<span class="nc bnc" id="L4551" title="All 2 branches missed.">	            if (eadLabel &lt; 0) {</span>
+<span class="fc bfc" id="L4549" title="All 2 branches covered.">            if (!supported) {</span>
+<span class="fc bfc" id="L4550" title="All 2 branches covered.">	            if (eadLabel &lt; 0) {</span>
 	            	// Since the EAD item is critical and is not supported, the protocol must be discontinued
-<span class="nc" id="L4553">	                errMsg = new String(&quot;Unsupported EAD_&quot; + msgNum + &quot; critical item with ead_label &quot; + eadLabel);</span>
-<span class="nc" id="L4554">	                error = true;</span>
-<span class="nc" id="L4555">	                break;</span>
+<span class="fc" id="L4552">	                errMsg = new String(&quot;Unsupported EAD_&quot; + msgNum + &quot; critical item with ead_label &quot; + eadLabelUnsigned);</span>
+<span class="fc" id="L4553">	                error = true;</span>
+<span class="fc" id="L4554">	                break;</span>
 	            }
 	            else {
 	            	// Since the EAD item is non-critical and is not supported,
 	            	// it is not passed to the application for further processing
-<span class="nc bnc" id="L4560" title="All 4 branches missed.">	            	if (i+1 &lt; objectList.length &amp;&amp; objectList[i+1].getType() == CBORType.ByteString) {</span>
-<span class="nc" id="L4561">	                    i++; // This will result in moving to the next EAD item, if any</span>
+<span class="pc bpc" id="L4559" title="2 of 4 branches missed.">	            	if (i+1 &lt; objectList.length &amp;&amp; objectList[i+1].getType() == CBORType.ByteString) {</span>
+<span class="fc" id="L4560">	                    i++; // This will result in moving to the next EAD item, if any</span>
 	            	}
                     continue;
 	            }
@@ -4567,44 +4566,44 @@ import com.upokecenter.cbor.CBORType;
             // This EAD item is supported, so it is kept for further processing
 
             // Make a hard copy of the ead_label
-<span class="nc" id="L4570">            byte[] serializedObjectLabel = myObject.EncodeToBytes();</span>
-<span class="nc" id="L4571">            CBORObject elementLabel = CBORObject.DecodeFromBytes(serializedObjectLabel);</span>
-<span class="nc" id="L4572">            aux[count] = elementLabel;</span>
-<span class="nc" id="L4573">            count++;</span>
+<span class="fc" id="L4569">            byte[] serializedObjectLabel = myObject.EncodeToBytes();</span>
+<span class="fc" id="L4570">            CBORObject elementLabel = CBORObject.DecodeFromBytes(serializedObjectLabel);</span>
+<span class="fc" id="L4571">            aux[count] = elementLabel;</span>
+<span class="fc" id="L4572">            count++;</span>
             
             if (debugPrint) {
-<span class="nc" id="L4576">            	System.out.println(&quot;ead_label: &quot; + eadLabel);</span>
+<span class="fc" id="L4575">            	System.out.println(&quot;ead_label: &quot; + eadLabel);</span>
             }
             
             // Make a hard copy of the ead_value, if present
-<span class="nc bnc" id="L4580" title="All 4 branches missed.">        	if (i+1 &lt; objectList.length &amp;&amp; objectList[i+1].getType() == CBORType.ByteString) {</span>
-<span class="nc" id="L4581">                byte[] serializedObjectValue = objectList[i+1].EncodeToBytes();</span>
-<span class="nc" id="L4582">                CBORObject elementValue = CBORObject.DecodeFromBytes(serializedObjectValue);</span>
-<span class="nc" id="L4583">                aux[count] = elementValue;</span>
-<span class="nc" id="L4584">                count++;</span>
+<span class="pc bpc" id="L4579" title="2 of 4 branches missed.">        	if (i+1 &lt; objectList.length &amp;&amp; objectList[i+1].getType() == CBORType.ByteString) {</span>
+<span class="fc" id="L4580">                byte[] serializedObjectValue = objectList[i+1].EncodeToBytes();</span>
+<span class="fc" id="L4581">                CBORObject elementValue = CBORObject.DecodeFromBytes(serializedObjectValue);</span>
+<span class="fc" id="L4582">                aux[count] = elementValue;</span>
+<span class="fc" id="L4583">                count++;</span>
                 
                 if (debugPrint) {
-<span class="nc" id="L4587">                	Util.nicePrint(&quot;ead_value&quot;, objectList[i+1].GetByteString());</span>
+<span class="fc" id="L4586">                	Util.nicePrint(&quot;ead_value&quot;, objectList[i+1].GetByteString());</span>
                 }
                 
-<span class="nc" id="L4590">                i++; // This will result in moving to the next EAD item, if any</span>
+<span class="fc" id="L4589">                i++; // This will result in moving to the next EAD item, if any</span>
         	}
 
 		}
 		
-<span class="nc bnc" id="L4595" title="All 2 branches missed.">		if (error == true) {</span>
+<span class="fc bfc" id="L4594" title="All 2 branches covered.">		if (error == true) {</span>
 			// Prepare the diagnostic error text to be returned
-<span class="nc" id="L4597">			ret = new CBORObject[1];</span>
-<span class="nc" id="L4598">			ret[0] = CBORObject.FromObject(errMsg);</span>
+<span class="fc" id="L4596">			ret = new CBORObject[1];</span>
+<span class="fc" id="L4597">			ret[0] = CBORObject.FromObject(errMsg);</span>
 		}
 		else {
 			// Prepare the subset of the EAD items to provide to the application for further processing
-<span class="nc" id="L4602">			ret = new CBORObject[count];</span>
-<span class="nc bnc" id="L4603" title="All 2 branches missed.">			for (int i = 0; i &lt; count; i++)</span>
-<span class="nc" id="L4604">				ret[i] = aux[i];</span>
+<span class="fc" id="L4601">			ret = new CBORObject[count];</span>
+<span class="fc bfc" id="L4602" title="All 2 branches covered.">			for (int i = 0; i &lt; count; i++)</span>
+<span class="fc" id="L4603">				ret[i] = aux[i];</span>
 		}
 		
-<span class="nc" id="L4607">		return ret;</span>
+<span class="fc" id="L4606">		return ret;</span>
 		
 	}
 	
